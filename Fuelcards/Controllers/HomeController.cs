@@ -12,9 +12,26 @@ namespace Fuelcards.Controllers
         {
             _logger = logger;
         }
+        public ActionResult CustomerDetails()
+        {
+            ViewData["Title"] = "Customer Details";
+            return View("/Views/CustomerDetails/CustomerDetails.cshtml");
+        }
 
+        public ActionResult Edi()
+        {
+            ViewData["Title"] = "Edi's";
+            return View();
+        }
+
+        public ActionResult Invoicing()
+        {
+            ViewData["Title"] = "Invoicing";
+            return View();
+        }
         public IActionResult Index()
         {
+            ViewData["Title"] = "Home";
             return View();
         }
 
@@ -29,4 +46,6 @@ namespace Fuelcards.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
+
+
 }

@@ -18,5 +18,16 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  font-family: 'Arial', sans-serif;
+  background-image: url('/lib/Fuel\ Card.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+
+.Pagebody{
+  margin-left: 283px; 
+  padding: 15px;
 }

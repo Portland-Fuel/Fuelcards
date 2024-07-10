@@ -1,0 +1,79 @@
+﻿@{
+    Layout = "~/Views/Shared/_CustDetailsLayout.cshtml";
+}
+<div class="Section" id="AddOrEditSection">
+    <div class="form-container">
+        <h1>Customer Details</h1>
+        <form id="customerForm">
+            <label for="customerName">Name of Customer:</label>
+            <input type="text" id="customerName" name="customerName" required>
+
+            <label for="emailTo">Email To:</label>
+            <input  type="email" id="emailTo" name="emailTo" required>
+
+            <label for="emailCc">Email CC:</label>
+            <input type="email" id="emailCc" name="emailCc">
+
+            <label for="emailBcc">Email BCC:</label>
+            <input type="email" id="emailBcc" name="emailBcc">
+
+            <label for="Networklist">Select Network/s:</label>
+
+            <div class="dropdown">
+                <div class="dropdown-content">
+                    <div class="NetworkList">
+                        <div class="network-grouping">
+                            <label class="network-item">
+                                <input type="checkbox" name="network" value="KeyFuels" onclick="ShowNetworkAccountNumberInput(this);">
+                                KeyFuels
+                            </label>
+                        </div>
+                        <div class="network-grouping">
+                            <label class="network-item">
+                                <input type="checkbox" name="network" value="Texaco" onclick="ShowNetworkAccountNumberInput(this);">
+                                Texaco
+                            </label>
+                        </div>
+                        <div class="network-grouping">
+                            <label class="network-item">
+                                <input type="checkbox" name="network" value="UkFuels" onclick="ShowNetworkAccountNumberInput(this);">
+                                UkFuels
+                            </label>
+                        </div>
+                        <div class="network-grouping">
+                            <label class="network-item">
+                                <input type="checkbox" name="network" value="FuelGenie" onclick="ShowNetworkAccountNumberInput(this);">
+                                FuelGenie
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <label for="invoiceOrderType">Invoice Order Type:</label>
+            <select id="invoiceOrderType" name="invoiceOrderType" required>
+                <option value="transactionTime">Transaction Time</option>
+                <option value="pan">Pan</option>
+                <option value="card">Card</option>
+            </select>
+
+            <label for="addon">Addon:</label>
+            <input type="text" id="addon" name="addon" required>
+
+            <label for="paymentTerm">Payment Term:</label>
+            <select id="paymentTerm" name="paymentTerm" required>
+                <option value="7">7</option>
+                <option value="14">14</option>
+                <option value="21">21</option>
+                <option value="28">28</option>
+                <option value="31">31</option>
+            </select>
+
+           
+            <button type="submit">Add</button>
+        </form>
+    </div>
+</div>
+
+<div class="Section" id="CustomerFixSection">
+    <p>CustomerFixSection</p>
+</div>

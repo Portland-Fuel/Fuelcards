@@ -1,0 +1,16 @@
+﻿@{
+    Layout = "_Layout.cshtml";
+}
+<link href="~/css/CustDetailsLayout.css" rel="stylesheet" />
+<script src="~/js/customerdetails.js"></script>
+<div id="sidenav" class="sidenav">
+    <h1>
+        Customer Details
+    </h1>
+    <a onclick="ToggleSection('AddOrEditSection',this);">Add/Edit Customer</a>
+    <a onclick="ToggleSection('CustomerFixSection',this)"> Customer fix</a>
+</div>
+<div class="Pagebody">
+    @RenderBody()
+</div>
+

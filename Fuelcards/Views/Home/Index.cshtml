@@ -1,8 +1,31 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+<link href="~/css/index.css" rel="stylesheet" />
+<script src="~/js/index.js"></script>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="animate__animated animate__zoomIn ">
+    <div class="Header">
+        <h1>Welcome to the Fuelcard App</h1>
+        <h3>You are logged in as @User.Identity.Name</h3>
+    </div>
+</div>
+
+<div class="animate__animated animate__backInDown animate__delay-1s">
+    <div class="ImageContainer">
+        <div class="ImageAndLabel">
+            <img onclick="NavigateToCustomerPage()" src="/lib/CustomerDetailsLogo.png" alt="Customer">
+            <label>Customer Details</label>
+        </div>
+        <div class="ImageAndLabel">
+            <img onclick="NavigateToEdiPage()" style="height:400px;" src="/lib//File Icon Logo.png" alt="EDI">
+            <label>EDI's'</label>
+        </div>
+        <div class="ImageAndLabel">
+            <img style="margin-top:50px; height:400px;" onclick="NavigateToInvoicingPage()" src="/lib/InvoiceCreateLogo.png" alt="Invoicing">
+            <label>Invoicing</label>
+
+        </div>
+    </div>
+
 </div>

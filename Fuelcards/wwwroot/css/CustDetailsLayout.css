@@ -1,0 +1,131 @@
+﻿.sidenav {
+    height: 100%;
+    width: 280px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #322525;
+    overflow-x: hidden;
+    padding-top: 20px;
+}
+
+.sidenav a {
+    padding: 10px 15px;
+    text-decoration:none;
+    font-size: 22px;
+    color: white !important; 
+    display: block;
+    cursor: pointer;
+}
+
+.sidenav h1 {
+    padding: 10px 15px;
+    color: #85d1d1;
+    font-size: 30px;
+    margin: 0;
+}
+
+.sidenav a:hover {
+    color: #f1f1f1;
+    background-color: #464949;
+}
+
+
+
+.Section{
+    display: none;
+    width: 100%;
+}
+
+.Section p{
+    font-size: 20px;
+    color: white;
+    margin: 0;
+    padding: 10px;
+}
+
+
+.Section .form-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.Section h1 {
+    text-align: center;
+    color: white;
+}
+
+.Section form {
+    display: flex;
+    flex-direction: column;
+}
+
+.Section label {
+    margin-bottom: 5px;
+    color: white;
+}
+
+.Section input[type="text"],
+.Section input[type="email"],
+.Section select {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.Section button {
+    padding: 10px 15px;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.Section button:hover {
+    background-color: #0a58ca;
+}
+
+
+
+.Section .dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.Section .dropdown-content {
+    min-width: 100%;
+    z-index: 1;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.Section .dropdown-content label {
+    display: block;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.Section .dropdown-content label:hover {
+    background-color: #f1f1f1;
+    color: black !important; 
+
+}
+
+.Section .network-item{
+    border-bottom: 1px solid #ccc;
+}
+
+.Section .network-grouping{
+    width: 100%;
+}
+
+.Section .network-grouping input[type="text"]{
+    width: 100%;
+}
