@@ -19,10 +19,12 @@ namespace Fuelcards.Controllers
         {
             _logger = logger;
         }
-        public ActionResult CustomerDetails()
+        public IActionResult CustomerDetails()
         {
+            CustomerDetailsModels pageModel = new();
+            pageModel.CustomerLists = RetrieveCustomer.CustomerDetailsLoadData();
             ViewData["Title"] = "Customer Details";
-            return View("/Views/CustomerDetails/CustomerDetails.cshtml");
+            return View("/Views/CustomerDetails/CustomerDetails.cshtml", pageModel);
         }
 
         public ActionResult Edi()
@@ -36,8 +38,12 @@ namespace Fuelcards.Controllers
             ViewData["Title"] = "Invoicing";
             return View();
         }
-        public IActionResult Homepage()
+        public async Task<IActionResult> Homepage()
         {
+            if (PFLXeroCustomersData.Count == 0)
+            {
+                await ConnectingToXero.GetFuelcardCustomers(PFLXeroCustomersData, FTCXeroCustomersData, _xeroconnector);
+            }
             return View();
         }
         public async Task<IActionResult> Index()
