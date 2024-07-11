@@ -1,4 +1,7 @@
-﻿using Fuelcards.Controllers;
+﻿using DataAccess.Cdata;
+using DataAccess.Fuelcards;
+using Fuelcards.Controllers;
+using Fuelcards.Repositories;
 using Microsoft.Graph.TermStore;
 using RestSharp;
 
@@ -6,6 +9,11 @@ namespace Fuelcards.GenericClassFiles
 {
     public class RetrieveCustomer
     {
+        private static IQueriesRepository _db;
+        public RetrieveCustomer(IQueriesRepository db)
+        {
+            _db = db;
+        }
         public static List<CustomerList> CustomerDetailsLoadData()
         {
             List<CustomerList> customers = new();
@@ -29,12 +37,17 @@ namespace Fuelcards.GenericClassFiles
             {
                 xeroID = ValidateXeroId(XeroCustomer.ContactID.ToString()),
                 name = ValidateCustomerName(XeroCustomer.Name, XeroCustomer.ContactID.ToString()),
-
+                portlandId = ValidatePortlandId(xeroId)
             };
             return Customers;
         }
 
-
+        private static int ValidatePortlandId(string xeroId)
+        {
+            int? PortlandId = _db.GetPortlandIdFromXeroId(xeroId);
+            if (PortlandId == null) throw new ArgumentException($"Portland ID cannot be null for XeroID = {xeroId}");
+            return (int)PortlandId;
+        }
 
         private static string ValidateCustomerName(string? name, string? id)
         {
@@ -52,6 +65,9 @@ namespace Fuelcards.GenericClassFiles
     {
         public string? name { get; set; }
         public string? xeroID { get; set; }
+        public int portlandId { get; set; }
+        public HistoricAddon? allAddons { get; set; }
+
     }
     public struct CustomerList
     {

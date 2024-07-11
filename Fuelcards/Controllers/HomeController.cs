@@ -1,6 +1,7 @@
 
 using Fuelcards.GenericClassFiles;
 using Fuelcards.Models;
+using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using PortlandXeroLib;
 using System.Diagnostics;
@@ -13,11 +14,12 @@ namespace Fuelcards.Controllers
         public static List<Xero.NetStandard.OAuth2.Model.Accounting.Contact> FTCXeroCustomersData = new();
         public static PortlandXeroLib.XeroConnector _xeroconnector;
         private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly IQueriesRepository _db;
+        public HomeController(ILogger<HomeController> logger, IQueriesRepository db)
 
         {
             _logger = logger;
+            _db = db;
         }
         public IActionResult CustomerDetails()
         {

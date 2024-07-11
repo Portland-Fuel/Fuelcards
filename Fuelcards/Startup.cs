@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DataAccess.Cdata;
+using DataAccess.Fuelcards;
+using Fuelcards.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
@@ -21,7 +25,10 @@ namespace Fuelcards
             services.AddSignalR();
             services.AddAuthentication(Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"));
-
+            services.AddDbContext<CDataContext>(options => options.UseNpgsql(
+                   Configuration.GetConnectionString("Cdata")));
+            services.AddDbContext<FuelcardsContext>(options => options.UseNpgsql(
+                   Configuration.GetConnectionString("FuelcardDb")));
             services.AddControllersWithViews(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
@@ -35,21 +42,21 @@ namespace Fuelcards
             services.AddRazorPages()
                 .AddMicrosoftIdentityUI();
 
-
+            
             // Register your database contexts here
-           /* services.AddDbContext<TradingContext>(options =>
-                 options.UseNpgsql(Configuration.GetConnectionString("Trading")));
+            /* services.AddDbContext<TradingContext>(options =>
+                  options.UseNpgsql(Configuration.GetConnectionString("Trading")));
 
-            services.AddDbContext<PricesContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("PortlandPricesDb")));
+             services.AddDbContext<PricesContext>(options =>
+                 options.UseNpgsql(Configuration.GetConnectionString("PortlandPricesDb")));
 
-            services.AddDbContext<CDataContext>(options =>
-               options.UseNpgsql(Configuration.GetConnectionString("PortlandCDataDb")));*/
+             services.AddDbContext<CDataContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("PortlandCDataDb")));*/
 
             // Register your IQueries implementation
 
             services.AddTransient<Microsoft.Graph.GraphServiceClient>();
-
+            services.AddScoped<IQueriesRepository, QueriesRepository>();
         }
 
 
