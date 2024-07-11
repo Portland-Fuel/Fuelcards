@@ -1,3 +1,5 @@
+
+using Fuelcards.GenericClassFiles;
 using Fuelcards.Models;
 using Microsoft.AspNetCore.Mvc;
 using PortlandXeroLib;
@@ -40,11 +42,12 @@ namespace Fuelcards.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            
-                if (PFLXeroCustomersData.Count != 0)
-                {
-                    return Json("Already connected to xero");
-                }
+            if (PFLXeroCustomersData.Count != 0)
+            {
+                await ConnectingToXero.GetFuelcardCustomers(PFLXeroCustomersData, FTCXeroCustomersData, _xeroconnector);
+            }
+
+
             ViewData["Title"] = "Home";
             return View();
         }
@@ -56,6 +59,16 @@ namespace Fuelcards.Controllers
             _xeroconnector = xero;
             var AuthLink = await xero.GetLinkAndOpen();
             return Json(AuthLink);
+        }
+
+        [HttpPost]
+        public JsonResult CheckXeroConnection()
+        {
+            if (PFLXeroCustomersData.Count != 0)
+            {
+                return Json("Already connected to xero");
+            }
+            else return Json("Not connected to xero");
         }
 
         public IActionResult Privacy()
