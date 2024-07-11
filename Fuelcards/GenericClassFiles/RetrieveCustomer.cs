@@ -60,6 +60,7 @@ namespace Fuelcards.GenericClassFiles
             return xeroID;
         }
 
+
     }
     public struct CustomerModel
     {
