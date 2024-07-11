@@ -35,7 +35,12 @@
     display: none;
     width: 100%;
 }
-
+.Section .ChoiceButtonGrouping {
+    flex-basis: 100%;
+    justify-content: space-between;
+    display: flex;
+    margin-top: 20px;
+}
 .form-container {
     padding: 20px;
     border-radius: 8px;
@@ -52,12 +57,18 @@
     margin-bottom: 15px;
     justify-content: center;
     align-items: center;
+    gap: 10px;
 }
 .network-form-row{
     display: flex;
     flex-wrap: wrap;
     margin-bottom: 15px;
     justify-content: space-between;
+}
+.network-form-row span{
+    margin-left: 150px;
+    color : white;
+    gap: 10px;
 }
 .form-group {
     flex: 1;
@@ -73,13 +84,14 @@
     display: block;
     margin-bottom: 5px;
 }
-.form-container input {
+.form-container input:not([type="checkbox"]), select {
     width: 100%;
     padding: 10px;
+    height: 40px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-.form-container button {
+.form-container button[type="submit"] {
     padding: 10px 15px;
     background-color: #007bff;
     color: #fff;
@@ -88,8 +100,21 @@
     cursor: pointer;
     width: 25%;
 }
-.form-container button:hover {
+.form-container button[type="button"] {
+    padding: 10px 15px;
+    background-color: rgb(72, 194, 235);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 15%;
+}
+.form-container button[type="submit"]:hover {
     background-color: #0056b3;
+}
+.form-container button:hover {
+    background-color: rgb(42, 166, 207);
+
 }
 
 
@@ -120,6 +145,7 @@
     padding: 10px;
     border-bottom: 1px solid #ddd;
     cursor: pointer;
+    height: 50px;;
 }
 
 .network-item:hover {
@@ -128,10 +154,83 @@
 
 .dropdown input[type="checkbox"] {
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .dropdown label {
     display: flex;
     align-items: center;
     cursor: pointer;
+}
+
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(44, 40, 41, 0.8); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.overlay .form-container {
+    background: #b35464;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.overlay .form-container h2 {
+  color: white;
+}
+.overlay .form-container h2 {
+    margin-top: 0;
+    text-align: center;
+}
+.overlay .form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.overlay .form-group label {
+    flex: 1;
+    color: white; /* White text for labels */
+    margin-bottom: 0;
+    padding-right: 10px;
+}
+.overlay .form-group input,select {
+    flex: 2;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.overlay .form-group button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+.overlay .form-group button[type="submit"]:hover {
+    background-color: #218838;
+}
+.overlay .form-group button[type="button"] {
+    width: 100%;
+    padding: 10px;
+    background-color: indianred;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+.overlay .form-group button[type="button"]:hover {
+    background-color: rgb(199, 61, 61);
 }
