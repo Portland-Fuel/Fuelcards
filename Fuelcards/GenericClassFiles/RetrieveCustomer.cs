@@ -63,6 +63,7 @@ namespace Fuelcards.GenericClassFiles
     }
     public struct CustomerModel
     {
+        // IF ANYONE TOUCHES THIS WITHOUT INFORMING CHUCKLES. BIGGGG TROUBLE
         public string? name { get; set; }
         public string? xeroID { get; set; }
         public int portlandId { get; set; }
