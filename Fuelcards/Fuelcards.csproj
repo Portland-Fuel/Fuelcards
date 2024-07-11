@@ -31,4 +31,8 @@
     <ProjectReference Include="..\PortlandXeroLib\PortlandXeroLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>

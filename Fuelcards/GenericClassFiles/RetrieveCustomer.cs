@@ -57,5 +57,12 @@ namespace Fuelcards.GenericClassFiles
     {
         public string? Name { get; set; }
         public string? xeroId { get; set; }
+         
+    }
+    public struct HistoricAddon
+    {
+        public string network { get; set; }
+        public double? Addon { get; set; }
+        public DateOnly effectiveDate { get; set; }
     }
 }
