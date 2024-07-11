@@ -1,9 +1,11 @@
-﻿@{
+﻿
+
+@{
     Layout = "~/Views/Shared/_CustDetailsLayout.cshtml";
 }
 <div class="Section" id="AddOrEditSection">
     <div class="form-container">
-        <form>
+        <form id="AddOrEditCustomerForm" onsubmit="SubmitAddOrEditCustomer(event)">
             <div class="form-row">
                 <div class="form-group ">
                     <label for="customerName">Name of Customer:</label>
@@ -93,7 +95,7 @@
 
             </div>
             <div class="form-row-centered">
-                <button type="submit">Submit</button>
+                <button  type="submit">Submit</button>
             </div>
         </form>
     </div>

@@ -199,3 +199,56 @@ const TexacoFixs = []
 const UkFuelsFixs = []
 const FuelGenieFixs = []
 
+
+
+
+
+async function CustomerSearchInput(element){
+
+    ShowLoader();
+if(element.value === ""){
+    return;
+}
+    await $.ajax({
+        url: '/CustomerDetails/SearchCustomer', 
+        type: 'POST',
+        data: JSON.stringify(element.value), 
+        contentType: 'application/json;charset=utf-8',
+        success: async function (response) {
+            HideLoader();
+           SortDataAndPopulateFromSearch(response);
+        },
+        error: async function (xhr, status, error) {
+            HideLoader();
+            element.value = "";
+            console.error('XHR Response:', xhr.responseText || 'No response from server');
+            console.error('Error:', error || 'No error message');
+            await Swal.fire({
+                icon: "error",
+                title: "Sorry there has been a big error",
+                text: xhr.responseText || 'An unknown error occurred.',
+                footer: '<a href="https://192.168.0.17:666/" target="_blank">Report it here!</a>'
+            });
+        }
+    });
+}
+
+
+function SortDataAndPopulateFromSearch(data){
+
+    alert("Not implemented yet");
+}
+
+function SubmitAddOrEditCustomer(event){
+    event.preventDefault();
+    var form = document.getElementById("AddOrEditCustomerForm");
+    var formData = new FormData(form);
+    var values = Object.fromEntries(formData.entries());
+    var parsedValues = JSON.stringify(values);
+    
+    console.log("Form to submit: " + parsedValues);
+
+
+}
+
+

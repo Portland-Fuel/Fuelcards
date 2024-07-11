@@ -1,4 +1,7 @@
-﻿@{
+﻿@model CustomerDetailsModels
+
+
+@{
     Layout = "_Layout.cshtml";
 }
 <link href="~/css/CustDetailsLayout.css" rel="stylesheet" />
@@ -7,10 +10,22 @@
     <h1>
         Customer Details
     </h1>
+    <input style="width:100%" type="text" class="form-control" placeholder="Search for a customer" list="customerOptions" autocomplete="off" onchange="CustomerSearchInput(this)" />
+            <datalist id="customerOptions">
+                @{
+                    var sortedKeys = new List<string>();
+                    sortedKeys.AddRange(Model.CustomerLists.Select(e => e.Name).ToList());
+                    sortedKeys.Sort(); 
+
+                    foreach (var customer in sortedKeys)
+                    {
+                        <option value="@customer">@customer</option>
+                    }
+                }
+            </datalist>
     <a onclick="ToggleSection('AddOrEditSection',this);">Add/Edit Customer</a>
     <a onclick="ToggleSection('CustomerFixSection',this)"> Customer fix</a>
 </div>
 <div class="Pagebody">
     @RenderBody()
 </div>
-
