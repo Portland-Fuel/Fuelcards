@@ -29,30 +29,132 @@
                     <div class="dropdown-content">
                         <div class="NetworkList">
                             <div class="network-form-row">
-                                <label class="network-item">
-                                    <input type="checkbox" name="network" value="KeyFuels" onclick="ShowNetworkAccountNumberInput(this);">
-                                    KeyFuels
-                                </label>
-                                <label class="network-item">
-                                    <input type="checkbox" name="network" value="Texaco" onclick="ShowNetworkAccountNumberInput(this);">
-                                    Texaco
-                                </label>
-                                <label class="network-item">
-                                    <input type="checkbox" name="network" value="UkFuels" onclick="ShowNetworkAccountNumberInput(this);">
-                                    UkFuels
-                                </label>
-                                <label class="network-item">
-                                    <input type="checkbox" name="network" value="FuelGenie" onclick="ShowNetworkAccountNumberInput(this);">
-                                    FuelGenie
-                                </label>
+                                <div class="form-group">
+                                    <label  class="network-item">
+                                        <input class="NetworkCheck" type="checkbox" name="network" value="KeyFuels" onclick="ShowNetworkAccountNumberInput(this);">
+                                        KeyFuels
+                                        <span id="KeyFuelsSpan">No Fixes</span>
+
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="network-item">
+                                        <input class="NetworkCheck" type="checkbox" name="network" value="Texaco" onclick="ShowNetworkAccountNumberInput(this);">
+                                        Texaco
+                                        <span id="TexacoSpan">No Fixes</span>
+
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label  class="network-item">
+                                        <input class="NetworkCheck" type="checkbox" name="network" value="UkFuels" onclick="ShowNetworkAccountNumberInput(this);">
+                                        UkFuels
+                                        <span id="UkFuelsSpan">No Fixes</span>
+
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label  class="network-item">
+                                        <input class="NetworkCheck" type="checkbox" name="network" value="FuelGenie" onclick="ShowNetworkAccountNumberInput(this);">
+                                        FuelGenie
+                                        <span id="FuelGenieSpan">No Fixes</span>
+
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="invoiceOrderType">Invoice Order Type:</label>
+                    <select id="invoiceOrderType" name="invoiceOrderType" required>
+                        <option value="transactionTime">Transaction Time</option>
+                        <option value="pan">Pan</option>
+                        <option value="card">Card</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="paymentTerm">Payment Term:</label>
+                    <select id="paymentTerm" name="paymentTerm" required>
+                        <option value="7">7</option>
+                        <option value="14">14</option>
+                        <option value="21">21</option>
+                        <option value="28">28</option>
+                        <option value="31">31</option>
+                    </select>
+                </div>
+
+            </div>
+            <div class="form-row-centered">
+                <button type="button">Cancel</button>
+                <button onclick="ShowNewFixForm()" type="button">New Fix</button>
+
+            </div>
             <div class="form-row-centered">
                 <button type="submit">Submit</button>
             </div>
+        </form>
+    </div>
+    <div hidden id="overlay" class="overlay">
+        <form id="NewFixForm">
+            <div class="form-container">
+                <h2>Add New Fix</h2>
+                <div id="NewFixSelectParent" class="form-group">
+                    <label>Select network:</label>
+                </div>
+                <div class="form-group">
+                    <label for="effectiveFrom">Effective From:</label>
+                    <input type="date" id="effectiveFrom" name="effectiveFrom">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" name="endDate">
+                </div>
+                <div class="form-group">
+                    <label for="period">Period:</label>
+                    <select id="period" name="periods">
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Fortnightly">Fortnightly</option>
+
+                    </select>
+
+                </div>
+                <div class="form-group">
+                    <label for="grade">Grade:</label>
+                    <select id="grade" name="grade">
+                        <option value="Diesel">Diesel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fixedPrice">Fixed Price:</label>
+                    <input type="text" id="fixedPrice" name="fixedPrice">
+                </div>
+                <div class="form-group">
+                    <label for="fixedPriceIncDuty">Fixed Price Inc Duty:</label>
+                    <input type="text" id="fixedPriceIncDuty" name="fixedPriceIncDuty">
+                </div>
+                <div class="form-group">
+                    <label for="fixedVolume">Fixed Volume:</label>
+                    <input type="text" id="fixedVolume" name="fixedVolume">
+                </div>
+                <div class="form-group">
+                    <label for="periods">Periods:</label>
+                    <input type="text" id="periods" name="periods">
+                </div>
+                <div class="form-group">
+                    <label for="tradeReference">Trade Reference:</label>
+                    <input type="text" id="tradeReference" name="tradeReference">
+                </div>
+                <div class="form-group">
+                    <button onclick="AddNewFix(event)" type="submit">Add Fix</button>
+                    <button onclick="CloseNewFixOverlay()" type="button">Close</button>
+
+                </div>
+            </div>
+
         </form>
     </div>
 </div>
