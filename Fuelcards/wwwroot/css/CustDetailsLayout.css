@@ -31,111 +31,107 @@
     background-color: #464949;
 }
 
-
-
 .Section{
     display: none;
     width: 100%;
 }
 
-.Section p{
-    font-size: 20px;
-    color: white;
-    margin: 0;
-    padding: 10px;
-}
-
-
-.Section .form-container {
-    max-width: 500px;
-    margin: 50px auto;
+.form-container {
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-
-.Section h1 {
-    text-align: center;
-    color: white;
-}
-
-.Section form {
+.form-row {
     display: flex;
-    flex-direction: column;
-}
-
-.Section label {
-    margin-bottom: 5px;
-    color: white;
-}
-
-.Section input[type="text"],
-.Section input[type="email"],
-.Section select {
+    flex-wrap: wrap;
     margin-bottom: 15px;
+}
+.form-row-centered {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+    justify-content: center;
+    align-items: center;
+}
+.network-form-row{
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+    justify-content: space-between;
+}
+.form-group {
+    flex: 1;
+    min-width: 200px;
+    margin-right: 10px;
+}
+.form-group:last-child {
+    margin-right: 0;
+}
+.form-container label {
+    color: white;
+    
+    display: block;
+    margin-bottom: 5px;
+}
+.form-container input {
+    width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-
-.Section button {
+.form-container button {
     padding: 10px 15px;
-    background-color: #0d6efd;
-    color: white;
+    background-color: #007bff;
+    color: #fff;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    width: 25%;
+}
+.form-container button:hover {
+    background-color: #0056b3;
 }
 
-.Section button:hover {
-    background-color: #0a58ca;
-}
 
-
-
-.Section .dropdown {
+.dropdown {
     position: relative;
     display: inline-block;
-}
-
-.Section .dropdown-content {
-    min-width: 100%;
-    z-index: 1;
-    padding: 10px;
     width: 100%;
-    box-sizing: border-box;
 }
 
-.Section .dropdown-content label {
+.dropdown-content {
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 12px 16px;
+    z-index: 1;
+    width: 100%;
+}
+
+.dropdown:hover .dropdown-content {
     display: block;
-    padding: 8px 16px;
+}
+
+.NetworkList {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.network-item {
+    display: block;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
     cursor: pointer;
 }
 
-.Section .dropdown-content label:hover {
-    background-color: #f1f1f1;
-    color: black !important; 
-
+.network-item:hover {
+    background-color: #3b3737;
 }
 
-.Section .network-item{
-    border-bottom: 1px solid #ccc;
+.dropdown input[type="checkbox"] {
+    margin-right: 10px;
 }
 
-.Section .network-grouping{
-    width: 100%;
-}
-
-.Section .network-grouping input[type="text"]{
-    width: 100%;
-}
-.Section .ChoiceButtonGrouping{
-    justify-content: space-between;
+.dropdown label {
     display: flex;
-}
-
-.Section .ChoiceButtonGrouping button{
-    width: 48%;
-    background-color: lightblue;
-    color: black;
+    align-items: center;
+    cursor: pointer;
 }
