@@ -129,3 +129,13 @@
 .Section .network-grouping input[type="text"]{
     width: 100%;
 }
+.Section .ChoiceButtonGrouping{
+    justify-content: space-between;
+    display: flex;
+}
+
+.Section .ChoiceButtonGrouping button{
+    width: 48%;
+    background-color: lightblue;
+    color: black;
+}
