@@ -1,35 +1,48 @@
-﻿.sidenav {
+﻿body{
+    background-image: none;
+    background-color: #004080;
+}
+
+
+.sidenav {
     height: 100%;
     width: 280px;
     position: fixed;
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: #322525;
+    background-color: #302929;
     overflow-x: hidden;
     padding-top: 20px;
 }
 
+.sidenav .back-arrow {
+    display: inline-block;
+    font-size: 22px;
+    color: white;
+    cursor: pointer;
+    position: absolute;
+}
+
+.sidenav h1 {
+    color: #85d1d1;
+    font-size: 30px;
+}
+
 .sidenav a {
     padding: 10px 15px;
-    text-decoration:none;
+    text-decoration: none;
     font-size: 22px;
     color: white !important; 
     display: block;
     cursor: pointer;
 }
 
-.sidenav h1 {
-    padding: 10px 15px;
-    color: #85d1d1;
-    font-size: 30px;
-    margin: 0;
-}
-
 .sidenav a:hover {
     color: #f1f1f1;
     background-color: #464949;
 }
+
 
 .Section{
     display: none;
@@ -91,28 +104,18 @@
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-.form-container button[type="submit"] {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 25%;
-}
-.form-container button[type="button"] {
+
+.form-container .FormButton[type="button"] {
     padding: 10px 15px;
     background-color: rgb(72, 194, 235);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 10px;
     cursor: pointer;
     width: 15%;
 }
-.form-container button[type="submit"]:hover {
-    background-color: #0056b3;
-}
-.form-container button:hover {
+
+.form-container .FormButton:hover {
     background-color: rgb(42, 166, 207);
 
 }
@@ -136,7 +139,7 @@
 }
 
 .NetworkList {
-    max-height: 200px;
+    max-height: 400px;
     overflow-y: auto;
 }
 
@@ -176,7 +179,7 @@
     align-items: center;
 }
 .overlay .form-container {
-    background: #b35464;
+    background: #004080;
     padding: 20px;
     border-radius: 8px;
     width: 400px;
@@ -234,5 +237,157 @@
 .overlay .form-group button[type="button"]:hover {
     background-color: rgb(199, 61, 61);
 }
+.Small-Button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background-color 0.3s ease;
+}
+
+.Small-Button:hover {
+    background-color: #0056b3;
+}
+
+.Small-Button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+}
+
+.Small-Button:active {
+    background-color: #004080;
+}
+
+
+.AnimateNetworkOptions{
+    animation-duration: 1.5s;
+    animation-name: slidein;    
+}
+
+@keyframes slidein {
+        from {
+            margin-left: 100%;
+            width: 300%;
+        }
+        to {
+            margin-left: 0%;
+            width: 100%;
+        }
+}
+
+  *{ box-sizing: border-box;}
+  h1{
+    font-size: 1.5em;
+  }
   
+  small{
+    color: #888;
+  }
   
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    border-radius: 15px;
+    background-color: #007bff;
+    border: none;
+    height: 50px;
+    width: 20%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: relative;
+}
+
+.button.animate {
+    pointer-events: none;
+}
+.button.success{
+    cursor:default!important;
+    background-color: #28a745;
+
+}
+.button .loader, 
+.button .success-icon, 
+.button .error-icon {
+    display: none;
+}
+
+.button.animate .loader {
+    display: inline-block;
+}
+
+.button.success .loader,
+.button.error .loader {
+    display: none;
+}
+
+.button.success .success-icon,
+.button.error .error-icon {
+    display: inline-block;
+}
+
+.loader,
+.success-icon,
+.error-icon {
+    margin-left: 10px;
+}
+
+.loader {
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+}
+
+.success-icon::before,
+.error-icon::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.button.error {
+    background-color: red;
+    cursor:default!important;
+}
+
+
+.LoadHistoricButton{
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 15px;
+    color: #fff;
+    background-color: #168b26;
+    border: none;
+    height: 40px;
+    width: 100%;
+    cursor: pointer;
+    position: relative;
+
+}
+
+.LoadHistoricButton:hover{
+  background-color: #094611;
+
+}
+
+.form-group-flex{
+  justify-content: center;
+}

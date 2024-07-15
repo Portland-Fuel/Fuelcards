@@ -1,4 +1,5 @@
 
+using DataAccess.Fuelcards;
 using Fuelcards.GenericClassFiles;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
@@ -32,9 +33,26 @@ namespace Fuelcards.Controllers
         public ActionResult Edi()
         {
             ViewData["Title"] = "Edi's";
-            return View();
+            var model = LoadEdiVmModel();
+            return View("/Views/Edi/Edi.cshtml",model);
         }
+        public static EDIVM LoadEdiVmModel()
+        {
 
+           EDIVM model = new();
+            model.EDIs = new();
+            FuelcardsContext _fuelcardrepo = new();
+            IEnumerable<FcControl> edis = _fuelcardrepo.FcControls.Where(e => e.Invoiced != true);
+            foreach (var item in edis)
+            {
+                if (item.Network != 0) item.TotalQuantity = item.TotalQuantity / 100;
+                FcControlVM _fcControl = FcControlVM.Map(item);
+                _fcControl.DayOfTheWeek = item.CreationDate.Value.DayOfWeek;
+                model.EDIs.Add(_fcControl);
+            }
+            model.EDIs = model.EDIs.OrderByDescending(e => e.CreationDate).ToList();
+            return model;
+        }
         public ActionResult Invoicing()
         {
             ViewData["Title"] = "Invoicing";

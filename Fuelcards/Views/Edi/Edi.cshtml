@@ -1,0 +1,77 @@
+﻿@model EDIVM
+
+
+
+
+
+<link href="~/css/edi.css" rel="stylesheet" />
+<script src="~/js/edi.js"></script>
+<div class="form-container">
+    <h1>Import EDI Files</h1>
+    <form asp-action="MoveFilesToCorrectFolder" asp-controller="Edi" method="post" enctype="multipart/form-data">
+        <div>
+            <input type="file" id="ediFile1" name="Files"  />
+        </div>
+        <div>
+            <input type="file" id="ediFile2" name="Files"  />
+        </div>
+        <div>
+            <input type="file" id="ediFile3" name="Files"  />
+        </div>
+        <div>
+            <input type="file" id="ediFile4" name="Files"  />
+        </div>
+        <button type="submit">Upload Files</button>
+        @if (ViewData["EdiMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @ViewData["EdiMessage"]
+                <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
+            </div>
+        }
+        @if (ViewData.ModelState.ErrorCount > 0)
+        {
+            <div class="alert alert-danger">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <p>@error.ErrorMessage</p>
+                }
+                <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
+            </div>
+        }
+    </form>
+</div>
+
+<div class="table-container">
+    <h3>Latest Edi Upload</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Control ID</th>
+                <th>Day Of Week</th>
+                <th>Creation Date</th>
+                <th>Creation Time</th>
+                <th>Record Count</th>
+                <th>Total Quantity</th>
+                <th>Network</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.EDIs)
+            {
+                <tr onclick="HighlightRow(this);">
+                    <td>@item.ControlId</td>
+                    <td>@item.DayOfTheWeek</td>
+                    <td>@item.CreationDate.ToString()</td>
+                    <td>@item.CreationTime.ToString()</td>
+                    <td>@item.RecordCount</td>
+                    <td>@item.TotalQuantity</td>
+                    <td data-network="@item.Network"></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+

@@ -57,6 +57,7 @@ namespace Fuelcards
 
             services.AddTransient<Microsoft.Graph.GraphServiceClient>();
             services.AddScoped<IQueriesRepository, QueriesRepository>();
+            services.AddControllers();
         }
 
 
@@ -82,6 +83,7 @@ namespace Fuelcards
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
