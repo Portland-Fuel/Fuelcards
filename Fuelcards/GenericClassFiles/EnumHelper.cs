@@ -4,7 +4,7 @@ namespace Fuelcards.GenericClassFiles
 {
     public class EnumHelper
     {
-        public enum products
+        public enum Products
         {
             Diesel,
             Gasoil,
@@ -109,35 +109,35 @@ namespace Fuelcards.GenericClassFiles
                     throw new ArgumentException($"Retail diesel to string only caters for Tesco,morrisons and sainsburys. You have provided a value of {market.ToString()}");
             }
         }
-        public static string productsToString(products product)
+        public static string ProductsToString(Products product)
         {
             switch (product)
             {
-                case products.Diesel:
+                case Products.Diesel:
                     return "Diesel";
-                case products.Gasoil:
+                case Products.Gasoil:
                     return "Gasoil";
-                case products.ULSP:
+                case Products.ULSP:
                     return "ULSP";
-                case products.Lube:
+                case Products.Lube:
                     return "Lube";
-                case products.Adblue:
+                case Products.Adblue:
                     return "Adblue";
-                case products.SuperUnleaded:
+                case Products.SuperUnleaded:
                     return "SuperUnleaded";
-                case products.TescoDieselNewDiesel:
+                case Products.TescoDieselNewDiesel:
                     return "TescoDieselNewDiesel";
-                case products.PackagedAdblue:
+                case Products.PackagedAdblue:
                     return "PackagedAdblue";
-                case products.PremiumDiesel:
+                case Products.PremiumDiesel:
                     return "PremiumDiesel";
-                case products.Tolls:
+                case Products.Tolls:
                     return "Tolls";
-                case products.Unknown:
+                case Products.Unknown:
                     return "Unknown";
-                case products.Other:
+                case Products.Other:
                     return "Other";
-                case products.AdblueCan:
+                case Products.AdblueCan:
                     return "AdblueCan";
                 default:
                     throw new ArgumentException("Invalid enum value");

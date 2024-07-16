@@ -13,9 +13,10 @@ namespace Fuelcards.Repositories
             _db = db;
             _Cdb = cDb;
         }
-        public void GetListOfAddonsForCustomer(int PortlandId)
+        public List<CustomerPricingAddon>? GetListOfAddonsForCustomer(int PortlandId)
         {
              List<CustomerPricingAddon>? AllCustomerAddons = GetAll().Where(e=>e.PortlandId == PortlandId).ToList();
+            return AllCustomerAddons;
         }
         public int? GetPortlandIdFromXeroId(string xeroId)
         {
@@ -24,6 +25,16 @@ namespace Fuelcards.Repositories
         public IEnumerable<CustomerPricingAddon> GetAll()
         {
             return _db.CustomerPricingAddons.Where(e => e.Id > -1);
+        }
+        public int? GetPaymentTerms(string xeroId)
+        {
+            int? paymentTerms = _db.PaymentTerms.FirstOrDefault(e => e.XeroId == xeroId)?.PaymentTerms;
+            return paymentTerms;
+        }
+        public List<FixedPriceContract>? AllFixContracts(int portlandId)
+        {
+            List<FixedPriceContract>? fix =_db.FixedPriceContracts.Where(e=>e.PortlandId == portlandId).ToList();
+            return fix;
         }
     }
 }
