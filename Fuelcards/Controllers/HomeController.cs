@@ -30,6 +30,7 @@ namespace Fuelcards.Controllers
             if(string.IsNullOrEmpty(xeroID) == false)
             {
                 pageModel.CustomerModel = RetrieveCustomer.GetCustomerInformation(xeroID);
+                
             }
             else
             {
