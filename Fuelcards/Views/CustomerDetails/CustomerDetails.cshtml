@@ -1,12 +1,9 @@
 ﻿@{
     Layout = "~/Views/Shared/_CustDetailsLayout.cshtml";
-    var jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(Model);
+  
 }
 
-<script>
-    var model = JSON.parse('@Html.Raw(jsonModel)');
-    console.log(model);
-</script>
+
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <div class="Section" id="AddOrEditSection">
