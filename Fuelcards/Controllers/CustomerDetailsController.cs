@@ -19,16 +19,16 @@ namespace Fuelcards.Controllers
         }
 
         [HttpPost]
-        public JsonResult SearchCustomer([FromBody] string CustomerName)
+        public JsonResult SearchCustomer([FromBody] string xeroId)
         {
             RetrieveCustomer customerClass = new(_db);
             try
             {
 
-               CustomerModel Return =  customerClass.GetCustomerInformation(CustomerName);
+               CustomerModel Return =  customerClass.GetCustomerInformation(xeroId);
                 var JsonResult = new
                 {
-                    Addons = Return.allAddons,
+                    networdData = Return.networks,
                     CustomerName = Return.name,
                 };
 

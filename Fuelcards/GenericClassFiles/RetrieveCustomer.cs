@@ -40,25 +40,29 @@ namespace Fuelcards.GenericClassFiles
                 name = ValidateCustomerName(XeroCustomer.Name, XeroCustomer.ContactID.ToString()),
                 portlandId = ValidatePortlandId(xeroId),
             };
-            Customers.allAddons = GetAddon(Customers.portlandId);
-            Customers.paymentTerms = ValidatePaymentTerms(Customers.xeroID, Customers.name);
-            Customers = getAllFixedData(Customers);
+            Customers.networks = new();
+            int[]? Accounts = _db.GetAccounts(Customers.portlandId);
+            foreach (var account in Accounts)
+            {
+                Network network = new();
+                network.networkName = _db.getNetworkFromAccount(account);
+                network.allAddons = GetAddon(Customers.portlandId, network.networkName);
+                network.paymentTerms = ValidatePaymentTerms(Customers.xeroID, Customers.name);
+                network.Fixed = getAllFixedData(account);
+                network.email = _db.AllEmail(account);
+                network.account = account;
+                Customers.networks.Add(network);
+            }
             return Customers;
         }
 
-        private CustomerModel getAllFixedData(CustomerModel customers)
+        
+
+        private List<FixedPriceContract>? getAllFixedData(int account)
         {
-            List<FixedPriceContract>? contracts = _db.AllFixContracts(customers.portlandId);
-            if (contracts is null || contracts.Count == 0) return customers;
-            customers.keyfuelsFixedData = new();
-            customers.ukfuelFixedData = new();
-            customers.texacoFixedData = new();
-            customers.fuelgenieFixedData = new();
-            customers.keyfuelsFixedData = contracts.Where(e => e.Network is not null && e.Network[0] == 0).ToList();
-            customers.ukfuelFixedData = contracts.Where(e => e.Network is not null && e.Network[0] == 1).ToList();
-            customers.texacoFixedData = contracts.Where(e => e.Network is not null && e.Network[0] == 2).ToList();
-            customers.fuelgenieFixedData = contracts.Where(e => e.Network is not null && e.Network[0] == 3).ToList();
-            return customers;
+            List<FixedPriceContract>? contracts = _db.AllFixContracts(account);
+            if (contracts is null || contracts.Count == 0) return null;
+            return contracts.ToList();
         }
 
         private int ValidatePaymentTerms(string xeroID, string name)
@@ -67,10 +71,9 @@ namespace Fuelcards.GenericClassFiles
             if (paymentTerms != null) return (int)paymentTerms;
             throw new ArgumentException($"No Payment Terms have been found for the following customer {name}");
         }
-
-        private List<HistoricAddon> GetAddon(int portlandId)
+        private List<HistoricAddon> GetAddon(int portlandId, EnumHelper.Network network)
         {
-            List<CustomerPricingAddon>? AllAddons = _db.GetListOfAddonsForCustomer(portlandId);
+            List<CustomerPricingAddon>? AllAddons = _db.GetListOfAddonsForCustomer(portlandId, network);
             List<HistoricAddon> historicAddons = new();
             if (AllAddons != null && AllAddons.Count > 0)
             {
@@ -80,7 +83,6 @@ namespace Fuelcards.GenericClassFiles
                     {
                         effectiveDate = addon.EffectiveDate,
                         Addon = addon.Addon,
-                        network = EnumHelper.NetworkEnumFromInt(addon.Network).ToString(),
                     };
                     historicAddons.Add(model);
                 }
@@ -115,14 +117,19 @@ namespace Fuelcards.GenericClassFiles
         public string? name { get; set; }
         public string? xeroID { get; set; }
         public int portlandId { get; set; }
-        public List<HistoricAddon>? allAddons { get; set; }
-        public int? paymentTerms { get; set; }
-        public List<FixedPriceContract> keyfuelsFixedData { get; set; }
-        public List<FixedPriceContract> ukfuelFixedData { get; set; }
-        public List<FixedPriceContract> texacoFixedData { get; set; }
-        public List<FixedPriceContract> fuelgenieFixedData { get; set; }
+        public List<Network> networks { get; set; }
+        
     }
+    public class Network
+    {
+        public EnumHelper.Network networkName { get; set; }
+        public int account { get; set; }
+        public List<HistoricAddon>? allAddons { get; set; }
+        public List<FixedPriceContract>? Fixed { get; set; }
+        public int? paymentTerms { get; set; }
+        public Email email { get; set; }
 
+    }
     public struct CustomerList
     {
         public string? Name { get; set; }
@@ -131,8 +138,13 @@ namespace Fuelcards.GenericClassFiles
 
     public struct HistoricAddon
     {
-        public string network { get; set; }
         public double? Addon { get; set; }
         public DateOnly? effectiveDate { get; set; }
+    }
+    public  struct Email
+    {
+        public string? To { get; set; }
+        public string? Cc { get; set; }
+        public string? Bcc { get; set; }
     }
 }
