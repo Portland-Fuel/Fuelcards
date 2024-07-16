@@ -1,8 +1,15 @@
-﻿
+﻿@model Fuelcards.GenericClassFiles.CustomerModel
 
 @{
     Layout = "~/Views/Shared/_CustDetailsLayout.cshtml";
+    var jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(Model);
 }
+
+<script>
+    var model = JSON.parse('@Html.Raw(jsonModel)');
+    console.log(model);
+</script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <div class="Section" id="AddOrEditSection">
     <div class="form-container">
@@ -10,21 +17,21 @@
             <div class="form-row">
                 <div class="form-group ">
                     <label for="customerName">Name of Customer:</label>
-                    <input type="text" id="customerName" name="customerName" required value="John Doe">
+                    <input type="text" id="customerName" name="customerName" required value="@Model.name">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group  ">
                     <label for="emailTo">Email To:</label>
-                    <input type="email" id="emailTo" name="emailTo" required value="johndoe@example.com">
+                    <input type="email" id="emailTo" name="emailTo" required value="">
                 </div>
                 <div class="form-group">
                     <label for="emailCc">Email CC:</label>
-                    <input type="email" id="emailCc" name="emailCc" value="cc@example.com">
+                    <input type="email" id="emailCc" name="emailCc" value="">
                 </div>
                 <div class="form-group">
                     <label for="emailBcc">Email BCC:</label>
-                    <input type="email" id="emailBcc" name="emailBcc" value="bcc@example.com">
+                    <input type="email" id="emailBcc" name="emailBcc" value="">
                 </div>
             </div>
             <div class="form-row-centered">

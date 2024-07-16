@@ -50,6 +50,10 @@ function ShowNetworkAccountNumberInput(element){
             input.remove();
         });
     } else {
+
+        const FirstAddonInList = model[0];
+        
+
         const AccountLabel = document.createElement("label");
         AccountLabel.textContent = "Account Number";
         AccountLabel.className = "AnimateNetworkOptions";
@@ -64,9 +68,9 @@ function ShowNetworkAccountNumberInput(element){
         InputElement.value = generateRandomValue(); // Set random value
         ElementToAppend.appendChild(InputElement);
 
-        CreateAddonElementAndLabel(ElementToAppend,element);
+        CreateAddonElementAndLabel(ElementToAppend,element, FirstAddonInList);
 
-        CreateDateElementAndLabel(ElementToAppend,element);
+        CreateDateElementAndLabel(ElementToAppend,element, FirstAddonInList);
 
         if (document.getElementById('CustomerSearch').value !== "") {
             const divElement = document.createElement("div");
@@ -85,7 +89,7 @@ function ShowNetworkAccountNumberInput(element){
         }
     }
 }
-function CreateDateElementAndLabel(ElementToAppend,element){
+function CreateDateElementAndLabel(ElementToAppend,element, FirstAddonInList){
     const DateLabel = document.createElement("label");
     DateLabel.textContent = "Effective From";
     DateLabel.className = "AnimateNetworkOptions";
@@ -97,10 +101,10 @@ function CreateDateElementAndLabel(ElementToAppend,element){
     var datePlaceholderTxt = element.value + " Date";
     DateElement.className = "AnimateNetworkOptions";
     DateElement.placeholder = datePlaceholderTxt;
-    DateElement.value = generateRandomDate(); // Set random value
+    DateElement.value = FirstAddonInList.effectiveDate;
     ElementToAppend.appendChild(DateElement);
 }
-function CreateAddonElementAndLabel(ElementToAppend,element){
+function CreateAddonElementAndLabel(ElementToAppend,element,FirstAddonInList){
     const AddonLabel = document.createElement("label");
     AddonLabel.textContent = "Addon";
     AddonLabel.className = "AnimateNetworkOptions";
@@ -112,12 +116,9 @@ function CreateAddonElementAndLabel(ElementToAppend,element){
     var addonPlaceholderTxt = element.value + " Addon";
     AddonElement.placeholder = addonPlaceholderTxt;
     AddonElement.className = "AnimateNetworkOptions";
-    AddonElement.value = generateRandomValue(); // Set random value
+    AddonElement.value = FirstAddonInList.addon;
     ElementToAppend.appendChild(AddonElement);
 }
-
-
-
 
 function LoadHistoricData(element){
     const NetworkUserSelected = element.value;
