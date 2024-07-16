@@ -22,10 +22,19 @@ namespace Fuelcards.Controllers
             _logger = logger;
             _db = db;
         }
-        public IActionResult CustomerDetails()
+        [HttpPost]
+        public IActionResult CustomerDetails([FromBody]string? xeroID)
         {
             CustomerDetailsModels pageModel = new();
             pageModel.CustomerLists = RetrieveCustomer.CustomerDetailsLoadData();
+            if(string.IsNullOrEmpty(xeroID) == false)
+            {
+                pageModel.CustomerModel = RetrieveCustomer.GetCustomerInformation(xeroID);
+            }
+            else
+            {
+                pageModel.CustomerModel = new();
+            }
             ViewData["Title"] = "Customer Details";
             return View("/Views/CustomerDetails/CustomerDetails.cshtml", pageModel);
         }

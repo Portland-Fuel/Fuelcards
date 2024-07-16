@@ -15,7 +15,7 @@
         </h1>
     </div>
 
-    <input id="CustomerSearch" style="width:100%" type="text" class="form-control" placeholder="Search for a customer" list="customerOptions" autocomplete="off" @* onchange="CustomerSearchInput(this)" *@ />
+    <input id="CustomerSearch" style="width:100%" type="text" class="form-control" placeholder="Search for a customer" list="customerOptions" autocomplete="off" onchange="CustomerSearchInput(this)" />
     <datalist id="customerOptions">
         @{
             var customerDictionary = Model.CustomerLists.ToDictionary(e => e.Name, e => e.xeroId);
