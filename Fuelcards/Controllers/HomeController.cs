@@ -25,12 +25,12 @@ namespace Fuelcards.Controllers
         [HttpPost]
         public IActionResult CustomerDetails([FromBody]string? xeroID)
         {
+            RetrieveCustomer customerClass = new(_db);
             CustomerDetailsModels pageModel = new();
-            pageModel.CustomerLists = RetrieveCustomer.CustomerDetailsLoadData();
+            pageModel.CustomerLists = customerClass.CustomerDetailsLoadData();
             if(string.IsNullOrEmpty(xeroID) == false)
             {
-                pageModel.CustomerModel = RetrieveCustomer.GetCustomerInformation(xeroID);
-                
+                pageModel.CustomerModel = customerClass.GetCustomerInformation(xeroID);
             }
             else
             {

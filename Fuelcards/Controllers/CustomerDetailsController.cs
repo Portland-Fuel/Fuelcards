@@ -1,4 +1,5 @@
 ﻿using Fuelcards.GenericClassFiles;
+using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Graph;
 using static Fuelcards.Models.CustomerDetailsModels;
@@ -7,6 +8,11 @@ namespace Fuelcards.Controllers
 {
     public class CustomerDetailsController : Controller
     {
+        private readonly IQueriesRepository _db;
+        public CustomerDetailsController(IQueriesRepository db)
+        {
+            _db = db;
+        }
         public IActionResult Index()
         {
             return View();
@@ -14,23 +20,12 @@ namespace Fuelcards.Controllers
 
         [HttpPost]
         public JsonResult SearchCustomer([FromBody] string CustomerName)
-        
         {
-  /*          List<string> PFLXeroCustomerNames = HomeController.PFLXeroCustomersData.Select(x => x.Name).ToList();
-            List<string> FTCXeroCustomerNames = HomeController.FTCXeroCustomersData.Select(x => x.Name).ToList();
-
-            PFLXeroCustomerNames.AddRange(FTCXeroCustomerNames);
-
-            bool customerExists = PFLXeroCustomerNames.Contains(CustomerName, StringComparer.OrdinalIgnoreCase);
-
-            if (!customerExists)
-            {
-                throw new Exception("Customer not found!!! Try reloading xero");
-            }*/
+            RetrieveCustomer customerClass = new(_db);
             try
             {
 
-               CustomerModel Return =  RetrieveCustomer.GetCustomerInformation(CustomerName);
+               CustomerModel Return =  customerClass.GetCustomerInformation(CustomerName);
                 var JsonResult = new
                 {
                     Addons = Return.allAddons,

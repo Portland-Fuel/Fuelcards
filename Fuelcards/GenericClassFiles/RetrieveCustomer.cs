@@ -9,12 +9,14 @@ namespace Fuelcards.GenericClassFiles
 {
     public class RetrieveCustomer
     {
-        private static IQueriesRepository _db;
+        private readonly IQueriesRepository _db;
+
         public RetrieveCustomer(IQueriesRepository db)
         {
             _db = db;
         }
-        public static List<CustomerList> CustomerDetailsLoadData()
+
+        public List<CustomerList> CustomerDetailsLoadData()
         {
             List<CustomerList> customers = new();
             foreach (var item in HomeController.PFLXeroCustomersData)
@@ -28,7 +30,7 @@ namespace Fuelcards.GenericClassFiles
             }
             return customers;
         }
-        public static CustomerModel GetCustomerInformation(string xeroId)
+        public CustomerModel GetCustomerInformation(string xeroId)
         {
             var XeroCustomer = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == xeroId).FirstOrDefault();
             if (XeroCustomer == null) throw new ArgumentException("Xero ID passed in from the view does not match a customer in the list produced from xero");
@@ -44,10 +46,10 @@ namespace Fuelcards.GenericClassFiles
             return Customers;
         }
 
-        private static CustomerModel getAllFixedData(CustomerModel customers)
+        private CustomerModel getAllFixedData(CustomerModel customers)
         {
             List<FixedPriceContract>? contracts = _db.AllFixContracts(customers.portlandId);
-            if (contracts is null || contracts.Count() == 0) return customers;
+            if (contracts is null || contracts.Count == 0) return customers;
             customers.keyfuelsFixedData = new();
             customers.ukfuelFixedData = new();
             customers.texacoFixedData = new();
@@ -59,15 +61,14 @@ namespace Fuelcards.GenericClassFiles
             return customers;
         }
 
-        private static int ValidatePaymentTerms(string xeroID, string name)
+        private int ValidatePaymentTerms(string xeroID, string name)
         {
             int? paymentTerms = _db.GetPaymentTerms(xeroID);
-            if (paymentTerms != null)return (int)paymentTerms;
+            if (paymentTerms != null) return (int)paymentTerms;
             throw new ArgumentException($"No Payment Terms have been found for the following customer {name}");
-            
         }
 
-        private static List<HistoricAddon> GetAddon(int portlandId)
+        private List<HistoricAddon> GetAddon(int portlandId)
         {
             List<CustomerPricingAddon>? AllAddons = _db.GetListOfAddonsForCustomer(portlandId);
             List<HistoricAddon> historicAddons = new();
@@ -88,28 +89,26 @@ namespace Fuelcards.GenericClassFiles
             return historicAddons;
         }
 
-
-
-        private static int ValidatePortlandId(string xeroId)
+        private int ValidatePortlandId(string xeroId)
         {
             int? PortlandId = _db.GetPortlandIdFromXeroId(xeroId);
             if (PortlandId == null) throw new ArgumentException($"Portland ID cannot be null for XeroID = {xeroId}");
             return (int)PortlandId;
         }
 
-        private static string ValidateCustomerName(string? name, string? id)
+        private string ValidateCustomerName(string? name, string? id)
         {
             if (name is null) throw new ArgumentNullException($"Error setting the customer name. Name was null. Xero ID Was {id}");
             return name;
         }
-        private static string ValidateXeroId(string? xeroID)
+
+        private string ValidateXeroId(string? xeroID)
         {
             if (xeroID is null) throw new ArgumentNullException("Error setting the xeroID name. Name was null. Xero ID Was");
             return xeroID;
         }
-
-
     }
+
     public struct CustomerModel
     {
         // IF ANYONE TOUCHES THIS WITHOUT INFORMING CHUCKLES. BIGGGG TROUBLE
@@ -118,18 +117,18 @@ namespace Fuelcards.GenericClassFiles
         public int portlandId { get; set; }
         public List<HistoricAddon>? allAddons { get; set; }
         public int? paymentTerms { get; set; }
-        public List<FixedPriceContract> keyfuelsFixedData { get; set; } 
-        public List<FixedPriceContract> ukfuelFixedData { get; set; } 
-        public List<FixedPriceContract> texacoFixedData { get; set; } 
+        public List<FixedPriceContract> keyfuelsFixedData { get; set; }
+        public List<FixedPriceContract> ukfuelFixedData { get; set; }
+        public List<FixedPriceContract> texacoFixedData { get; set; }
         public List<FixedPriceContract> fuelgenieFixedData { get; set; }
-
     }
+
     public struct CustomerList
     {
         public string? Name { get; set; }
         public string? xeroId { get; set; }
-         
     }
+
     public struct HistoricAddon
     {
         public string network { get; set; }
