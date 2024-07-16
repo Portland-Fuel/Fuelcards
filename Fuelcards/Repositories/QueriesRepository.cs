@@ -19,7 +19,8 @@ namespace Fuelcards.Repositories
         }
         public int? GetPortlandIdFromXeroId(string xeroId)
         {
-            return _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.XeroId == xeroId)?.PortlandId;
+            var Return = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.XeroId == xeroId)?.PortlandId;
+            return Return;
         }
         public IEnumerable<CustomerPricingAddon> GetAll()
         {
