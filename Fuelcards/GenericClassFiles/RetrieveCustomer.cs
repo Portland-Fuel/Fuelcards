@@ -4,6 +4,9 @@ using Fuelcards.Controllers;
 using Fuelcards.Repositories;
 using Microsoft.Graph.TermStore;
 using RestSharp;
+using System.Runtime.CompilerServices;
+using Xero.NetStandard.OAuth2.Client;
+using Xero.NetStandard.OAuth2.Model.Accounting;
 
 namespace Fuelcards.GenericClassFiles
 {
@@ -30,6 +33,41 @@ namespace Fuelcards.GenericClassFiles
             }
             return customers;
         }
+
+        private string GenerateAddress(Xero.NetStandard.OAuth2.Model.Accounting.Contact? item)
+        {
+            if (item is null) throw new ArgumentException("Xero Id was null therefore no address can be found");
+                string? AddressLine = item.Addresses[0].AddressLine1;
+                string? AddressLine2 = item.Addresses[0].AddressLine2;
+                string? AddressLine3 = item.Addresses[0].AddressLine3;
+                string? City = item.Addresses[0].City;
+                string? Postcode = item.Addresses[0].PostalCode;
+                string? Region = item.Addresses[0].Region;
+                string address = $"{AddressLine},{AddressLine2},{AddressLine3},{City},{Postcode},{Region}";
+                if (address == ",,,,," && item.Addresses.Count() > 1)
+                {
+                    AddressLine = item.Addresses[1].AddressLine1;
+                    AddressLine2 = item.Addresses[1].AddressLine2;
+                    AddressLine3 = item.Addresses[1].AddressLine3;
+                    City = item.Addresses[1].City;
+                    Postcode = item.Addresses[1].PostalCode;
+                    Region = item.Addresses[1].Region;
+                    address = $"{AddressLine},{AddressLine2},{AddressLine3},{City},{Postcode},{Region}";
+
+                }
+                AddressLine = null;
+                City = null;
+                Postcode = null;
+                Region = null;
+
+                if (item.Name == "Portland Fuel Ltd") item.EmailAddress = "info@portland-fuel.co.uk";
+                if (address == ",,,,,")
+                {
+                    throw new Exception("Address could not be established.");
+                }
+            return address;
+            }
+
         public CustomerModel GetCustomerInformation(string xeroId)
         {
             var XeroCustomer = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == xeroId).FirstOrDefault();
@@ -39,6 +77,7 @@ namespace Fuelcards.GenericClassFiles
                 xeroID = ValidateXeroId(XeroCustomer.ContactID.ToString()),
                 name = ValidateCustomerName(XeroCustomer.Name, XeroCustomer.ContactID.ToString()),
                 portlandId = ValidatePortlandId(xeroId),
+                address = GenerateAddress(HomeController.PFLXeroCustomersData.Where(e=>e.ContactID.ToString() == xeroId).FirstOrDefault()),
             };
             Customers.networks = new();
             int[]? Accounts = _db.GetAccounts(Customers.portlandId);
@@ -117,6 +156,7 @@ namespace Fuelcards.GenericClassFiles
         public string? name { get; set; }
         public string? xeroID { get; set; }
         public int portlandId { get; set; }
+        public string? address { get; set; }
         public List<Network> networks { get; set; }
         
     }
