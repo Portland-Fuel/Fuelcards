@@ -52,14 +52,9 @@ namespace Fuelcards.Controllers
 
         [HttpPost]
         public JsonResult SubmitAddOrEdit([FromBody] CustomerDetailsModels.AddEditCustomerFormData AddEditCustomerFormData)
-        {
+        {   
             try
-            {
-                var JsonResult = new
-                {
-                    ffff = "f" +
-                    "ff"
-                };
+            { 
 
                 return Json(JsonResult);
             }
@@ -90,15 +85,5 @@ namespace Fuelcards.Controllers
 
     }
 
-    public struct AddonFromJs
-    {
-        public string? account { get; set; }
-        public string addon { get; set; }
-        public string? effectiveFrom { get; set; }
-        public string toEmail { get; set; }
-        public string ccEmail
-        { get; set; }
-        public string bccEmail { get; set; }
 
-    }
 }
