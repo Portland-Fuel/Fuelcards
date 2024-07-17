@@ -52,29 +52,11 @@ namespace Fuelcards.Controllers
 
         [HttpPost]
         public JsonResult SubmitAddOrEdit([FromBody] CustomerDetailsModels.AddEditCustomerFormData AddEditCustomerFormData)
-        {   
-            try
-            { 
-
-                return Json(JsonResult);
-            }
-            catch (Exception e)
-            {
-                Response.StatusCode = 443;
-                return Json(new { error = e.Message });
-            }
-        }
-
-        [HttpPost]
-
-        public JsonResult UpdateAddon([FromBody] AddonFromJs customerPricingAddon)
         {
             try
             {
-                _db.UpdateAddon(customerPricingAddon);
-                
-                    
-                return Json("");
+
+                return Json("JsonResult");
             }
             catch (Exception e)
             {
@@ -82,8 +64,5 @@ namespace Fuelcards.Controllers
                 return Json(new { error = e.Message });
             }
         }
-
     }
-
-
 }

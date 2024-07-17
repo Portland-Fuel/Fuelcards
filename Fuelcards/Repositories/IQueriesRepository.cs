@@ -19,7 +19,7 @@ namespace Fuelcards.Repositories
         double? GetDieselBand7Texaco();
         List<CustomerInvoice>? GetCustomersToInvoice(int network, DateOnly invoiceDate);
         List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network);
-        void UpdateAddon(AddonFromJs customerPricingAddon);
+        void UpdateAddon(CustomerDetailsModels.AddonFromJs customerPricingAddon);
         List<int> GetFailedSiteBanding(int network);
     }
 }

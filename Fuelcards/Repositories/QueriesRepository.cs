@@ -7,6 +7,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Fuelcards.Controllers;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Xero.NetStandard.OAuth2.Models;
+using static Fuelcards.Models.CustomerDetailsModels;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -132,31 +133,44 @@ namespace Fuelcards.Repositories
             }
             return Customers;
         }
-        public void UpdateAddon(AddonFromJs data)
+        public void UpdateAddon(CustomerDetailsModels.AddonFromJs data)
         {
             try
             {
-                
-                CustomerPricingAddon model = new();
-
-                model.EffectiveDate = DateOnly.Parse(data.effectiveFrom);
-                if (model.EffectiveDate is null) throw new ArgumentException("Problem mapping the effective date from the Json object to the CustomerPricingAddon model");
-
-                model.Addon = Convert.ToDouble(data.addon);
-                if (model.Addon is null) throw new ArgumentException("Problem converting the addon from a string to a double");
-
-                model.Network = (int)_db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(data.account)).Network;
-                if (model.Network is null) throw new ArgumentException($"Could not pull out the network for the following account number {data.account}");
-
-                model.PortlandId = (int)_db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(data.account)).PortlandId;
-                if (model.Network is null) throw new ArgumentException($"Could not pull out the Portland ID for the following account number {data.account}");
-                
-                _db.CustomerPricingAddons.Add(model);
-                _db.SaveChanges();
+                ProcessAddonList(data.keyFuels);
+                ProcessAddonList(data.uKFuels);
+                ProcessAddonList(data.texaco);
             }
             catch (Exception e)
             {
                 throw new ArgumentException(e.Message);
+            }
+        }
+        private void ProcessAddonList(List<AddonDataFromJS>? addonList)
+        {
+            if (addonList == null) return;
+
+            foreach (var addon in addonList)
+            {
+                CustomerPricingAddon model = new();
+
+                model.EffectiveDate = DateOnly.Parse(addon.effectiveFrom);
+                if (model.EffectiveDate == null)
+                    throw new ArgumentException("Problem mapping the effective date from the Json object to the CustomerPricingAddon model");
+
+                model.Addon = Convert.ToDouble(addon.addon);
+                if (model.Addon == null)
+                    throw new ArgumentException("Problem converting the addon from a string to a double");
+
+                var networkEntry = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(addon.account));
+                if (networkEntry == null)
+                    throw new ArgumentException($"Could not pull out the network and Portland ID for the following account number {addon.account}");
+
+                model.Network = (int)networkEntry.Network;
+                model.PortlandId = (int)networkEntry.PortlandId;
+
+                _db.CustomerPricingAddons.Add(model);
+                _db.SaveChanges();
             }
         }
         public List<int> GetFailedSiteBanding(int network)
