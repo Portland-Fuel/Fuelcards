@@ -76,13 +76,10 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                var JsonResult = new
-                {
-                    ffff = "f" +
-                    "ff"
-                };
-
-                return Json(JsonResult);
+                _db.UpdateAddon(customerPricingAddon);
+                
+                    
+                return Json("");
             }
             catch (Exception e)
             {

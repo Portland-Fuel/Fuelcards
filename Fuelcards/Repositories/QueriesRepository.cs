@@ -106,7 +106,7 @@ namespace Fuelcards.Repositories
                 if (PortlandId == null) throw new ArgumentException($"Portland Id could not be established from the acocunt number {accountNumber}");
                 string? xeroId = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.PortlandId == PortlandId && e.XeroTennant == tennant)?.XeroId;
                 if (xeroId == null) throw new ArgumentException($"Xero Id could not be established from the Portland Id {PortlandId}");
-                var name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == xeroId).Select(e=>e.Name).ToList();
+                var name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == xeroId).Select(e => e.Name).ToList();
                 if (name == null) throw new ArgumentException($"Customer name could not be established from the Xero Id {xeroId}");
                 CustomerInvoice model = new()
                 {
@@ -129,6 +129,33 @@ namespace Fuelcards.Repositories
 
             }
             return Customers;
+        }
+        public void UpdateAddon(AddonFromJs data)
+        {
+            try
+            {
+                
+                CustomerPricingAddon model = new();
+
+                model.EffectiveDate = DateOnly.Parse(data.effectiveFrom);
+                if (model.EffectiveDate is null) throw new ArgumentException("Problem mapping the effective date from the Json object to the CustomerPricingAddon model");
+
+                model.Addon = Convert.ToDouble(data.addon);
+                if (model.Addon is null) throw new ArgumentException("Problem converting the addon from a string to a double");
+
+                model.Network = (int)_db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(data.account)).Network;
+                if (model.Network is null) throw new ArgumentException($"Could not pull out the network for the following account number {data.account}");
+
+                model.PortlandId = (int)_db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(data.account)).PortlandId;
+                if (model.Network is null) throw new ArgumentException($"Could not pull out the Portland ID for the following account number {data.account}");
+                
+                _db.CustomerPricingAddons.Add(model);
+                _db.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
     }
 }

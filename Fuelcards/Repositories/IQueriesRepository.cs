@@ -1,6 +1,7 @@
 ﻿using Fuelcards.Models;
 using DataAccess.Fuelcards;
 using Fuelcards.GenericClassFiles;
+using Fuelcards.Controllers;
 
 namespace Fuelcards.Repositories
 {
@@ -18,6 +19,6 @@ namespace Fuelcards.Repositories
         double? GetDieselBand7Texaco();
         List<CustomerInvoice>? GetCustomersToInvoice(int network, DateOnly invoiceDate);
         List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network);
-
+        void UpdateAddon(AddonFromJs customerPricingAddon);
     }
 }
