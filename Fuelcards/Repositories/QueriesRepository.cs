@@ -2,7 +2,7 @@
 using DataAccess.Fuelcards;
 using Fuelcards.GenericClassFiles;
 using System.Runtime.CompilerServices;
-
+using Fuelcards.Models;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository: IQueriesRepository

@@ -1,4 +1,4 @@
-﻿
+﻿using Fuelcards.Models;
 using DataAccess.Fuelcards;
 using Fuelcards.GenericClassFiles;
 

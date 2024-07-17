@@ -2,7 +2,8 @@
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Graph;
-using static Fuelcards.Models.CustomerDetailsModels;
+using Fuelcards.Models;
+//using static Fuelcards.Models.CustomerDetailsModels;
 
 namespace Fuelcards.Controllers
 {
@@ -43,7 +44,7 @@ namespace Fuelcards.Controllers
         }
 
         [HttpPost]
-        public JsonResult SubmitAddOrEdit([FromBody] AddEditCustomerFormData AddEditCustomerFormData)
+        public JsonResult SubmitAddOrEdit([FromBody] CustomerDetailsModels.AddEditCustomerFormData AddEditCustomerFormData)
         {
             try
             {
