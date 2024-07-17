@@ -25,11 +25,15 @@ namespace Fuelcards.Controllers
             try
             {
 
-               CustomerModel Return =  customerClass.GetCustomerInformation(xeroId);
+                CustomerModel Return = customerClass.GetCustomerInformation(xeroId);
                 var JsonResult = new
                 {
-                    networdData = Return.networks,
+                    networkData = Return.networks,
                     CustomerName = Return.name,
+                    portlandId = Return.portlandId,
+                    XeroId = Return.xeroID,
+
+
                 };
 
                 return Json(JsonResult);
@@ -41,6 +45,7 @@ namespace Fuelcards.Controllers
                 return Json(new { error = e.Message });
             }
         }
+
 
         [HttpPost]
         public JsonResult SubmitAddOrEdit([FromBody] AddEditCustomerFormData AddEditCustomerFormData)

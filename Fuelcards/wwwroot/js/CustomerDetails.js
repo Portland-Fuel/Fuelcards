@@ -29,95 +29,129 @@ function RemoveColorFromAllOtherbuttonsAndCloseAllSections() {
 }
 
 
-
-function ShowNetworkAccountNumberInput(element){
-    const Parent = element.parentElement.parentElement;
-    const ElementToAppend = Parent.querySelector(".NetworkOptions");
-    
-    if (!element.checked) {
-        const AllDivs = ElementToAppend.querySelectorAll("div");
-        AllDivs.forEach(div => {
-            div.remove();
-        });
-
-        const AllLabels = ElementToAppend.querySelectorAll("label");
-        AllLabels.forEach(label => {
-            label.remove();
-        });
-
-        const AllInputs = ElementToAppend.querySelectorAll("input");
-        AllInputs.forEach(input => {
-            input.remove();
-        });
-    } else {
-
-        const FirstAddonInList = model[0];
-        
-
-        const AccountLabel = document.createElement("label");
-        AccountLabel.textContent = "Account Number";
-        AccountLabel.className = "AnimateNetworkOptions";
-        ElementToAppend.appendChild(AccountLabel);
-
-        const InputElement = document.createElement("input");
-        InputElement.type = "text";
-        InputElement.required = true;
-        var placeholderTxt = element.value + " Account Number";
-        InputElement.placeholder = placeholderTxt;
-        InputElement.className = "AnimateNetworkOptions";
-        InputElement.value = generateRandomValue(); // Set random value
-        ElementToAppend.appendChild(InputElement);
-
-        CreateAddonElementAndLabel(ElementToAppend,element, FirstAddonInList);
-
-        CreateDateElementAndLabel(ElementToAppend,element, FirstAddonInList);
-
-        if (document.getElementById('CustomerSearch').value !== "") {
-            const divElement = document.createElement("div");
-            divElement.className = "form-row-centered";
-            ElementToAppend.appendChild(divElement);
-
-            const loadButton = document.createElement("button");
-            loadButton.className = "LoadHistoricButton";
-            loadButton.textContent = "Load Historic";
-            loadButton.type = "button";
-            loadButton.className = "AnimateNetworkOptions LoadHistoricButton";
-            loadButton.onclick = function () {
-                LoadHistoricData(element);
-            }
-            divElement.appendChild(loadButton);
+function createElement(type, attributes = {}, textContent = '') {
+    const element = document.createElement(type);
+    for (const attr in attributes) {
+        if (attributes.hasOwnProperty(attr)) {
+            element[attr] = attributes[attr];
         }
     }
+    if (textContent) {
+        element.textContent = textContent;
+    }
+    return element;
 }
-function CreateDateElementAndLabel(ElementToAppend,element,FirstAddonInList){
-    const DateLabel = document.createElement("label");
-    DateLabel.textContent = "Effective From";
-    DateLabel.className = "AnimateNetworkOptions";
-    ElementToAppend.appendChild(DateLabel);
 
-    const DateElement = document.createElement("input");
-    DateElement.type = "date";
-    DateElement.required = true;
-    var datePlaceholderTxt = element.value + " Date";
-    DateElement.className = "AnimateNetworkOptions";
-    DateElement.placeholder = datePlaceholderTxt;
-    DateElement.value = generateRandomDate(); // Set random value
-    ElementToAppend.appendChild(DateElement);
+function ShowNetworkAccountNumberInput(element) {
+    const Parent = element.parentElement.parentElement;
+    const ElementToAppend = Parent.querySelector(".NetworkOptions");
+
+    if (!element.checked) {
+        while (ElementToAppend.firstChild) {
+            ElementToAppend.removeChild(ElementToAppend.firstChild);
+        }
+    } else {
+
+
+        const FirstAddonInList = CustomerSearchModelData.networkData.find(xx => xx.networkName === element.value);
+        
+        const accountLabel = createElement("label", { className: "AnimateNetworkOptions" }, "Account Number");
+        const inputElement = createElement("input", {
+            type: "text",
+            required: true,
+            placeholder: `${element.value} Account Number`,
+            className: "AnimateNetworkOptions",
+            value: generateRandomValue()
+        });
+
+        ElementToAppend.appendChild(accountLabel);
+        ElementToAppend.appendChild(inputElement);
+
+        CreateAddonElementAndLabel(ElementToAppend, element, FirstAddonInList);
+        CreateDateElementAndLabel(ElementToAppend, element, FirstAddonInList);
+
+        if (document.getElementById('CustomerSearch').value !== "") {
+            const divElement = createElement("div", { className: "form-row-centered" });
+            const loadButton = createElement("button", {
+                className: "AnimateNetworkOptions LoadHistoricButton",
+                type: "button",
+                onclick: function () { LoadHistoricData(element); }
+            }, "Load Historic");
+
+            divElement.appendChild(loadButton);
+            ElementToAppend.appendChild(divElement);
+        }
+
+        const emailPlaceholder = "Seperate email/s with a ;";
+
+        const emailDiv = createElement("div", { className: "form-row" });
+        ElementToAppend.appendChild(emailDiv);
+
+        const emailToLabel = createElement("label", {}, "Email To:");
+        const emailToInput = createElement("input", {
+            type: "email",
+            id: `emailTo${element.value}`,
+            placeholder: emailPlaceholder,
+            name: "emailTo",
+            required: true,
+            className: "AnimateNetworkOptions"
+        });
+
+        const emailCcLabel = createElement("label", {}, "Email CC:");
+        const emailCcInput = createElement("input", {
+            type: "email",
+            id: `emailCc${element.value}`,
+            name: "emailCc",
+            placeholder: emailPlaceholder,
+            className: "AnimateNetworkOptions"
+        });
+
+        const emailBccLabel = createElement("label", {}, "Email BCC:");
+        const emailBccInput = createElement("input", {
+            type: "email",
+            id: `emailBcc${element.value}`,
+            name: "emailBcc",
+            placeholder: emailPlaceholder,
+            className: "AnimateNetworkOptions"
+        });
+
+        ElementToAppend.appendChild(emailToLabel);
+        ElementToAppend.appendChild(emailToInput);
+        ElementToAppend.appendChild(emailCcLabel);
+        ElementToAppend.appendChild(emailCcInput);
+        ElementToAppend.appendChild(emailBccLabel);
+        ElementToAppend.appendChild(emailBccInput);
+    }
 }
-function CreateAddonElementAndLabel(ElementToAppend,element,FirstAddonInList){
-    const AddonLabel = document.createElement("label");
-    AddonLabel.textContent = "Addon";
-    AddonLabel.className = "AnimateNetworkOptions";
-    ElementToAppend.appendChild(AddonLabel);
 
-    const AddonElement = document.createElement("input");
-    AddonElement.type = "text";
-    AddonElement.required = true;
-    var addonPlaceholderTxt = element.value + " Addon";
-    AddonElement.placeholder = addonPlaceholderTxt;
-    AddonElement.className = "AnimateNetworkOptions";
-    AddonElement.value = generateRandomValue(); // Set random value
-    ElementToAppend.appendChild(AddonElement);
+function CreateDateElementAndLabel(ElementToAppend, element, FirstAddonInList) {
+    console.log("FirstAddonInList: " + FirstAddonInList);
+    const dateLabel = createElement("label", { className: "AnimateNetworkOptions" }, "Effective From");
+    const dateElement = createElement("input", {
+        type: "date",
+        required: true,
+        className: "AnimateNetworkOptions",
+        placeholder: `${element.value} Date`,
+        value: generateRandomDate()
+    });
+
+    ElementToAppend.appendChild(dateLabel);
+    ElementToAppend.appendChild(dateElement);
+}
+
+function CreateAddonElementAndLabel(ElementToAppend, element, FirstAddonInList) {
+    console.log("FirstAddonInList Addon: " + FirstAddonInList);
+    const addonLabel = createElement("label", { className: "AnimateNetworkOptions" }, "Addon");
+    const addonElement = createElement("input", {
+        type: "text",
+        required: true,
+        className: "AnimateNetworkOptions",
+        placeholder: `${element.value} Addon`,
+        value: generateRandomValue()
+    });
+
+    ElementToAppend.appendChild(addonLabel);
+    ElementToAppend.appendChild(addonElement);
 }
 
 
@@ -295,7 +329,7 @@ const UkFuelsFixs = []
 const FuelGenieFixs = []
 
 
-
+let CustomerSearchModelData = []
 
 
 async function CustomerSearchInput(element){
@@ -303,12 +337,20 @@ if(element.value === ""){
     return;
 }
     await $.ajax({
-        url: '/Home/CustomerDetails', 
+        url: '/CustomerDetails/SearchCustomer', 
         type: 'POST',
         data: JSON.stringify(element.value), 
         contentType: 'application/json;charset=utf-8',
         success: async function (response) {
-           SortDataAndPopulateFromSearch(response);
+            console.log("CustomerData:");
+            const stringifyData = JSON.stringify(response, null, 2);
+            console.log(stringifyData);
+            CustomerSearchModelData = JSON.parse(stringifyData);
+            SortDataAndPopulateFromSearch(CustomerSearchModelData);
+            Toast.fire({
+                icon: 'success',
+                title: 'Successfully Loaded Customer'
+            });
         },
         error: async function (xhr, error) {
             element.value = "";
@@ -324,12 +366,50 @@ if(element.value === ""){
     });
 }
 
+function clearAllInputsOnCustomerDetailsPage() {
+    // Clear all input fields in the AddOrEditSection
+    const addOrEditSectionInputs = document.querySelectorAll('#AddOrEditSection input');
+    addOrEditSectionInputs.forEach(input => {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+            input.checked = false;
+        } else {
+            input.value = '';
+        }
+    });
 
+    // Clear all select fields in the AddOrEditSection
+    const addOrEditSectionSelects = document.querySelectorAll('#AddOrEditSection select');
+    addOrEditSectionSelects.forEach(select => {
+        select.selectedIndex = 0;
+    });
+
+    // Clear all input fields in the CustomerFixSection
+    const customerFixSectionInputs = document.querySelectorAll('#CustomerFixSection input');
+    customerFixSectionInputs.forEach(input => {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+            input.checked = false;
+        } else {
+            input.value = '';
+        }
+    });
+
+    // Clear all select fields in the CustomerFixSection
+    const customerFixSectionSelects = document.querySelectorAll('#CustomerFixSection select');
+    customerFixSectionSelects.forEach(select => {
+        select.selectedIndex = 0;
+    });
+}
 function SortDataAndPopulateFromSearch(data){
-
+    clearAllInputsOnCustomerDetailsPage();
+   
+    FillCustomerName(data.customerName);
 }
 
-
+function FillCustomerName(customerName){
+    const CustomerNameElement = document.getElementById("customerName");
+    CustomerNameElement.value = customerName;
+    CustomerNameElement.disabled = true;
+}
 function GetModelToSubmitToController(){ 
     var form = document.getElementById("AddOrEditCustomerForm");
     var formData = new FormData(form);
