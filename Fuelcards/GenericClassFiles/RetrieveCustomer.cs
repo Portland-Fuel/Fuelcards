@@ -84,8 +84,8 @@ namespace Fuelcards.GenericClassFiles
             foreach (var account in Accounts)
             {
                 Network network = new();
-                network.networkName = _db.getNetworkFromAccount(account);
-                network.allAddons = GetAddon(Customers.portlandId, network.networkName);
+                network.networkName = _db.getNetworkFromAccount(account).ToString();
+                network.allAddons = GetAddon(Customers.portlandId, EnumHelper.NetworkEnumFromString(network.networkName));
                 network.paymentTerms = ValidatePaymentTerms(Customers.xeroID, Customers.name);
                 network.Fixed = getAllFixedData(account);
                 network.email = _db.AllEmail(account);
@@ -162,7 +162,7 @@ namespace Fuelcards.GenericClassFiles
     }
     public class Network
     {
-        public EnumHelper.Network networkName { get; set; }
+        public string networkName { get; set; }
         public int account { get; set; }
         public List<HistoricAddon>? allAddons { get; set; }
         public List<FixedPriceContract>? Fixed { get; set; }
