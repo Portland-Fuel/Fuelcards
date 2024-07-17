@@ -20,5 +20,6 @@ namespace Fuelcards.Repositories
         List<CustomerInvoice>? GetCustomersToInvoice(int network, DateOnly invoiceDate);
         List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network);
         void UpdateAddon(AddonFromJs customerPricingAddon);
+        List<int> GetFailedSiteBanding(int network);
     }
 }

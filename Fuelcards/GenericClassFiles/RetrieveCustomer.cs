@@ -8,6 +8,7 @@ using RestSharp;
 using System.Runtime.CompilerServices;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Model.Accounting;
+using Newtonsoft.Json;
 
 namespace Fuelcards.GenericClassFiles
 {
@@ -59,6 +60,8 @@ namespace Fuelcards.GenericClassFiles
                 Customers.networks.Add(network);
             }
             InvoicePreCheckModels _checks = new(_db);
+            _checks.invoiceDate = DateOnly.Parse("2024-07-15");
+            var egg = _checks.FailedKeyfuelsSites;
             return Customers;
         }
         private string GenerateAddress(Xero.NetStandard.OAuth2.Model.Accounting.Contact? item)

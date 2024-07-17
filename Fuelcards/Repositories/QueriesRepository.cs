@@ -5,6 +5,8 @@ using System.Runtime.CompilerServices;
 using Fuelcards.Models;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Fuelcards.Controllers;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Xero.NetStandard.OAuth2.Models;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -91,10 +93,10 @@ namespace Fuelcards.Repositories
                     accounts = _db.KfE1E3Transactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => (int)e.CustomerCode).Distinct().ToList();
                     break;
                 case 1:
-                    accounts = _db.UkfTransactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => (int)e.Customer).ToList();
+                    accounts = _db.UkfTransactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => (int)e.Customer).Distinct().ToList();
                     break;
                 case 2:
-                    accounts = _db.TexacoTransactions.Where(e => fcControls.Contains((int)e.ControlId)).Select(e => (int)e.Customer).ToList();
+                    accounts = _db.TexacoTransactions.Where(e => fcControls.Contains((int)e.ControlId)).Select(e => (int)e.Customer).Distinct().ToList();
                     break;
                 case 3:
                     tennant = 1;
@@ -157,5 +159,36 @@ namespace Fuelcards.Repositories
                 throw new ArgumentException(e.Message);
             }
         }
+        public List<int> GetFailedSiteBanding(int network)
+        {
+            List<int> Failed = new();
+            List<int?> Sites = new();
+            List<int> fcControls = _db.FcControls.Where(e => e.Invoiced != true).Select(e => e.ControlId).ToList();
+            switch (network)
+            {
+                case 0:
+                    Sites = _db.KfE1E3Transactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => e.SiteCode).Distinct().ToList();
+                    break;
+                case 1:
+                    Sites = _db.UkfTransactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => (int?)e.Site).Distinct().ToList();
+                    break;
+                case 2:
+                    Sites = _db.TexacoTransactions.Where(e => fcControls.Contains((int)e.ControlId)).Select(e => (int?)e.Site).Distinct().ToList();
+                    break;
+                case 3:
+                    break;
+            }
+            foreach (var item in Sites)
+            {
+                SiteNumberToBand? SiteInfo = _db.SiteNumberToBands.FirstOrDefault(e => e.SiteNumber == item);
+                if (SiteInfo is null)
+                {
+                    Failed.Add((int)item);
+                    continue;
+                }
+                if (SiteInfo.Band is null) Failed.Add((int)item);
+            }
+            return Failed;
+        } 
     }
 }

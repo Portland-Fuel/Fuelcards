@@ -1,0 +1,23 @@
+﻿using Fuelcards.GenericClassFiles;
+using Fuelcards.Models;
+using Fuelcards.Repositories;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Fuelcards.Controllers
+{
+    public class InvoicingController : Controller
+    {
+        private readonly IQueriesRepository _db;
+        public InvoicingController(IQueriesRepository db)
+        {
+            _db = db;
+        }
+
+        public IActionResult Index()
+        {
+            InvoicePreCheckModels _checks = new(_db);
+            
+            return View(_checks);
+        }
+    }
+}
