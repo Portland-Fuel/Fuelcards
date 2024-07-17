@@ -34,7 +34,33 @@ namespace Fuelcards.GenericClassFiles
             }
             return customers;
         }
-
+        public CustomerModel GetCustomerInformation(string xeroId)
+        {
+            var XeroCustomer = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == xeroId).FirstOrDefault();
+            if (XeroCustomer == null) throw new ArgumentException("Xero ID passed in from the view does not match a customer in the list produced from xero");
+            CustomerModel Customers = new()
+            {
+                xeroID = ValidateXeroId(XeroCustomer.ContactID.ToString()),
+                name = ValidateCustomerName(XeroCustomer.Name, XeroCustomer.ContactID.ToString()),
+                portlandId = ValidatePortlandId(xeroId),
+                address = GenerateAddress(HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == xeroId).FirstOrDefault()),
+            };
+            Customers.networks = new();
+            int[]? Accounts = _db.GetAccounts(Customers.portlandId);
+            foreach (var account in Accounts)
+            {
+                Network network = new();
+                network.networkName = _db.getNetworkFromAccount(account).ToString();
+                network.allAddons = GetAddon(Customers.portlandId, EnumHelper.NetworkEnumFromString(network.networkName));
+                network.paymentTerms = ValidatePaymentTerms(Customers.xeroID, Customers.name);
+                network.Fixed = getAllFixedData(account);
+                network.email = _db.AllEmail(account);
+                network.account = account;
+                Customers.networks.Add(network);
+            }
+            InvoicePreCheckModels _checks = new(_db);
+            return Customers;
+        }
         private string GenerateAddress(Xero.NetStandard.OAuth2.Model.Accounting.Contact? item)
         {
             if (item is null) throw new ArgumentException("Xero Id was null therefore no address can be found");
@@ -68,36 +94,6 @@ namespace Fuelcards.GenericClassFiles
                 }
             return address;
             }
-
-        public CustomerModel GetCustomerInformation(string xeroId)
-        {
-            var XeroCustomer = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == xeroId).FirstOrDefault();
-            if (XeroCustomer == null) throw new ArgumentException("Xero ID passed in from the view does not match a customer in the list produced from xero");
-            CustomerModel Customers = new()
-            {
-                xeroID = ValidateXeroId(XeroCustomer.ContactID.ToString()),
-                name = ValidateCustomerName(XeroCustomer.Name, XeroCustomer.ContactID.ToString()),
-                portlandId = ValidatePortlandId(xeroId),
-                address = GenerateAddress(HomeController.PFLXeroCustomersData.Where(e=>e.ContactID.ToString() == xeroId).FirstOrDefault()),
-            };
-            Customers.networks = new();
-            int[]? Accounts = _db.GetAccounts(Customers.portlandId);
-            foreach (var account in Accounts)
-            {
-                Network network = new();
-                network.networkName = _db.getNetworkFromAccount(account).ToString();
-                network.allAddons = GetAddon(Customers.portlandId, EnumHelper.NetworkEnumFromString(network.networkName));
-                network.paymentTerms = ValidatePaymentTerms(Customers.xeroID, Customers.name);
-                network.Fixed = getAllFixedData(account);
-                network.email = _db.AllEmail(account);
-                network.account = account;
-                Customers.networks.Add(network);
-            }
-            return Customers;
-        }
-
-        
-
         private List<FixedPriceContract>? getAllFixedData(int account)
         {
             List<FixedPriceContract>? contracts = _db.AllFixContracts(account);
