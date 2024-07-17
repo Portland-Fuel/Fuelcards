@@ -1,4 +1,5 @@
-﻿using Fuelcards.GenericClassFiles;
+﻿using DataAccess.Fuelcards;
+using Fuelcards.GenericClassFiles;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Graph;
@@ -32,6 +33,7 @@ namespace Fuelcards.Controllers
                     CustomerName = Return.name,
                     portlandId = Return.portlandId,
                     XeroId = Return.xeroID,
+                    adress = Return.address,
 
 
                 };
@@ -66,6 +68,39 @@ namespace Fuelcards.Controllers
                 return Json(new { error = e.Message });
             }
         }
+
+        [HttpPost]
+
+        public JsonResult UpdateAddon([FromBody] AddonFromJs customerPricingAddon)
+        {
+            try
+            {
+                var JsonResult = new
+                {
+                    ffff = "f" +
+                    "ff"
+                };
+
+                return Json(JsonResult);
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 443;
+                return Json(new { error = e.Message });
+            }
+        }
+
+    }
+
+    public struct AddonFromJs
+    {
+        public string? account { get; set; }
+        public string addon { get; set; }
+        public string? effectiveFrom { get; set; }
+        public string toEmail { get; set; }
+        public string ccEmail
+        { get; set; }
+        public string bccEmail { get; set; }
 
     }
 }

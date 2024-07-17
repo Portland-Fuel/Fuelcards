@@ -27,13 +27,87 @@ function RemoveColorFromAllOtherbuttonsAndCloseAllSections() {
         section.style.display = "none";
     });
 }
+async function AddNewAddon(element) {
+    const table = document.getElementById('UniqueNetworkTable');
+    const tableBody = table.querySelector('tbody');
+    const rows = tableBody.querySelectorAll('tr');
+    const row = rows[0];
 
+    if (!row) {
+        LoadUniqueNetworkOverlayHeaders();
+        const result = await promptForInputs('Fill out all fields', getInitialInputsHtml());
+        if (result.isConfirmed) {
+            const newRow = createTableRow(result.value);
+            tableBody.appendChild(newRow);
+        }
+    } else {
+        const account = row.cells[0].textContent;
+        const result = await promptForInputs('Enter Addon and Effective From', getAddonAndEffectiveFromInputsHtml());
+        if (result.isConfirmed) {
+            const newRow = createTableRow({
+                account: account,
+                addon: result.value.addon,
+                effectiveFrom: result.value.effectiveFrom,
+                toEmail: row.cells[3].textContent,
+                ccEmail: row.cells[4].textContent,
+                bccEmail: row.cells[5].textContent
+            },element);
+            tableBody.appendChild(newRow);
+        }
+    }
+}
+
+function promptForInputs(title, html) {
+    return Swal.fire({
+        title: title,
+        html: html,
+        focusConfirm: false,
+        preConfirm: () => {
+            const accountInput = document.getElementById('accountInput') ? document.getElementById('accountInput').value : '';
+            const addonInput = document.getElementById('addonInput').value;
+            const effectiveFromInput = document.getElementById('effectiveFromInput').value;
+            const toEmailInput = document.getElementById('toEmailInput') ? document.getElementById('toEmailInput').value : '';
+            const ccEmailInput = document.getElementById('ccEmailInput') ? document.getElementById('ccEmailInput').value : '';
+            const bccEmailInput = document.getElementById('bccEmailInput') ? document.getElementById('bccEmailInput').value : '';
+            return {
+                account: accountInput,
+                addon: addonInput,
+                effectiveFrom: effectiveFromInput,
+                toEmail: toEmailInput,
+                ccEmail: ccEmailInput,
+                bccEmail: bccEmailInput
+            };
+        }
+    });
+}
+
+function getInitialInputsHtml() {
+    return `
+        <input id="accountInput" class="swal2-input" placeholder="Account">
+        <input id="addonInput" class="swal2-input" placeholder="Addon">
+        <input id="effectiveFromInput" class="swal2-input" placeholder="Effective From">
+        <input id="toEmailInput" class="swal2-input" placeholder="To Email">
+        <input id="ccEmailInput" class="swal2-input" placeholder="CC Email">
+        <input id="bccEmailInput" class="swal2-input" placeholder="BCC Email">
+    `;
+}
+
+function getAddonAndEffectiveFromInputsHtml() {
+    return `
+        <input id="addonInput" class="swal2-input" placeholder="Addon">
+        <input id="effectiveFromInput" class="swal2-input" placeholder="Effective From">
+    `;
+}
 
 function createElement(type, attributes = {}, textContent = '') {
     const element = document.createElement(type);
     for (const attr in attributes) {
         if (attributes.hasOwnProperty(attr)) {
-            element[attr] = attributes[attr];
+            if (attr === 'class') {
+                element.className = attributes[attr];
+            } else {
+                element[attr] = attributes[attr];
+            }
         }
     }
     if (textContent) {
@@ -42,142 +116,179 @@ function createElement(type, attributes = {}, textContent = '') {
     return element;
 }
 
-function ShowNetworkAccountNumberInput(element) {
-    const Parent = element.parentElement.parentElement;
-    const ElementToAppend = Parent.querySelector(".NetworkOptions");
+function createTableRow(data) {
+    const newRow = document.createElement('tr');
+    newRow.appendChild(createElement('td', {}, data.account));
+    newRow.appendChild(createElement('td', {}, data.addon));
+    newRow.appendChild(createElement('td', {}, data.effectiveFrom));
+    newRow.appendChild(createElement('td', {}, data.toEmail));
+    newRow.appendChild(createElement('td', {}, data.ccEmail));
+    newRow.appendChild(createElement('td', {}, data.bccEmail));
 
-    if (!element.checked) {
-        while (ElementToAppend.firstChild) {
-            ElementToAppend.removeChild(ElementToAppend.firstChild);
-        }
-    } else {
+    const cell = createElement('td');
+    const updateButton = document.createElement('button');
+    updateButton.className = 'btn btn-primary';
+    updateButton.textContent = 'UpdateAddon';
+    updateButton.onclick = function() {
+        UpdateNewAddon(data, this);
+    };
 
+    cell.appendChild(updateButton);
+    newRow.appendChild(cell);
 
-        const FirstAddonInList = CustomerSearchModelData.networkData.find(xx => xx.networkName === element.value);
-        
-        const accountLabel = createElement("label", { className: "AnimateNetworkOptions" }, "Account Number");
-        const inputElement = createElement("input", {
-            type: "text",
-            required: true,
-            placeholder: `${element.value} Account Number`,
-            className: "AnimateNetworkOptions",
-            value: generateRandomValue()
+    return newRow;
+}
+async function UpdateNewAddon(data, element) {
+    try {
+        const response = await $.ajax({
+            url: '/CustomerDetails/UpdateAddon',
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=utf-8'
         });
-
-        ElementToAppend.appendChild(accountLabel);
-        ElementToAppend.appendChild(inputElement);
-
-        CreateAddonElementAndLabel(ElementToAppend, element, FirstAddonInList);
-        CreateDateElementAndLabel(ElementToAppend, element, FirstAddonInList);
-
-        if (document.getElementById('CustomerSearch').value !== "") {
-            const divElement = createElement("div", { className: "form-row-centered" });
-            const loadButton = createElement("button", {
-                className: "AnimateNetworkOptions LoadHistoricButton",
-                type: "button",
-                onclick: function () { LoadHistoricData(element); }
-            }, "Load Historic");
-
-            divElement.appendChild(loadButton);
-            ElementToAppend.appendChild(divElement);
-        }
-
-        const emailPlaceholder = "Seperate email/s with a ;";
-
-        const emailDiv = createElement("div", { className: "form-row" });
-        ElementToAppend.appendChild(emailDiv);
-
-        const emailToLabel = createElement("label", {}, "Email To:");
-        const emailToInput = createElement("input", {
-            type: "email",
-            id: `emailTo${element.value}`,
-            placeholder: emailPlaceholder,
-            name: "emailTo",
-            required: true,
-            className: "AnimateNetworkOptions"
+        console.log("Response: " + response);
+        element.hidden = true;
+        Toast.fire({
+            icon: 'success',
+            title: 'Addon updated successfully!'
         });
-
-        const emailCcLabel = createElement("label", {}, "Email CC:");
-        const emailCcInput = createElement("input", {
-            type: "email",
-            id: `emailCc${element.value}`,
-            name: "emailCc",
-            placeholder: emailPlaceholder,
-            className: "AnimateNetworkOptions"
+    } catch (error) {
+        setTimeout(() => {
+            element.textContent = "!";
+            element.style.backgroundColor = "red";
+            setTimeout(() => {
+                element.textContent = "UpdateAddon";
+                element.style.backgroundColor = "";
+            }, 4000);
+        }, 0);
+        console.log("Error: " + error);
+        Toast.fire({
+            icon: 'error',
+            title: 'Failed to update addon!'
         });
-
-        const emailBccLabel = createElement("label", {}, "Email BCC:");
-        const emailBccInput = createElement("input", {
-            type: "email",
-            id: `emailBcc${element.value}`,
-            name: "emailBcc",
-            placeholder: emailPlaceholder,
-            className: "AnimateNetworkOptions"
-        });
-
-        ElementToAppend.appendChild(emailToLabel);
-        ElementToAppend.appendChild(emailToInput);
-        ElementToAppend.appendChild(emailCcLabel);
-        ElementToAppend.appendChild(emailCcInput);
-        ElementToAppend.appendChild(emailBccLabel);
-        ElementToAppend.appendChild(emailBccInput);
     }
 }
+function closeUniqueNetworkOverlay(element) {
+    LastOpenedNetworkCheck.checked = false;
+    document.getElementById('UniqueNetworkOverlay').hidden = true;
+}
+let LastOpenedNetworkCheck = null;
 
-function CreateDateElementAndLabel(ElementToAppend, element, FirstAddonInList) {
-    console.log("FirstAddonInList: " + FirstAddonInList);
-    const dateLabel = createElement("label", { className: "AnimateNetworkOptions" }, "Effective From");
-    const dateElement = createElement("input", {
-        type: "date",
-        required: true,
-        className: "AnimateNetworkOptions",
-        placeholder: `${element.value} Date`,
-        value: generateRandomDate()
+async function openUniqueNetworkOverlay(element) {
+    if(document.getElementById('customerName').value === "") {
+        element.checked = false;
+        await Swal.fire({
+            icon: 'warning',
+            title: 'You have not typed in the customer name!',
+            text: 'Please Type a customer first.',
+
+        });
+        return;
+    }
+    LastOpenedNetworkCheck = element;
+
+    var data = CustomerSearchModelData;
+    const Customernametouse = document.getElementById('customerName').value;
+    var CustName = document.getElementById('CustNameLabelUniqueNetwork');
+    CustName.textContent = "Customer Name:" + " " + Customernametouse;
+    var NetName = document.getElementById('NetworkNameLabelUniqueNetwork')
+    NetName.textContent = "Network:" + " " + element.value;
+    if (document.getElementById('CustomerSearch').value !== "") {
+        const NetworkData = data.networkData.find(xx => xx.networkName.toLowerCase() === element.value.toLowerCase());
+        if (NetworkData) {
+            LoadDataIntoNetworkOverlay(element,data);
+        }
+        else{
+            console.log("No data in db found for network: " + element.value);
+        }
+    }
+    document.getElementById('UniqueNetworkOverlay').hidden = false;
+}
+
+
+function LoadDataIntoNetworkOverlay(element,data){
+    ClearUniqueNetworkOverlayTable();
+    document.getElementById('LoadHistoricAddonsButton').hidden = false;
+    
+    LoadUniqueNetworkOverlayHeaders();
+    LoadUniqueNetworkOverlayData(data, element);
+
+
+}
+function LoadUniqueNetworkOverlayData(data,element){
+    const Table = document.getElementById('UniqueNetworkTable');
+    const TableBody = Table.querySelector('tbody');
+    const NetworkData = data.networkData.find(xx => xx.networkName.toLowerCase() === element.value.toLowerCase());
+    NetworkData.allAddons.forEach((addon, index) => {
+        const row = createElement('tr');
+        const cell1 = createElement('td', {}, NetworkData.account);
+        const cell2 = createElement('td', {}, addon.addon);
+        const cell3 = createElement('td', {}, addon.effectiveDate);
+        const cell4 = createElement('td', {}, NetworkData.email.to);
+        const cell5 = createElement('td', {}, NetworkData.email.cc);
+        const cell6 = createElement('td', {}, NetworkData.email.bcc);
+
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        row.appendChild(cell3);
+        row.appendChild(cell4);
+        row.appendChild(cell5);
+        row.appendChild(cell6);
+        TableBody.appendChild(row);
+
+        if (index !== 0) {
+            row.hidden = true;
+            row.classList.add("Historicaddons");
+        }
     });
 
-    ElementToAppend.appendChild(dateLabel);
-    ElementToAppend.appendChild(dateElement);
 }
-
-function CreateAddonElementAndLabel(ElementToAppend, element, FirstAddonInList) {
-    console.log("FirstAddonInList Addon: " + FirstAddonInList);
-    const addonLabel = createElement("label", { className: "AnimateNetworkOptions" }, "Addon");
-    const addonElement = createElement("input", {
-        type: "text",
-        required: true,
-        className: "AnimateNetworkOptions",
-        placeholder: `${element.value} Addon`,
-        value: generateRandomValue()
+function ClearUniqueNetworkOverlayTable() {
+    const table = document.getElementById('UniqueNetworkTable');
+    const TableheadRow = table.querySelector('thead');
+    TableheadRow.innerHTML = '';
+    const tableBody = table.querySelector('tbody');
+    tableBody.innerHTML = '';
+}
+function LoadUniqueNetworkOverlayHeaders(){
+    const Table = document.getElementById('UniqueNetworkTable');
+    const TableHead = Table.querySelector('thead');
+    const TableheadRow = createElement('tr');
+    
+    const headers = ['Account Number', 'Addon', 'Effective From', 'Email To', 'Email CC', 'Email BCC']; 
+    
+    headers.forEach(header => {
+        const th = createElement('th', {}, header);
+        TableheadRow.appendChild(th);
     });
-
-    ElementToAppend.appendChild(addonLabel);
-    ElementToAppend.appendChild(addonElement);
+    
+    TableHead.appendChild(TableheadRow);
 }
 
+function LoadHistoricAddons(element){   
+    if(element.textContent === "Load Historic Addons"){
+        element.textContent = "Hide Historic Addons";
+        element.style.backgroundColor = "indianred";
+
+    }else{
+        element.style.backgroundColor = "";
+        element.textContent = "Load Historic Addons";
+    }
 
 
 
-function LoadHistoricData(element){
-    const NetworkUserSelected = element.value;
-    const AccountNumInput = document.getElementById(NetworkUserSelected + "AccountNumInput").value;
-    const AddonInput = document.getElementById(NetworkUserSelected + "AddonInput").value;
-    const DateInput = document.getElementById(NetworkUserSelected + "DateInput").value;
-
-    console.log("NetworkUserSelected: " + NetworkUserSelected);
-    console.log("AccountNumInput: " + AccountNumInput);
-    console.log("AddonInput: " + AddonInput);
-    console.log("DateInput: " + DateInput);
-
-    var HistoricData = GetHistoricData(AccountNumInput, AddonInput, DateInput);
-    console.log("HistoricData: " + HistoricData);
-    PopulateHistoricData(HistoricData);
-
-}
-function PopulateHistoricData(HistoricData){
-    HistoricData.forEach(element => {
-        console.log(element);
+    const HistoricAddons = document.querySelectorAll('.Historicaddons');
+    HistoricAddons.forEach(element => {
+        if (element.hidden) {
+            element.hidden = false;
+        } else {
+            element.hidden = true;
+        }
     });
 }
+
+
+
 
 function GetHistoricData(AccountNumInput, AddonInput, DateInput){
     return "Historic Data";
@@ -321,16 +432,12 @@ function ChangeLabelToShowPlus1Fix(NetworkUserSelected){
         labelElement.textContent = NewFixNum + " Fixes";
     }
 }
-
-
 const KeyFuelsFixs = []
 const TexacoFixs = []
 const UkFuelsFixs = []
 const FuelGenieFixs = []
 
-
-let CustomerSearchModelData = []
-
+let CustomerSearchModelData;
 
 async function CustomerSearchInput(element){
 if(element.value === ""){

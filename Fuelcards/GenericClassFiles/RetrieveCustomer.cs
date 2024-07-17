@@ -162,7 +162,7 @@ namespace Fuelcards.GenericClassFiles
     }
     public class Network
     {
-        public string networkName { get; set; }
+        public string? networkName { get; set; }
         public int account { get; set; }
         public List<HistoricAddon>? allAddons { get; set; }
         public List<FixedPriceContract>? Fixed { get; set; }
