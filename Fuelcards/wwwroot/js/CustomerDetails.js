@@ -55,6 +55,7 @@ async function AddNewAddon(element) {
             tableBody.appendChild(newRow);
         }
     }
+    sortByHeader();
 }
 
 function promptForInputs(title, html) {
@@ -85,7 +86,7 @@ function getInitialInputsHtml() {
     return `
         <input id="accountInput" class="swal2-input" placeholder="Account">
         <input id="addonInput" class="swal2-input" placeholder="Addon">
-        <input id="effectiveFromInput" class="swal2-input" placeholder="Effective From">
+        <input type="date" id="effectiveFromInput" class="swal2-input" placeholder="Effective From">
         <input id="toEmailInput" class="swal2-input" placeholder="To Email">
         <input id="ccEmailInput" class="swal2-input" placeholder="CC Email">
         <input id="bccEmailInput" class="swal2-input" placeholder="BCC Email">
@@ -95,10 +96,25 @@ function getInitialInputsHtml() {
 function getAddonAndEffectiveFromInputsHtml() {
     return `
         <input id="addonInput" class="swal2-input" placeholder="Addon">
-        <input id="effectiveFromInput" class="swal2-input" placeholder="Effective From">
+        <input id="effectiveFromInput" class="swal2-input" placeholder="Effective From" type="date">
     `;
 }
+function sortByHeader() {
+    const table = document.getElementById('UniqueNetworkTable');
+    const tableBody = table.querySelector('tbody');
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
 
+    rows.sort((a, b) => {
+        const dateA = new Date(a.cells[2].textContent);
+        const dateB = new Date(b.cells[2].textContent);
+        return dateB - dateA; // Sort in descending order
+    });
+
+    tableBody.innerHTML = '';
+    rows.forEach(row => {
+        tableBody.appendChild(row);
+    });
+}
 function createElement(type, attributes = {}, textContent = '') {
     const element = document.createElement(type);
     for (const attr in attributes) {
@@ -126,51 +142,44 @@ function createTableRow(data) {
     newRow.appendChild(createElement('td', {}, data.bccEmail));
 
     const cell = createElement('td');
-    const updateButton = document.createElement('button');
-    updateButton.className = 'btn btn-primary';
-    updateButton.textContent = 'UpdateAddon';
-    updateButton.onclick = function() {
-        UpdateNewAddon(data, this);
-    };
-
-    cell.appendChild(updateButton);
+    cell.style.border = 'none';
+    const label = createElement('label', { class: 'label-new' }, 'NEW');
+    cell.appendChild(label);
     newRow.appendChild(cell);
-
+    var Network = document.getElementById('NetworkNameLabelUniqueNetwork').textContent.split(" ")[1];
+    var ListToPushTo;
+    ListToPushTo = GetNetworkListFromNetName(Network);
+    if (!ListToPushTo.includes(data)) {
+        ListToPushTo.push(data);
+    }
     return newRow;
 }
-async function UpdateNewAddon(data, element) {
-    try {
-        const response = await $.ajax({
-            url: '/CustomerDetails/UpdateAddon',
-            type: 'POST',
-            data: JSON.stringify(data),
-            contentType: 'application/json;charset=utf-8'
-        });
-        console.log("Response: " + response);
-        element.hidden = true;
-        Toast.fire({
-            icon: 'success',
-            title: 'Addon updated successfully!'
-        });
-    } catch (error) {
-        setTimeout(() => {
-            element.textContent = "!";
-            element.style.backgroundColor = "red";
-            setTimeout(() => {
-                element.textContent = "UpdateAddon";
-                element.style.backgroundColor = "";
-            }, 4000);
-        }, 0);
-        console.log("Error: " + error);
-        Toast.fire({
-            icon: 'error',
-            title: 'Failed to update addon!'
-        });
+function GetNetworkListFromNetName(NetworkName){
+    switch(NetworkName.toLowerCase()){
+        case "keyfuels":
+            return KeyFuelsAddonList;
+        case "texaco":
+            return TexacoAddonList;
+        case "ukfuels":
+            return UkFuelsAddonList;
+        case "fuelgenie":
+            return FuelGenieAddonList;
     }
 }
+const KeyFuelsAddonList = [];
+const TexacoAddonList = [];
+const UkFuelsAddonList = [];
+const FuelGenieAddonList = [];
+
+
+
 function closeUniqueNetworkOverlay(element) {
     LastOpenedNetworkCheck.checked = false;
     document.getElementById('UniqueNetworkOverlay').hidden = true;
+    document.getElementById('LoadHistoricAddonsButton').style.backgroundColor = "";
+    document.getElementById('LoadHistoricAddonsButton').textContent = "Load Historic Addons";
+
+
 }
 let LastOpenedNetworkCheck = null;
 
@@ -186,7 +195,6 @@ async function openUniqueNetworkOverlay(element) {
         return;
     }
     LastOpenedNetworkCheck = element;
-
     var data = CustomerSearchModelData;
     const Customernametouse = document.getElementById('customerName').value;
     var CustName = document.getElementById('CustNameLabelUniqueNetwork');
@@ -242,7 +250,13 @@ function LoadUniqueNetworkOverlayData(data,element){
         }
     });
 
+    var ListOfNewAddonsFromUser = GetNetworkListFromNetName(element.value);
+    ListOfNewAddonsFromUser.forEach(addon => {
+        const row = createTableRow(addon);
+        TableBody.appendChild(row);
+    });
 }
+
 function ClearUniqueNetworkOverlayTable() {
     const table = document.getElementById('UniqueNetworkTable');
     const TableheadRow = table.querySelector('thead');
@@ -320,34 +334,20 @@ function ShowNewFixForm(){
     RemoveSelectElementFromNewFixForm();
     const SelectEleForUsers = GetSelectOptionForUserForNewFixForm();
 
-    if (SelectEleForUsers.options.length === 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'No network options available',
-            text: 'Please select at least one network network.',
-        });
-    } else {
-        const parentElement = document.getElementById("NewFixSelectParent");
-        parentElement.appendChild(SelectEleForUsers);
-        var overlayElement = document.getElementById("overlay");
-        overlayElement.classList = "";
-        overlayElement.classList.add("animate__zoomInRight");
-        overlayElement.classList.add("animate__animated");
-        overlayElement.classList.add("overlay");
+    const parentElement = document.getElementById("NewFixSelectParent");
+    parentElement.appendChild(SelectEleForUsers);
+    var overlayElement = document.getElementById("overlay");
+    overlayElement.classList = "";
+    overlayElement.classList.add("animate__zoomInRight");
+    overlayElement.classList.add("animate__animated");
+    overlayElement.classList.add("overlay");
 
-        overlayElement.hidden = false;
-    }
+    overlayElement.hidden = false;
    
 }
 
 function GetSelectOptionForUserForNewFixForm(){
-    const NetworkCheckBoxes = document.querySelectorAll(".NetworkCheck");
-    var Options = [];
-    NetworkCheckBoxes.forEach(element => {
-        if(element.checked){
-            Options.push(element.value);
-        }
-    });
+    const Options = ['KeyFuels', 'FuelGenie', 'Texaco', 'UkFuels'];
 
     const selectElement = document.createElement("select");
     selectElement.id = "NewFixNetworkSelect";
@@ -449,9 +449,7 @@ if(element.value === ""){
         data: JSON.stringify(element.value), 
         contentType: 'application/json;charset=utf-8',
         success: async function (response) {
-            console.log("CustomerData:");
             const stringifyData = JSON.stringify(response, null, 2);
-            console.log(stringifyData);
             CustomerSearchModelData = JSON.parse(stringifyData);
             SortDataAndPopulateFromSearch(CustomerSearchModelData);
             Toast.fire({
@@ -525,10 +523,7 @@ function GetModelToSubmitToController(){
     console.log("Values:");
     console.log(JSON.stringify(values, null, 2));
     var AddEditCustomerFormData = {
-        customerName: values["customerName"],
-        emailTo: values["emailTo"],
-        emailCc: values["emailCc"],
-        emailBcc: values["emailBcc"],
+        customerName: document.getElementById('customerName').value,
         keyFuelsInfo: {
             NewFixesForCustomer: KeyFuelsFixs,
             accountNumber: GetValueFromId("KeyFuelsAccountNumInput"),
@@ -552,6 +547,12 @@ function GetModelToSubmitToController(){
             accountNumber: GetValueFromId("FuelgenieAccountNumInput"),
             addon: GetValueFromId("FuelgenieAddonInput"),
             date: GetValueFromId("FuelgenieDateInput"), 
+        },
+        addons:{
+            keyFuels: KeyFuelsAddonList,
+            texaco: TexacoAddonList,
+            uKFuels: UkFuelsAddonList,
+            fuelGenie: FuelGenieAddonList
         },
         invoiceOrderType: values["invoiceOrderType"],
         paymentTerm: values["paymentTerm"]
@@ -592,6 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var ModelFormToSubmitToController = GetModelToSubmitToController();
         console.log("ModelToSubmit:");
         console.log(JSON.stringify(ModelFormToSubmitToController, null, 2));
+
 
         try {
             let response = await $.ajax({

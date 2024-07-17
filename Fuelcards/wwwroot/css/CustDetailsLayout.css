@@ -486,3 +486,12 @@ element{
 .OverlayContent table td {
     padding: 12px 15px;
 }
+
+
+
+.label-new{
+    color: lightgreen;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}

@@ -52,31 +52,15 @@ namespace Fuelcards.Controllers
 
         [HttpPost]
         public JsonResult SubmitAddOrEdit([FromBody] CustomerDetailsModels.AddEditCustomerFormData AddEditCustomerFormData)
-        {
+        {   
             try
-            {
-                var JsonResult = new
+            { 
+
+                if(AddEditCustomerFormData == null)
                 {
-                    ffff = "f" +
-                    "ff"
-                };
-
-                return Json(JsonResult);
-            }
-            catch (Exception e)
-            {
-                Response.StatusCode = 443;
-                return Json(new { error = e.Message });
-            }
-        }
-
-        [HttpPost]
-
-        public JsonResult UpdateAddon([FromBody] AddonFromJs customerPricingAddon)
-        {
-            try
-            {
-                var JsonResult = new
+                    throw new Exception("Probably JS error as model in controller is null");
+                }
+                 var JsonResult = new
                 {
                     ffff = "f" +
                     "ff"
@@ -93,15 +77,5 @@ namespace Fuelcards.Controllers
 
     }
 
-    public struct AddonFromJs
-    {
-        public string? account { get; set; }
-        public string addon { get; set; }
-        public string? effectiveFrom { get; set; }
-        public string toEmail { get; set; }
-        public string ccEmail
-        { get; set; }
-        public string bccEmail { get; set; }
 
-    }
 }
