@@ -1,4 +1,5 @@
 ﻿
+using Fuelcards.GenericClassFiles;
 using Fuelcards.Repositories;
 
 namespace Fuelcards.Models
@@ -16,7 +17,6 @@ namespace Fuelcards.Models
         public int? KeyfuelImports { get => _db.GetTotalEDIs(0); }
         public int? UkfuelImports { get => _db.GetTotalEDIs(1); }
         public int? TexacoImports { get => _db.GetTotalEDIs(2); }
-        public double? TexacoDieselBand7 { get => _db.GetDieselBand7Texaco(); }
         public List<CustomerInvoice>? keyfuelsInvoiceList { get => _db.GetCustomersToInvoice(0, invoiceDate); }
 
         public List<CustomerInvoice>? ukFuelInvoiceList { get => _db.GetCustomersToInvoice(1, invoiceDate); }
@@ -25,11 +25,24 @@ namespace Fuelcards.Models
         public List<int> FailedKeyfuelsSites { get => _db.GetFailedSiteBanding(0); }
         public List<int> FailedUkfuelSites { get => _db.GetFailedSiteBanding(1); }
         public List<int> FailedTexacoSites { get => _db.GetFailedSiteBanding(2); }
+        public TexacoVolumes texacoVolume { get; set; }
     }
     public class CustomerInvoice
     {
         public string? name { get; set; }
         public double? addon { get; set; }
     }
-
+    public class TexacoVolumes
+    {
+        private readonly IQueriesRepository _db;
+        public TexacoVolumes(IQueriesRepository db)
+        {
+            _db = db;
+        }
+        public double? DieselBand7 { get => _db.GetDieselBand7Texaco(); }
+        public double? Unleaded { get => _db.GetProductVolume(EnumHelper.Products.ULSP); }
+        public double? Adblue { get => _db.GetProductVolume(EnumHelper.Products.Adblue); }
+        public double? SuperUnleaded { get => _db.GetProductVolume(EnumHelper.Products.SuperUnleaded); }
+        public double? Diesel { get => _db.GetProductVolume(EnumHelper.Products.Diesel); }
+    }
 }

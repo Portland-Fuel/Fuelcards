@@ -4,6 +4,7 @@ using Fuelcards.GenericClassFiles;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using PortlandXeroLib;
 using System.Diagnostics;
 
@@ -58,6 +59,7 @@ namespace Fuelcards.Controllers
         }
         public ActionResult Invoicing()
         {
+            return RedirectToAction("Invoicing", "Invoicing");
             ViewData["Title"] = "Invoicing";
             return View();
         }

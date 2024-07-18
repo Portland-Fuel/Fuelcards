@@ -13,9 +13,11 @@ namespace Fuelcards.Controllers
             _db = db;
         }
 
-        public IActionResult Index()
+        public IActionResult Invoicing()
         {
             InvoicePreCheckModels _checks = new(_db);
+            _checks.texacoVolume = new(_db);
+            
             
             return View(_checks);
         }

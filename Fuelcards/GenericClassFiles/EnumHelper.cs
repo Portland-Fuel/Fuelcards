@@ -183,6 +183,163 @@ namespace Fuelcards.GenericClassFiles
                     return RetailDiesel.None;
             }
         }
+        public static EnumHelper.Products? GetProductFromProductCode(int? productCode, EnumHelper.Network network)
+        {
+            switch (network)
+            {
+                case EnumHelper.Network.Keyfuels:
+                    switch (productCode)
+                    {
+                        case 1:
+                            return EnumHelper.Products.Diesel;
+                        case 52:
+                        case 334:
+                        case 351:
+                        case 352:
+                        case 469:
+                        case 470:
+                        case 471:
+                        case 472:
+                        case 473:
+                        case 474:
+                            return EnumHelper.Products.ULSP;
+                        case 3:
+                        case 244:
+                        case 343:
+                        case 349:
+                        case 350:
+                            return EnumHelper.Products.Gasoil;
+                        case 2:
+                        case 15:
+                        case 246:
+                        case 331:
+                        case 347:
+                        case 348:
+                        case 428:
+                        case 455:
+                        case 456:
+                            return EnumHelper.Products.Lube;
+                        case 279:
+                        case 361:
+                        case 362:
+                        case 425:
+                        case 489:
+                            return EnumHelper.Products.Adblue;
 
+                        case 54:
+                        case 74:
+                        case 108:
+                        case 332:
+                        case 336:
+                        case 338:
+                        case 339:
+                        case 368:
+                        case 415:
+                        case 453:
+                        case 476:
+                        case 477:
+                            return EnumHelper.Products.SuperUnleaded;
+                        case 77:
+                        case 276:
+                            return EnumHelper.Products.TescoDieselNewDiesel;
+                        case 364:
+                        case 365:
+                        case 459:
+                        case 536:
+                            return EnumHelper.Products.Unknown;
+                        case 260:
+                        case 435:
+                        case 487:
+                        case 488:
+                            return EnumHelper.Products.PremiumDiesel;
+
+                        case 465:
+                            return EnumHelper.Products.Tolls;
+                        case 448: return EnumHelper.Products.AdblueCan;
+                        case 5: return EnumHelper.Products.Card;
+                        case 208: return EnumHelper.Products.CardStopManagementFee;
+                        case 261: return EnumHelper.Products.EDISTDSignle;
+                        case 241: return EnumHelper.Products.StockNotification;
+                        default: return EnumHelper.Products.Other;
+
+                    }
+                case EnumHelper.Network.UkFuel:
+                    switch (productCode)
+                    {
+                        case 1:
+                        case 70:
+                            return EnumHelper.Products.Diesel;
+                        case 7: return EnumHelper.Products.LPG;
+                        case 24:
+                        case 45:
+                            return EnumHelper.Products.Goods;
+                        case 42: return EnumHelper.Products.HVO;
+                        case 2: return EnumHelper.Products.ULSP;
+                        case 5: return EnumHelper.Products.Gasoil;
+                        case 6: return EnumHelper.Products.Lube;
+                        case 8: return EnumHelper.Products.Adblue;
+                        case 18: return EnumHelper.Products.PackagedAdblue;
+                        case 3:
+                        case 31:
+                            return EnumHelper.Products.SuperUnleaded;
+                        case 30: return EnumHelper.Products.PremiumDiesel;
+                        default: return EnumHelper.Products.Other;
+
+                    }
+                case EnumHelper.Network.Texaco:
+                    switch (productCode)
+                    {
+                        case 1:
+                        case 70:
+                            return EnumHelper.Products.Diesel;
+                        case 3: return EnumHelper.Products.SuperUnleaded;
+
+                        case 2: return EnumHelper.Products.ULSP;
+                        case 5: return EnumHelper.Products.Gasoil;
+                        case 6: return EnumHelper.Products.Lube;
+                        case 8:
+                        case 18:
+                            return EnumHelper.Products.Adblue;
+                        case 30: return EnumHelper.Products.PremiumDiesel;
+                        default: return EnumHelper.Products.Other;
+                    }
+                case EnumHelper.Network.Fuelgenie:
+                    switch (productCode)
+                    {
+                        case 5:
+                            return EnumHelper.Products.Diesel;
+                        case 1:
+                        case 20:
+                        case 21:
+                        case 22:
+                        case 24:
+                            return EnumHelper.Products.ULSP;
+                        case 28:
+                            return EnumHelper.Products.Gasoil;
+                        case 0:
+                        case 10:
+                        case 11:
+                        case 12:
+                        case 13:
+                        case 14:
+                        case 15:
+                        case 16:
+                        case 17:
+                        case 18:
+                        case 19:
+                            return EnumHelper.Products.Lube;
+                        case 3:
+                            return EnumHelper.Products.Adblue;
+                        case 2:
+                            return EnumHelper.Products.PackagedAdblue;
+
+                        default: return EnumHelper.Products.Other;
+                    }
+
+                default:
+                    break;
+            }
+            return null;
+        }
     }
 }

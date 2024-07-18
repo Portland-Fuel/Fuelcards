@@ -8,6 +8,10 @@ using Fuelcards.Controllers;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Xero.NetStandard.OAuth2.Models;
 using static Fuelcards.Models.CustomerDetailsModels;
+using System.Linq;
+using Fuelcards.Models;
+using Xero.NetStandard.OAuth2.Client;
+using Fuelcards.InvoiceMethods;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -83,42 +87,8 @@ namespace Fuelcards.Repositories
         }
         public List<CustomerInvoice>? GetCustomersToInvoice(int network, DateOnly invoiceDate)
         {
-            int tennant = 0;
-            List<CustomerInvoice> CustomersToInvoiceOnNetwork = new();
-            var CustomersAccounts = GetAllFixedCustomers(invoiceDate, network);
-            List<int> fcControls = _db.FcControls.Where(e => e.Invoiced != true).Select(e => e.ControlId).ToList();
-            List<int> accounts = new();
-            switch (network)
-            {
-                case 0:
-                    accounts = _db.KfE1E3Transactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => (int)e.CustomerCode).Distinct().ToList();
-                    break;
-                case 1:
-                    accounts = _db.UkfTransactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => (int)e.Customer).Distinct().ToList();
-                    break;
-                case 2:
-                    accounts = _db.TexacoTransactions.Where(e => fcControls.Contains((int)e.ControlId)).Select(e => (int)e.Customer).Distinct().ToList();
-                    break;
-                case 3:
-                    tennant = 1;
-                    break;
-            }
-            foreach (var accountNumber in accounts)
-            {
-                int? PortlandId = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.Network == network && e.FcAccountNo == accountNumber)?.PortlandId;
-                if (PortlandId == null) throw new ArgumentException($"Portland Id could not be established from the acocunt number {accountNumber}");
-                string? xeroId = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.PortlandId == PortlandId && e.XeroTennant == tennant)?.XeroId;
-                if (xeroId == null) throw new ArgumentException($"Xero Id could not be established from the Portland Id {PortlandId}");
-                var name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == xeroId).Select(e => e.Name).ToList();
-                if (name == null) throw new ArgumentException($"Customer name could not be established from the Xero Id {xeroId}");
-                CustomerInvoice model = new()
-                {
-                    name = name[0].ToString(),
-                    addon = _db.CustomerPricingAddons.FirstOrDefault(e => e.Network == network && e.PortlandId == PortlandId)?.Addon
-                };
-                CustomersToInvoiceOnNetwork.Add(model);
-            }
-            return CustomersToInvoiceOnNetwork;
+            List<CustomerInvoice> test = new();
+            return test;
         }
         public List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network)
         {
@@ -203,6 +173,122 @@ namespace Fuelcards.Repositories
                 if (SiteInfo.Band is null) Failed.Add((int)item);
             }
             return Failed;
-        } 
+        }
+        public double? GetProductVolume(EnumHelper.Products product)
+        {
+            double? TotalQuantity = null;
+            switch (product)
+            {
+                case EnumHelper.Products.Diesel:
+                    List<int> DieselProductCodes = new List<int> { 1,70 };
+                    TotalQuantity = _db.TexacoTransactions
+                        .Where(e => e.Invoiced != true && DieselProductCodes.Contains((int)e.ProdNo))
+                        .Sum(e => e.Quantity) / 100;
+                    return TotalQuantity;
+                case EnumHelper.Products.Gasoil:
+                    break;
+                case EnumHelper.Products.ULSP:
+                    List<int> UnleadedProductCodes = new List<int>{ 2 };
+                    TotalQuantity = _db.TexacoTransactions
+                        .Where(e => e.Invoiced != true && UnleadedProductCodes.Contains((int)e.ProdNo))
+                        .Sum(e => e.Quantity)/100;
+                    return TotalQuantity;
+
+                case EnumHelper.Products.Lube:
+                    break;
+                case EnumHelper.Products.Adblue:
+                    List<int> AdblueProductCodes = new List<int> { 8,18 };
+                    TotalQuantity = _db.TexacoTransactions
+                        .Where(e => e.Invoiced != true && AdblueProductCodes.Contains((int)e.ProdNo))
+                        .Sum(e => e.Quantity) / 100;
+                    return TotalQuantity;
+                case EnumHelper.Products.SuperUnleaded:
+                    List<int> SuperUnleaded = new List<int> { 3 };
+                    TotalQuantity = _db.TexacoTransactions
+                        .Where(e => e.Invoiced != true && SuperUnleaded.Contains((int)e.ProdNo))
+                        .Sum(e => e.Quantity) / 100;
+                    return TotalQuantity;
+                case EnumHelper.Products.TescoDieselNewDiesel:
+                    break;
+                case EnumHelper.Products.PackagedAdblue:
+                    break;
+                case EnumHelper.Products.PremiumDiesel:
+                    List<int> PremiumDiesel = new List<int> { 30 };
+                    TotalQuantity = _db.TexacoTransactions
+                        .Where(e => e.Invoiced != true && PremiumDiesel.Contains((int)e.ProdNo))
+                        .Sum(e => e.Quantity) / 100;
+                    return TotalQuantity;
+                
+            }
+            return null;
+        }
+        public async Task<IEnumerable<KfE1E3Transaction>> GetAllKeyfuelTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate)
+        {
+            
+            var controlIds = _db.FcControls.Where(e => e.CreationDate <= InvoiceDate && e.Invoiced != true)
+                .OrderByDescending(e => e.ControlId)
+                .Select(e => e.ControlId)
+                .ToList();
+
+            var TransactionsToUse = _db.KfE1E3Transactions.Where(e => e.Invoiced != true || controlIds.Contains(e.ControlId)).ToList();
+            var PotentialSundrySales = _db.KfE4SundrySales.Where(e => e.Invoiced != true);
+            if (PotentialSundrySales?.Any() == true)
+            {
+                // Ensure transactionsToUse is a List (if it's not already)
+                var editableTransactions = TransactionsToUse as List<KfE1E3Transaction> ?? TransactionsToUse.ToList();
+                foreach (var item in PotentialSundrySales)
+                {
+                    editableTransactions.Add(ConvertSundryToTransaction(item));
+                }
+                TransactionsToUse = editableTransactions;
+            }
+            return TransactionsToUse;
+        }
+        public int? GetPortlandIdFromAccount(int account)
+        {
+            int? portlandId = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == account)?.PortlandId;
+            return portlandId;
+        }
+        public KfE1E3Transaction ConvertSundryToTransaction(KfE4SundrySale sundrysale)
+        {
+
+            KfE1E3Transaction model = new()
+            {
+                AccurateMileage = null,
+                CardNumber = sundrysale.CardNumber,
+                CardRegistration = null,
+                Commission = null,
+                ControlId = (int)sundrysale.ControlId,
+                CostSign = null,
+                Cost = sundrysale.Value,
+                CustomerAc = sundrysale.CustomerAc,
+                CustomerCode = sundrysale.CustomerCode,
+                FleetNumber = null,
+                Invoiced = sundrysale.Invoiced,
+                InvoiceNumber = null,
+                InvoicePrice = null,
+                Mileage = null,
+                Period = sundrysale.Period,
+                PortlandId = GetPortlandIdFromAccount((int)sundrysale.CustomerAc),
+                PrimaryRegistration = null,
+                ProductCode = sundrysale.ProductCode,
+                PumpNumber = null,
+                Quantity = sundrysale.Quantity,
+                ReportType = null,
+                Sign = null,
+                SiteCode = null,
+                TransactionDate = sundrysale.TransactionDate,
+                TransactionTime = sundrysale.TransactionTime,
+                TransactionId = sundrysale.Id,
+                TransactionNumber = sundrysale.TransactionNumber,
+                TransactionSequence = sundrysale.TransactionSequence,
+                TransactionType = sundrysale.TransactionType,
+                TransactonRegistration = sundrysale.VehicleRegistration,
+
+
+            };
+            return model;
+
+        }
     }
 }
