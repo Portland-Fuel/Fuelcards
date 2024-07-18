@@ -55,6 +55,7 @@ namespace Fuelcards.Controllers
         {
             try
             {
+                _db.UpdateAddon(AddEditCustomerFormData.addons);
                 return Json("JsonResult");
             }
             catch (Exception e)

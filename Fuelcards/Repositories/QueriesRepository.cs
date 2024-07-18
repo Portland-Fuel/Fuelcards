@@ -138,13 +138,14 @@ namespace Fuelcards.Repositories
             }
             return Customers;
         }
-        public void UpdateAddon(CustomerDetailsModels.AddonFromJs data)
+        public void UpdateAddon(CustomerDetailsModels.AddonFromJs? data)
         {
+            if(data == null) return;
             try
             {
-                ProcessAddonList(data.keyFuels);
-                ProcessAddonList(data.uKFuels);
-                ProcessAddonList(data.texaco);
+                ProcessAddonList(data.Value.keyFuels);
+                ProcessAddonList(data.Value.uKFuels);
+                ProcessAddonList(data.Value.texaco);
             }
             catch (Exception e)
             {
