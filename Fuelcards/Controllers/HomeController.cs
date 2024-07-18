@@ -31,7 +31,7 @@ namespace Fuelcards.Controllers
             pageModel.CustomerLists = customerClass.CustomerDetailsLoadData();
 
             ViewData["Title"] = "Customer Details";
-            return View("/Views/CustomerDetails/CustomerDetails.cshtml", pageModel);
+            return View("/Views/CustomerDetails/NewCustomerDetails.cshtml", pageModel);
         }
 
         public ActionResult Edi()
