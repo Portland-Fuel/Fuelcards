@@ -1,32 +1,4 @@
-function ToggleSection(SectionElement, buttonElement) {
-    RemoveColorFromAllOtherbuttonsAndCloseAllSections();
-    const elements = document.querySelectorAll(".section");
-    elements.forEach(element => {
-        element.style.display = "none";
-    });
 
-    buttonElement.style.backgroundColor = "#464949";
-    const element = document.getElementById(SectionElement);
-    if (element.style.display === "none") {
-        element.style.display = "block";
-    } else if(element.style.display === "block") {
-        element.style.display = "none";
-    }
-    else{
-        element.style.display = "block";
-    }
-}
-function RemoveColorFromAllOtherbuttonsAndCloseAllSections() {
-    const elements = document.querySelectorAll("#sidenav a");
-    elements.forEach(element => {
-        element.style.backgroundColor = "";
-    });
-
-    const sections = document.querySelectorAll(".Section");
-    sections.forEach(section => {
-        section.style.display = "none";
-    });
-}
 async function AddNewAddon(element) {
     const table = document.getElementById('UniqueNetworkTable');
     const tableBody = table.querySelector('tbody');
@@ -107,7 +79,7 @@ function sortByHeader() {
     rows.sort((a, b) => {
         const dateA = new Date(a.cells[2].textContent);
         const dateB = new Date(b.cells[2].textContent);
-        return dateB - dateA; // Sort in descending order
+        return dateB - dateA; // Sort in ascending order
     });
 
     tableBody.innerHTML = '';
@@ -194,6 +166,8 @@ async function openUniqueNetworkOverlay(element) {
         });
         return;
     }
+
+    sortByHeader();
     LastOpenedNetworkCheck = element;
     var data = CustomerSearchModelData;
     const Customernametouse = document.getElementById('customerName').value;
@@ -408,18 +382,7 @@ function AddNewFix(event){
        
 }
 
-function GetFixListToAddTo(NetworkUserSelected){
-    switch(NetworkUserSelected){
-        case "KeyFuels":
-            return KeyFuelsFixs;
-        case "Texaco":
-            return TexacoFixs;
-        case "UkFuels":
-            return UkFuelsFixs;
-        case "FuelGenie":
-            return FuelGenieFixs;
-    }
-}
+
 function ChangeLabelToShowPlus1Fix(NetworkUserSelected){
     const labelElement = document.getElementById(NetworkUserSelected + "Span");
     var SpanText = labelElement.innerText
@@ -506,10 +469,33 @@ function clearAllInputsOnCustomerDetailsPage() {
 }
 function SortDataAndPopulateFromSearch(data){
     clearAllInputsOnCustomerDetailsPage();
-   
     FillCustomerName(data.customerName);
+    FillInvoiceOrderType(data.invoiceOrderType);
+    FillPaymentTerm(data.paymentTerm);
+}
+function FillPaymentTerm(paymentTerm) {
+    const PaymentTermElement = document.getElementById("paymentTerm");
+    PaymentTermElement.value = paymentTerm;
+    for (let i = 0; i < PaymentTermElement.options.length; i++) {
+        if (PaymentTermElement.options[i].value === paymentTerm) {
+            PaymentTermElement.options[i].selected = true;
+            break;
+        }
+    }
+    PaymentTermElement.disabled = true;
 }
 
+function FillInvoiceOrderType(invoiceOrderType) {
+    const InvoiceOrderTypeElement = document.getElementById("invoiceOrderType");
+    InvoiceOrderTypeElement.value = invoiceOrderType;
+    for (let i = 0; i < InvoiceOrderTypeElement.options.length; i++) {
+        if (InvoiceOrderTypeElement.options[i].value === invoiceOrderType) {
+            InvoiceOrderTypeElement.options[i].selected = true;
+            break;
+        }
+    }
+    InvoiceOrderTypeElement.disabled = true;
+}
 function FillCustomerName(customerName){
     const CustomerNameElement = document.getElementById("customerName");
     CustomerNameElement.value = customerName;
