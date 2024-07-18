@@ -12,6 +12,7 @@ using System.Linq;
 using Fuelcards.Models;
 using Xero.NetStandard.OAuth2.Client;
 using Fuelcards.InvoiceMethods;
+using System.Transactions;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -85,11 +86,45 @@ namespace Fuelcards.Repositories
             double? quantity = (_db.TexacoTransactions.Where(e => controlIds.Contains((int)e.ControlId) && e.ProdNo == 1 && Band7.Contains((int?)e.Site)).Sum(e => e.Quantity)) / 100;
             return quantity;
         }
-        public List<CustomerInvoice>? GetCustomersToInvoice(int network, DateOnly invoiceDate)
+        public List<CustomerInvoice>? GetCustomersToInvoice(int network, DateOnly invoiceDate, double? BasePrice)
         {
-            List<CustomerInvoice> test = new();
-            return test;
+            List<GenericTransactionFile> PortlandTransaction = new();
+            List<List<GenericTransactionFile>> TransactionsByCustomerAndNetwork = new();
+            List<CustomerInvoice> Customers = new();
+            switch (network)
+            {
+                case 0:
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(GetAllKeyfuelTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null, null);
+                    break;
+                case 1:
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, GetAllUKTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null);
+                    break;
+                case 2:
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, GetAllTexTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null);
+                    break;
+                case 3:
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, null, GetAllFGTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList());
+                    break;
+            }
+            if (PortlandTransaction is null) return null;
+            TransactionsByCustomerAndNetwork = GroupTransactionsByCustomer(PortlandTransaction);
+            foreach (var item in TransactionsByCustomerAndNetwork)
+            {
+                CustomerInvoice model = new();
+                model.name = HomeController.PFLXeroCustomersData.Where(e=>e.ContactID.ToString() == GetXeroIdFromPortlandId(item[0].PortlandId)).FirstOrDefault()?.Name;
+                model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                model.addon = BasePrice + model.addon;
+                Customers.Add(model);
+            }
+            return Customers;
         }
+
+        public string? GetXeroIdFromPortlandId(int? portlandId)
+        {
+            string? xero = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.PortlandId == portlandId && e.XeroTennant == 0)?.XeroId;
+            return xero;
+        }
+
         public List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network)
         {
             List<int> Customers = new();
@@ -180,7 +215,7 @@ namespace Fuelcards.Repositories
             switch (product)
             {
                 case EnumHelper.Products.Diesel:
-                    List<int> DieselProductCodes = new List<int> { 1,70 };
+                    List<int> DieselProductCodes = new List<int> { 1, 70 };
                     TotalQuantity = _db.TexacoTransactions
                         .Where(e => e.Invoiced != true && DieselProductCodes.Contains((int)e.ProdNo))
                         .Sum(e => e.Quantity) / 100;
@@ -188,16 +223,16 @@ namespace Fuelcards.Repositories
                 case EnumHelper.Products.Gasoil:
                     break;
                 case EnumHelper.Products.ULSP:
-                    List<int> UnleadedProductCodes = new List<int>{ 2 };
+                    List<int> UnleadedProductCodes = new List<int> { 2 };
                     TotalQuantity = _db.TexacoTransactions
                         .Where(e => e.Invoiced != true && UnleadedProductCodes.Contains((int)e.ProdNo))
-                        .Sum(e => e.Quantity)/100;
+                        .Sum(e => e.Quantity) / 100;
                     return TotalQuantity;
 
                 case EnumHelper.Products.Lube:
                     break;
                 case EnumHelper.Products.Adblue:
-                    List<int> AdblueProductCodes = new List<int> { 8,18 };
+                    List<int> AdblueProductCodes = new List<int> { 8, 18 };
                     TotalQuantity = _db.TexacoTransactions
                         .Where(e => e.Invoiced != true && AdblueProductCodes.Contains((int)e.ProdNo))
                         .Sum(e => e.Quantity) / 100;
@@ -218,13 +253,13 @@ namespace Fuelcards.Repositories
                         .Where(e => e.Invoiced != true && PremiumDiesel.Contains((int)e.ProdNo))
                         .Sum(e => e.Quantity) / 100;
                     return TotalQuantity;
-                
+
             }
             return null;
         }
         public async Task<IEnumerable<KfE1E3Transaction>> GetAllKeyfuelTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate)
         {
-            
+
             var controlIds = _db.FcControls.Where(e => e.CreationDate <= InvoiceDate && e.Invoiced != true)
                 .OrderByDescending(e => e.ControlId)
                 .Select(e => e.ControlId)
@@ -425,7 +460,7 @@ namespace Fuelcards.Repositories
 
         private int? GetAccountFromCostCentre(decimal? cardNumber)
         {
-            var AllCards = _db.FcHiddenCards.Where(e=>e.Id > -1);
+            var AllCards = _db.FcHiddenCards.Where(e => e.Id > -1);
             foreach (var item in AllCards)
             {
                 if (cardNumber.ToString().Contains(item.CardNo))
@@ -438,8 +473,8 @@ namespace Fuelcards.Repositories
         public EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId)
         {
             EnumHelper.Network networkEnum = EnumHelper.NetworkEnumFromString(networkName);
-            int? DisplayGroup = _db.InvoicingOptions.FirstOrDefault(e=>e.GroupedNetwork.Contains((int)networkEnum) && e.PortlandId == portlandId)?.Displaygroup;
-            if(DisplayGroup is null) return EnumHelper.InvoiceFormatType.Default;
+            int? DisplayGroup = _db.InvoicingOptions.FirstOrDefault(e => e.GroupedNetwork.Contains((int)networkEnum) && e.PortlandId == portlandId)?.Displaygroup;
+            if (DisplayGroup is null) return EnumHelper.InvoiceFormatType.Default;
             if (DisplayGroup == 1) return EnumHelper.InvoiceFormatType.Pan;
             else return null;
         }

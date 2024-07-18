@@ -54,7 +54,7 @@
             <select>
                 @foreach (var item in Model.keyfuelsInvoiceList)
                 {
-                    <option>@item.name : (@Model.BasePrice + @item.addon)</option>
+                    <option>@item.name : @item.addon</option>
                 }
 
 
@@ -65,7 +65,7 @@
             <select>
                 @foreach (var item in Model.ukFuelInvoiceList)
                 {
-                    <option>@item.name : (@Model.BasePrice + @item.addon)</option>
+                    <option>@item.name : @item.addon</option>
                 }
 
 
@@ -75,7 +75,7 @@
             <select>
                 @foreach (var item in Model.texacoInvoiceList)
                 {
-                    <option>@item.name : (@Model.BasePrice + @item.addon)</option>
+                    <option>@item.name : @item.addon</option>
                 }
 
 
