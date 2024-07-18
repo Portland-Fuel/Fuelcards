@@ -341,5 +341,10 @@ namespace Fuelcards.GenericClassFiles
             }
             return null;
         }
+        public enum InvoiceFormatType
+        {
+            Default,
+            Pan,
+        }
     }
 }

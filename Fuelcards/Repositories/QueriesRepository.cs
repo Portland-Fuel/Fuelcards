@@ -244,6 +244,25 @@ namespace Fuelcards.Repositories
             }
             return TransactionsToUse;
         }
+
+        public async Task<IEnumerable<UkfTransaction>> GetAllUKTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate)
+        {
+            var controlIds = _db.FcControls.Where(e => e.CreationDate < InvoiceDate.AddDays(1) && e.Invoiced != true)
+                 .OrderByDescending(e => e.ControlId)
+                 .Select(e => e.ControlId)
+                 .ToList();
+            var TransactionsToUse = _db.UkfTransactions.Where(e => controlIds.Contains(e.ControlId) || e.Invoiced != true);
+            return TransactionsToUse;
+        }
+        public async Task<IEnumerable<TexacoTransaction>> GetAllTexTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate)
+        {
+            var controlIds = _db.FcControls.Where(e => e.CreationDate < InvoiceDate.AddDays(1) && e.Invoiced != true)
+                .OrderByDescending(e => e.ControlId)
+                .Select(e => e.ControlId)
+                .ToList();
+            var Transactions = _db.TexacoTransactions.Where(e => e.Invoiced != true || controlIds.Contains((int)e.ControlId));
+            return Transactions;
+        }
         public int? GetPortlandIdFromAccount(int account)
         {
             int? portlandId = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == account)?.PortlandId;
@@ -289,6 +308,140 @@ namespace Fuelcards.Repositories
             };
             return model;
 
+        }
+
+        public List<List<GenericTransactionFile>> GetUninvoicedTransactionsAndGroupThemByCustomerAndNetwork(DateOnly InvoiceDate, DateOnly FuelgenieDate)
+        {
+            List<GenericTransactionFile> AllTransactions;
+            bool updatesMade;
+            do
+            {
+                updatesMade = false;
+
+                AllTransactions = Transactions.TurnTransactionIntoGeneric(
+                    GetAllKeyfuelTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList(),
+                    GetAllUKTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList(),
+                    GetAllTexTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList(),
+                    GetAllFGTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList());
+
+                foreach (var item in AllTransactions.Where(e => e.PortlandId is null))
+                {
+                    try
+                    {
+                        var PortlandId = GetPortlandIdFromMaskedCards(item.CardNumber);
+                        if (PortlandId is not null)
+                        {
+                            UpdatePortlandIdOnTransaction(item, PortlandId);
+                            updatesMade = true;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        throw new ArgumentException($"error with a masked card. The card number {item.CardNumber} Failed.");
+                    }
+                }
+            } while (updatesMade);
+            List<List<GenericTransactionFile>> TransactionsByCustomerAndNetwork = GroupTransactionsByCustomer(AllTransactions);
+            return TransactionsByCustomerAndNetwork;
+        }
+
+        public int? GetPortlandIdFromMaskedCards(decimal? cardNumber)
+        {
+            try
+            {
+                return _db.FcMaskedCards.FirstOrDefault(e => e.CardNumber == cardNumber).PortlandId;
+            }
+            catch (Exception)
+            {
+                return _db.FcHiddenCards.FirstOrDefault(e => cardNumber.Value.ToString().Contains(e.CardNo)).PortlandId;
+            }
+        }
+
+        public async Task<IEnumerable<FgTransaction>> GetAllFGTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate)
+        {
+            return _db.FgTransactions.Where(e => e.Invoiced != true);
+        }
+        public void UpdatePortlandIdOnTransaction(GenericTransactionFile item, int? portlandId)
+        {
+            switch (item.network)
+            {
+                case 0:
+                    var transaction1 = _db.KfE1E3Transactions.FirstOrDefault(e => e.TransactionId == item.TransactionId);
+                    transaction1.PortlandId = portlandId;
+                    _db.KfE1E3Transactions.Update(transaction1);
+                    _db.SaveChanges();
+                    return;
+                case 1:
+                    var transaction2 = _db.UkfTransactions.FirstOrDefault(e => e.TransactionId == item.TransactionId);
+                    transaction2.PortlandId = portlandId;
+                    _db.UkfTransactions.Update(transaction2);
+                    _db.SaveChanges();
+                    return;
+                case 2:
+                    var transaction3 = _db.TexacoTransactions.FirstOrDefault(e => e.TransactionId == item.TransactionId);
+                    transaction3.PortlandId = portlandId;
+                    _db.TexacoTransactions.Update(transaction3);
+                    _db.SaveChanges();
+                    return;
+                case 3:
+                    var transaction4 = _db.FgTransactions.FirstOrDefault(e => e.TransactionId == item.TransactionId);
+                    transaction4.PortlandId = portlandId;
+                    _db.FgTransactions.Update(transaction4);
+                    _db.SaveChanges();
+                    return;
+            }
+        }
+        public List<List<GenericTransactionFile>> GroupTransactionsByCustomer(List<GenericTransactionFile> transactions)
+        {
+
+            List<List<GenericTransactionFile>> TransactionsByCustomer = transactions
+       .GroupBy(t => t.CustomerCode)
+       .Select(group => group.ToList())
+       .ToList();
+            var AllAquaid = TransactionsByCustomer
+                .SelectMany(list => list)
+                .Where(e => e.PortlandId == 100028 || e.PortlandId == 100029 || e.PortlandId == 100030 || e.PortlandId == 100031 || e.PortlandId == 100032 || e.PortlandId == 100494)
+                .ToList();
+            if (AllAquaid.Count > 0)
+            {
+                foreach (var CostCentre in AllAquaid)
+                {
+                    CostCentre.CustomerCode = GetAccountFromCostCentre(CostCentre.CardNumber);
+                }
+                var groupedAquaid = AllAquaid.GroupBy(e => e.CustomerCode).ToList();
+                foreach (var aquaidList in AllAquaid)
+                {
+                    TransactionsByCustomer.RemoveAll(transactionsList => transactionsList.Contains(aquaidList));
+                }
+                foreach (var Transaction in groupedAquaid)
+                {
+                    TransactionsByCustomer.Add(Transaction.ToList());
+                }
+            }
+            return TransactionsByCustomer;
+
+
+        }
+
+        private int? GetAccountFromCostCentre(decimal? cardNumber)
+        {
+            var AllCards = _db.FcHiddenCards.Where(e=>e.Id > -1);
+            foreach (var item in AllCards)
+            {
+                if (cardNumber.ToString().Contains(item.CardNo))
+                {
+                    return item.AccountNo;
+                }
+            }
+            throw new Exception($"Error on masked card {cardNumber}");
+        }
+        public EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId)
+        {
+            EnumHelper.Network networkEnum = EnumHelper.NetworkEnumFromString(networkName);
+            int? DisplayGroup = _db.InvoicingOptions.FirstOrDefault(e=>e.GroupedNetwork.Contains((int)networkEnum) && e.PortlandId == portlandId)?.Displaygroup;
+            if(DisplayGroup is null) return EnumHelper.InvoiceFormatType.Default;
+            if (DisplayGroup == 1) return EnumHelper.InvoiceFormatType.Pan;
+            else return null;
         }
     }
 }

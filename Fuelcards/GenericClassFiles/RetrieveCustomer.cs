@@ -58,6 +58,7 @@ namespace Fuelcards.GenericClassFiles
                 network.email = _db.AllEmail(account);
                 network.account = account;
                 Customers.networks.Add(network);
+                network.invoiceFormatType = _db.GetInvoiceFormatType(network.networkName, Customers.portlandId);
             }
             InvoicePreCheckModels _checks = new(_db);
             _checks.invoiceDate = DateOnly.Parse("2024-07-15");

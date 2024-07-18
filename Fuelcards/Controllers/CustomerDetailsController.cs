@@ -55,7 +55,6 @@ namespace Fuelcards.Controllers
         {
             try
             {
-
                 return Json("JsonResult");
             }
             catch (Exception e)

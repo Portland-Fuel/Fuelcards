@@ -23,5 +23,9 @@ namespace Fuelcards.Repositories
         List<int> GetFailedSiteBanding(int network);
         double? GetProductVolume(EnumHelper.Products product);
         int? GetPortlandIdFromAccount(int account);
+        Task<IEnumerable<FgTransaction>> GetAllFGTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate);
+        void UpdatePortlandIdOnTransaction(GenericTransactionFile item, int? portlandId);
+        List<List<GenericTransactionFile>> GroupTransactionsByCustomer(List<GenericTransactionFile> transactions);
+        EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId);
     }
 }
