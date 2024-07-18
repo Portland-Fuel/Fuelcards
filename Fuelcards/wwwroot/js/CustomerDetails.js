@@ -132,7 +132,7 @@ function GetNetworkListFromNetName(NetworkName){
             return KeyFuelsAddonList;
         case "texaco":
             return TexacoAddonList;
-        case "ukfuels":
+        case "ukfuels" || "ukfuel":
             return UkFuelsAddonList;
         case "fuelgenie":
             return FuelGenieAddonList;

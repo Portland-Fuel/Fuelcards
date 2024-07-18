@@ -217,12 +217,14 @@ function promptForInputs(title, html) {
             const ccEmailInput = document.getElementById('ccEmailInput') ? document.getElementById('ccEmailInput').value : '';
             const bccEmailInput = document.getElementById('bccEmailInput') ? document.getElementById('bccEmailInput').value : '';
             const paymentTerm = document.getElementById('paymentTermsInput') ? document.getElementById('paymentTermsInput').value : '';
+            const invoiceFormatType = document.getElementById('invoiceFormatTypeInput') ? document.getElementById('invoiceFormatTypeInput').value : '';
             return {
                 account: accountInput,
                 toEmail: toEmailInput,
                 ccEmail: ccEmailInput,
                 bccEmail: bccEmailInput,
                 paymentTerm: paymentTerm,
+                invoiceFormatType: invoiceFormatType,
             };
         }
     });
@@ -244,18 +246,21 @@ function promptForAddonInputs(title, html) {
 }
 
 
-function getInitialInputsHtml() {
+function getInitialInputsHtml(data) {
     return `
-        <input id="accountInput" class="swal2-input" placeholder="Account">
-        <input id="toEmailInput" class="swal2-input" placeholder="To Email">
-        <input id="ccEmailInput" class="swal2-input" placeholder="CC Email">
-        <input id="bccEmailInput" class="swal2-input" placeholder="BCC Email">
-        <input id="paymentTermsInput" class="swal2-input" placeholder="Payment Terms">
+        <input id="accountInput" class="swal2-input" value="${data.account}" placeholder="Account">
+        <input id="toEmailInput" class="swal2-input" value="${data.toEmail}" placeholder="To Email">
+        <input id="ccEmailInput" class="swal2-input" value="${data.ccEmail}" placeholder="CC Email">
+        <input id="bccEmailInput" class="swal2-input" value="${data.bccEmail}" placeholder="BCC Email">
+        <input id="paymentTermsInput" class="swal2-input" value="${data.paymentTerm}" placeholder="Payment Terms">
+        <input id="invoiceFormatTypeInput" class="swal2-input" value="${data.invoiceFormatType}" placeholder="Invoice Format type">
+
     `;
 }
 
 async function AddNewAccount(btnelement) {
-    const result = await promptForInputs('Enter Details', getInitialInputsHtml());
+    var data = GetFirstAccountRowFromTable();
+    const result = await promptForInputs('Enter Details', getInitialInputsHtml(data));
     if (result.isConfirmed) {
         const table = document.getElementById('UniqueNetworkTable');
         const newRow = createAccounTableRow(result.value);
@@ -265,7 +270,32 @@ async function AddNewAccount(btnelement) {
         GetAccountListFromNetworkName(Network).push(result.value);
     }
 }
+function GetFirstAccountRowFromTable(){
+    const table = document.getElementById('UniqueNetworkTable');
+    const tableBody = table.querySelector('tbody');
+    const rows = tableBody.querySelectorAll('tr');
+    if (rows.length === 0) {
+        return {
+            account: '',
+            toEmail: '',
+            ccEmail: '',
+            bccEmail: '',
+            paymentTerm: '',
+            invoiceFormatType: '',
+        };
+    }
+    const lastRow = rows[rows.length - 1];
+    const cells = lastRow.querySelectorAll('td');
+    return {
+        account: cells[0].textContent,
+        toEmail: cells[1].textContent,
+        ccEmail: cells[2].textContent,
+        bccEmail: cells[3].textContent,
+        paymentTerm: cells[4].textContent,
+        invoiceFormatType: cells[5].textContent,
+    };
 
+}
 function createAccounTableRow(data){
     const newRow = document.createElement('tr');
     newRow.appendChild(createElement('td', {}, data.account));
@@ -273,6 +303,7 @@ function createAccounTableRow(data){
     newRow.appendChild(createElement('td', {}, data.ccEmail));
     newRow.appendChild(createElement('td', {}, data.bccEmail));
     newRow.appendChild(createElement('td', {}, data.paymentTerm));
+    newRow.appendChild(createElement('td', {}, data.invoiceFormatType));
     const label = createElement('label', { class: 'label-new' }, 'NEW');
     newRow.appendChild(label);
 
@@ -361,12 +392,15 @@ function LoadUniqueNetworkOverlayData(data,element){
         const cell5 = createElement('td', {}, networkData.email.cc);
         const cell6 = createElement('td', {}, networkData.email.bcc);
         const cell7 = createElement('td', {}, networkData.paymentTerms);
+        const cell8 = createElement('td', {}, networkData.invoiceFormatType);
+
 
         row.appendChild(cell1);
         row.appendChild(cell4);
         row.appendChild(cell5);
         row.appendChild(cell6);
         row.appendChild(cell7);
+        row.appendChild(cell8);
         TableBody.appendChild(row);
     });
 
@@ -447,7 +481,7 @@ function createElement(type, attributes = {}, textContent = '') {
             }
         }
     }
-    if (textContent) {
+    if (textContent !== undefined && textContent !== null) {
         element.textContent = textContent;
     }
     return element;
@@ -458,7 +492,7 @@ function LoadUniqueNetworkOverlayHeaders(){
     const TableHead = Table.querySelector('thead');
     const TableheadRow = createElement('tr');
     
-    const headers = ['Account Number', 'Email To', 'Email CC', 'Email BCC','Payment Terms']; 
+    const headers = ['Account Number', 'Email To', 'Email CC', 'Email BCC','Payment Terms','Invoice fomat type']; 
     
     headers.forEach(header => {
         const th = createElement('th', {}, header);
@@ -476,6 +510,12 @@ function ClearUniqueNetworkOverlayTable() {
 }
 function closeUniqueNetworkOverlay(element) {
     document.getElementById('UniqueNetworkOverlay').hidden = true;
+
+    var UniqueNetworkTable =  document.getElementById('UniqueNetworkTable').hidden = true;
+    clearTable(UniqueNetworkTable);
+    var HistoricAddonsTable = document.getElementById('HistoricAddons');
+    clearTable(HistoricAddonsTable);
+
 }
 
 
@@ -553,6 +593,8 @@ function GetFixListToAddTo(NetworkUserSelected){
             return UkFuelsFixs;
         case "fuelgenie":
             return FuelGenieFixs;
+        case "ukfuel":
+            return UkFuelsFixs;
     }
 }
 function GetSelectOptionForUserForNewFixForm(){
