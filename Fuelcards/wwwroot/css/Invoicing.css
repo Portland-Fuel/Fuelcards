@@ -38,3 +38,41 @@ body{
 }
 
 
+.ChecListTableContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.ChecListTable {
+    border-collapse: collapse;
+    background-color: transparent;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 25%;
+}
+
+.ChecListTable thead {
+    background-color: transparent;
+}
+.ChecListTable th {
+    width: 10%;
+    color: white;
+    
+
+}
+.ChecListTable th,
+.ChecListTable td {
+    padding: 10px;
+    text-align: left;
+    color: white;
+    border: 3px solid #f8f9fa;
+    width: 15px;
+}
+
+
+.ChecListTable tbody tr:hover {
+    cursor: pointer;
+    background-color: #511212;
+}

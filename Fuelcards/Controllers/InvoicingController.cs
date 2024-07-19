@@ -17,10 +17,11 @@ namespace Fuelcards.Controllers
         public IActionResult Invoicing()
         {
             InvoicePreCheckModels _checks = new(_db);
-          /*  _checks.invoiceDate = DateOnly.Parse("2024-07-16");
+            _checks.invoiceDate = DateOnly.Parse("2024-07-16");
             _checks.texacoVolume = new(_db);
-            var egg = _checks.keyfuelsInvoiceList;*/
+            var egg = _checks.keyfuelsInvoiceList;
             return View("/Views/Invoicing/RealInvoicing.cshtml", _checks);
         }
+
     }
 }
