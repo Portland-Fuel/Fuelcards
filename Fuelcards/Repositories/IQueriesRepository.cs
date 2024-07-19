@@ -28,6 +28,6 @@ namespace Fuelcards.Repositories
         List<List<GenericTransactionFile>> GroupTransactionsByCustomer(List<GenericTransactionFile> transactions);
         EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId);
         string? GetXeroIdFromPortlandId(int? portlandId);
-        void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, List<NewCustomerDetailsModel.AccountInfo>? newAccountInfo);
+        void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network);
     }
 }

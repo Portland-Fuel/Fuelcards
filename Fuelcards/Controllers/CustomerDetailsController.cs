@@ -55,9 +55,9 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                SortChanges(AddEditCustomerFormData.keyFuelsInfo);
-                SortChanges(AddEditCustomerFormData.uKFuelsInfo);
-                SortChanges(AddEditCustomerFormData.texacoInfo);
+                SortChanges(AddEditCustomerFormData.keyFuelsInfo,AddEditCustomerFormData.customerName, EnumHelper.Network.Keyfuels);
+                SortChanges(AddEditCustomerFormData.uKFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.UkFuel);
+                SortChanges(AddEditCustomerFormData.texacoInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Texaco);
                 return Json("JsonResult");
             }
             catch (Exception e)
@@ -67,11 +67,11 @@ namespace Fuelcards.Controllers
             }
         }
 
-        private void SortChanges(NewCustomerDetailsModel.NetworkInfo? networkInfo)
+        private void SortChanges(NewCustomerDetailsModel.NetworkInfo? networkInfo, string CustomerName, EnumHelper.Network network)
         {
             foreach (var NewAddon in networkInfo.newAddons)
             {
-                _db.UpdateAddon(NewAddon, networkInfo.newAccountInfo);
+                _db.UpdateAddon(NewAddon, CustomerName, network);
             }
         }
     }

@@ -111,7 +111,7 @@ namespace Fuelcards.Repositories
             foreach (var item in TransactionsByCustomerAndNetwork)
             {
                 CustomerInvoice model = new();
-                model.name = HomeController.PFLXeroCustomersData.Where(e=>e.ContactID.ToString() == GetXeroIdFromPortlandId(item[0].PortlandId)).FirstOrDefault()?.Name;
+                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == GetXeroIdFromPortlandId(item[0].PortlandId)).FirstOrDefault()?.Name;
                 model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 model.addon = BasePrice + model.addon;
                 Customers.Add(model);
@@ -138,43 +138,46 @@ namespace Fuelcards.Repositories
             }
             return Customers;
         }
-        public void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, List<NewCustomerDetailsModel.AccountInfo>? newAccountInfo)
+        public void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network)
         {
-            if(newAccountInfo == null) return;
+            if (newAddon == null) return;
             try
             {
-                foreach (var account in newAccountInfo)
-                {
-                    ProcessAddonList(newAddon, account.account);
-                }
+                int? PortlandId = GetPortlandIdFromCustomerName(CustomerName);
+                if (PortlandId is null) throw new ArgumentException("Portland Id could not be established from the customer name");
+                ProcessAddonList(newAddon, PortlandId, network);
             }
             catch (Exception e)
             {
                 throw new ArgumentException(e.Message);
             }
         }
-        private void ProcessAddonList(NewCustomerDetailsModel.AddonData newAddon, string account)
+
+        public int? GetPortlandIdFromCustomerName(string customerName)
+        {
+            string xeroID = HomeController.PFLXeroCustomersData.Where(e => e.Name == customerName).FirstOrDefault().ContactID.ToString();
+            int? portlandId = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.XeroId == xeroID && e.XeroTennant == 0).PortlandId;
+            if (portlandId is null) throw new ArgumentException($"Portland ID could not be established from the xero id {xeroID}");
+            return portlandId;
+        }
+
+        private void ProcessAddonList(NewCustomerDetailsModel.AddonData newAddon, int? portlandId, EnumHelper.Network network)
         {
             if (newAddon == null) return;
-                CustomerPricingAddon model = new();
+            CustomerPricingAddon model = new();
 
-                model.EffectiveDate = DateOnly.Parse(newAddon.effectiveFrom);
-                if (model.EffectiveDate == null)
-                    throw new ArgumentException("Problem mapping the effective date from the Json object to the CustomerPricingAddon model");
+            model.EffectiveDate = DateOnly.Parse(newAddon.effectiveFrom);
+            if (model.EffectiveDate == null)
+                throw new ArgumentException("Problem mapping the effective date from the Json object to the CustomerPricingAddon model");
 
-                model.Addon = Convert.ToDouble(newAddon.addon);
-                if (model.Addon == null)
-                    throw new ArgumentException("Problem converting the addon from a string to a double");
+            model.Addon = Convert.ToDouble(newAddon.addon);
+            if (model.Addon == null)
+                throw new ArgumentException("Problem converting the addon from a string to a double");
+            model.Network = (int)network;
+            model.PortlandId = portlandId;
 
-                var networkEntry = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(account));
-                if (networkEntry == null)
-                    throw new ArgumentException($"Could not pull out the network and Portland ID for the following account number {account}");
-
-                model.Network = (int)networkEntry.Network;
-                model.PortlandId = (int)networkEntry.PortlandId;
-
-                _db.CustomerPricingAddons.Add(model);
-                _db.SaveChanges();
+            _db.CustomerPricingAddons.Add(model);
+            _db.SaveChanges();
         }
         public List<int> GetFailedSiteBanding(int network)
         {
