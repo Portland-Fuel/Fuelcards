@@ -73,6 +73,8 @@ namespace Fuelcards.Models
             public string? ccEmail{ get; set; }
             public string? bccEmail { get; set; }
 
+            public string? invoiceFormatType { get; set; }
+
         }
 
     }

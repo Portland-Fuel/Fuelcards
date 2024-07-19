@@ -51,7 +51,7 @@ namespace Fuelcards.Controllers
 
 
         [HttpPost]
-        public JsonResult SubmitAddOrEdit([FromBody] CustomerDetailsModels.AddEditCustomerFormData AddEditCustomerFormData)
+        public JsonResult SubmitAddOrEdit([FromBody] NewCustomerDetailsModel.AddEditCustomerFormData AddEditCustomerFormData)
         {
             try
             {

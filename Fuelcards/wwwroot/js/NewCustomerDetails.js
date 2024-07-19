@@ -1,7 +1,7 @@
-const KeyFuelsFixs = []
-const TexacoFixs = []
-const UkFuelsFixs = []
-const FuelGenieFixs = []
+const KeyFuelsFixs = [];
+const TexacoFixs = [];
+const UkFuelsFixs = [];
+const FuelGenieFixs = [];
 
 const NewKeyFuelsAddonList = [];
 const NewTexacoAddonList = [];
@@ -13,47 +13,175 @@ const NewTexacoAccountList = [];
 const NewUkFuelsAccountList = [];
 const NewFuelGenieAccountList = [];
 
-
-
-
 let CustomerSearchModelData;
-async function CustomerSearchInput(element){
-    if(element.value === ""){
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('AddOrEditCustomerForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        var form = document.getElementById("AddOrEditCustomerForm");
+        var submitButton = document.getElementById("SubmitButton");
+
+        // Prevent multiple submissions
+        if(submitButton.classList.contains('animate')) {
+            return;
+        }
+
+        animateButton(submitButton);
+
+        var formData = new FormData(form);
+        var values = Object.fromEntries(formData.entries());
+        var parsedValues = JSON.stringify(values);
+
+        var ModelFormToSubmitToController = GetModelToSubmitToController();
+        console.log("ModelToSubmit:");
+        console.log(JSON.stringify(ModelFormToSubmitToController, null, 2));
+
+
+        try {
+            let response = await $.ajax({
+                url: '/CustomerDetails/SubmitAddOrEdit', 
+                type: 'POST',
+                data: JSON.stringify(ModelFormToSubmitToController), 
+                contentType: 'application/json;charset=utf-8'
+            });
+            handleSuccess(submitButton);
+            Toast.fire({
+                icon: 'success',
+                title: 'Form submitted successfully'
+            });
+        } catch (xhr) {
+            console.error('XHR Response:', xhr.responseText || 'No response from server');
+            console.error('Error:', xhr.statusText || 'No error message');
+            handleError(submitButton, xhr);
+            Toast.fire({
+                icon: 'error',
+                title: 'Error submitting form',
+                text: xhr.statusText + ': ' + xhr.responseText,
+                footer: "Contact IT if you have issues <a href='https://192.168.0.17:666/Home/ReportIssue'>Report Issue</a>"
+
+            });
+        }
+    });
+
+    function animateButton(button) {
+        button.classList.add('animate');
+        button.innerHTML = 'Submitting...<div class="loader"></div>';
+        button.disabled = true;
+    }
+
+    function handleSuccess(button) {
+        button.disabled = true;
+        button.classList.remove('animate');
+        button.classList.add('success');
+        button.innerHTML = 'Submitted<div class="success-icon"><i class="fas fa-check"></i></div>';
+        setTimeout(function() {
+            button.classList.remove('success');
+            button.innerHTML = 'Submit';
+            button.disabled = false;
+        }, 3500);
+    }
+
+    function handleError(button, xhr) {
+        button.disabled = true;
+        button.classList.remove('animate');
+        button.classList.add('error');
+        button.innerHTML = 'Error<div class="error-icon"><i class="fas fa-exclamation"></i></div>';
+        setTimeout(function() {
+            button.classList.remove('error');
+            button.innerHTML = 'Submit';
+            button.disabled = false;
+        }, 3500);
+    }
+
+
+    function GetModelToSubmitToController(){ 
+        var form = document.getElementById("AddOrEditCustomerForm");
+        var formData = new FormData(form);
+        var values = Object.fromEntries(formData.entries());
+    
+        console.log("Values:");
+        console.log(JSON.stringify(values, null, 2));
+        var AddEditCustomerFormData = {
+            customerName: document.getElementById('customerName').value,
+            keyFuelsInfo: {
+                newFixesForcustomer: KeyFuelsFixs,
+                newAccountInfo: NewKeyFuelsAccountList,
+                newAddons: NewKeyFuelsAddonList
+            },
+            texacoInfo: {
+                newFixesForcustomer: TexacoFixs,
+                newAccountInfo: NewTexacoAccountList,
+                newAddons: NewTexacoAddonList
+            },
+            ukFuelsInfo: {
+                newFixesForcustomer: UkFuelsFixs,
+                newAccountInfo: NewUkFuelsAccountList,
+                newAddons: NewUkFuelsAddonList
+            },
+            fuelGenieInfo: {
+                newFixesForcustomer: FuelGenieFixs,
+                newAccountInfo: NewFuelGenieAccountList,
+                newAddons: NewFuelGenieAddonList
+            }
+
+        
+           
+        };
+        
+        return AddEditCustomerFormData;
+    }
+});
+
+
+
+
+
+
+
+
+
+
+async function CustomerSearchInput(element) {
+    if (element.value === "") {
         return;
     }
-        await $.ajax({
-            url: '/CustomerDetails/SearchCustomer', 
-            type: 'POST',
-            data: JSON.stringify(element.value), 
-            contentType: 'application/json;charset=utf-8',
-            success: async function (response) {
-                const stringifyData = JSON.stringify(response, null, 2);
-                CustomerSearchModelData = JSON.parse(stringifyData);
-                SortDataAndPopulateFromSearch(CustomerSearchModelData);
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Successfully Loaded Customer'
-                });
-            },
-            error: async function (xhr, error) {
-                element.value = "";
-                console.error('XHR Response:', xhr.responseText || 'No response from server');
-                console.error('Error:', error || 'No error message');
-                await Swal.fire({
-                    icon: "error",
-                    title: "Sorry there has been a big error",
-                    text: xhr.responseText || 'An unknown error occurred.',
-                    footer: '<a href="https://192.168.0.17:666/" target="_blank">Report it here!</a>'
-                });
-            }
-        });
+    await $.ajax({
+        url: '/CustomerDetails/SearchCustomer',
+        type: 'POST',
+        data: JSON.stringify(element.value),
+        contentType: 'application/json;charset=utf-8',
+        success: async function (response) {
+            const stringifyData = JSON.stringify(response, null, 2);
+            CustomerSearchModelData = JSON.parse(stringifyData);
+            SortDataAndPopulateFromSearch(CustomerSearchModelData);
+          
+            Toast.fire({
+                icon: 'success',
+                title: 'Successfully Loaded Customer'
+            });
+        },
+        error: async function (xhr, error) {
+            element.value = "";
+            console.error('XHR Response:', xhr.responseText || 'No response from server');
+            console.error('Error:', error || 'No error message');
+            await Swal.fire({
+                icon: "error",
+                title: "Sorry there has been a big error",
+                text: xhr.responseText || 'An unknown error occurred.',
+                footer: '<a href="https://192.168.0.17:666/" target="_blank">Report it here!</a>'
+            });
+        }
+    });
 }
-function SortDataAndPopulateFromSearch(data){
+
+function SortDataAndPopulateFromSearch(data) {
     clearAllInputsOnCustomerDetailsPage();
     FillCustomerName(data.customerName);
     //FillInvoiceOrderType(data.invoiceOrderType);
     //FillPaymentTerm(data.paymentTerm);
 }
+
 function clearAllInputsOnCustomerDetailsPage() {
     // Clear all input fields in the AddOrEditSection
     const addOrEditSectionInputs = document.querySelectorAll('#AddOrEditSection input');
@@ -87,6 +215,7 @@ function clearAllInputsOnCustomerDetailsPage() {
         select.selectedIndex = 0;
     });
 }
+
 function FillPaymentTerm(paymentTerm) {
     const PaymentTermElement = document.getElementById("paymentTerm");
     PaymentTermElement.value = paymentTerm;
@@ -110,63 +239,63 @@ function FillInvoiceOrderType(invoiceOrderType) {
     }
     InvoiceOrderTypeElement.disabled = true;
 }
-function FillCustomerName(customerName){
+
+function FillCustomerName(customerName) {
     const CustomerNameElement = document.getElementById("customerName");
     CustomerNameElement.value = customerName;
     CustomerNameElement.disabled = true;
 }
 
 async function openUniqueNetworkOverlay(element) {
-    if(document.getElementById('customerName').value === "") {
+    if (document.getElementById('customerName').value === "") {
         element.checked = false;
         await Swal.fire({
             icon: 'warning',
             title: 'You have not typed in the customer name!',
             text: 'Please Type a customer first.',
-
         });
         return;
     }
 
-    //sortByHeader();
     LastOpenedNetworkCheck = element;
-    var data = CustomerSearchModelData;
+    const data = CustomerSearchModelData;
     const Customernametouse = document.getElementById('customerName').value;
-    var CustName = document.getElementById('CustNameLabelUniqueNetwork');
+    const CustName = document.getElementById('CustNameLabelUniqueNetwork');
     CustName.textContent = "Customer Name:" + " " + Customernametouse;
-    var NetName = document.getElementById('NetworkNameLabelUniqueNetwork')
+    const NetName = document.getElementById('NetworkNameLabelUniqueNetwork');
     NetName.textContent = "Network:" + " " + element.textContent;
 
-    var FixList =  GetFixListToAddTo(element.textContent);
-    var count = FixList.length;
-    
-    var NewFixCount = document.getElementById('NewFixCount');
-    NewFixCount.textContent = count + " Fixes";
+    const FixList = GetFixListToAddTo(element.textContent);
+    const count = FixList.length;
 
+    const NewFixCount = document.getElementById('NewFixCount');
+    NewFixCount.textContent = count + " Fixes";
 
     if (document.getElementById('CustomerSearch').value !== "") {
         const NetworkData = data.networkData.filter(xx => xx.networkName.toLowerCase() === element.textContent.toLowerCase());
         if (NetworkData.length > 0) {
             LoadDataIntoNetworkOverlay(element, NetworkData);
         } else {
+            ClearUniqueNetworkOverlayTable();
             console.log("No data in db found for network: " + element.value);
         }
+        document.getElementById('UniqueNetworkTable').hidden = false;
+        document.getElementById('UniqueNetworkTable').style.display = "block";
+
+        document.getElementById('UniqueNetworkOverlay').hidden = false;
     }
-    document.getElementById('UniqueNetworkOverlay').hidden = false;
 }
-function LoadDataIntoNetworkOverlay(element,data){
+
+function LoadDataIntoNetworkOverlay(element, data) {
     ClearUniqueNetworkOverlayTable();
     document.getElementById('LoadHistoricAddonsButton').hidden = false;
-    
+
     LoadUniqueNetworkOverlayHeaders();
     LoadUniqueNetworkOverlayData(data, element);
-
-
 }
+
 function clearTable(table) {
-    // Ensure the table is a valid element
     if (table && table.nodeName === 'TABLE') {
-        // Remove all rows in the tbody
         const tableBody = table.querySelector('tbody');
         if (tableBody) {
             while (tableBody.firstChild) {
@@ -174,7 +303,6 @@ function clearTable(table) {
             }
         }
 
-        // Remove all headers in the thead
         const tableHead = table.querySelector('thead');
         if (tableHead) {
             while (tableHead.firstChild) {
@@ -229,6 +357,7 @@ function promptForInputs(title, html) {
         }
     });
 }
+
 function promptForAddonInputs(title, html) {
     return Swal.fire({
         title: title,
@@ -245,7 +374,6 @@ function promptForAddonInputs(title, html) {
     });
 }
 
-
 function getInitialInputsHtml(data) {
     return `
         <input id="accountInput" class="swal2-input" value="${data.account}" placeholder="Account">
@@ -254,23 +382,40 @@ function getInitialInputsHtml(data) {
         <input id="bccEmailInput" class="swal2-input" value="${data.bccEmail}" placeholder="BCC Email">
         <input id="paymentTermsInput" class="swal2-input" value="${data.paymentTerm}" placeholder="Payment Terms">
         <input id="invoiceFormatTypeInput" class="swal2-input" value="${data.invoiceFormatType}" placeholder="Invoice Format type">
-
     `;
 }
 
+function CloseNewFixOverlay(){
+    RemoveSelectElementFromNewFixForm();
+
+
+    var overlayElement = document.getElementById("overlay");
+    overlayElement.classList = "";
+    overlayElement.classList.add("animate__zoomOutRight");
+    overlayElement.classList.add("animate__animated");
+    overlayElement.classList.add("overlay");
+
+    overlayElement.hidden = true;
+}
+
 async function AddNewAccount(btnelement) {
-    var data = GetFirstAccountRowFromTable();
+    const data = GetFirstAccountRowFromTable();
     const result = await promptForInputs('Enter Details', getInitialInputsHtml(data));
     if (result.isConfirmed) {
         const table = document.getElementById('UniqueNetworkTable');
+        if(table.querySelector('thead').querySelector('tr') === null) {
+            LoadUniqueNetworkOverlayHeaders();
+        }
         const newRow = createAccounTableRow(result.value);
-        table.appendChild(newRow);
-        var Network = document.getElementById('NetworkNameLabelUniqueNetwork').textContent.split(" ")[1];
+        table.querySelector('tbody').appendChild(newRow);
+        const Network = document.getElementById('NetworkNameLabelUniqueNetwork').textContent.split(" ")[1];
 
-        GetAccountListFromNetworkName(Network).push(result.value);
+        var Result = GetAccountListFromNetworkName(Network);
+        Result.push(result.value);
     }
 }
-function GetFirstAccountRowFromTable(){
+
+function GetFirstAccountRowFromTable() {
     const table = document.getElementById('UniqueNetworkTable');
     const tableBody = table.querySelector('tbody');
     const rows = tableBody.querySelectorAll('tr');
@@ -294,9 +439,9 @@ function GetFirstAccountRowFromTable(){
         paymentTerm: cells[4].textContent,
         invoiceFormatType: cells[5].textContent,
     };
-
 }
-function createAccounTableRow(data){
+
+function createAccounTableRow(data) {
     const newRow = document.createElement('tr');
     newRow.appendChild(createElement('td', {}, data.account));
     newRow.appendChild(createElement('td', {}, data.toEmail));
@@ -308,50 +453,48 @@ function createAccounTableRow(data){
     newRow.appendChild(label);
 
     return newRow;
-
-
 }
 
-
-function GetAccountListFromNetworkName(NetworkName){
-    switch(NetworkName.toLowerCase()){
+function GetAccountListFromNetworkName(NetworkName) {
+    switch (NetworkName.toLowerCase()) {
         case "keyfuels":
-            return NewKeyFuelsAddonList;
+            return NewKeyFuelsAccountList;
         case "texaco":
-            return NewTexacoAddonList;
+            return NewTexacoAccountList;
         case "ukfuel":
-            return NewUkFuelsAddonList;
+
+            return NewUkFuelsAccountList;
         case "fuelgenie":
-            return NewFuelGenieAddonList;
+            return NewFuelGenieAccountList;
     }
 }
+
 function getAddonAndEffectiveFromInputsHtml() {
     return `
         <input id="addonInput" class="swal2-input" placeholder="Addon">
         <input id="effectiveFromInput" class="swal2-input" placeholder="Effective From" type="date">
     `;
 }
-function LoadHistoricAddons(element){   
+
+function LoadHistoricAddons(element) {
     const HistoricAddonsTable = document.getElementById('HistoricAddons');
 
-    if (element.textContent === "Load Historic Addons") {
-        element.textContent = "Hide Historic Addons";
+    if (element.textContent === "Load Addons") {
+        element.textContent = "Hide Addons";
         element.style.backgroundColor = "indianred";
     } else {
         const HistoricAddonsTable = document.getElementById('HistoricAddons');
         clearTable(HistoricAddonsTable);
         element.style.backgroundColor = "";
-        element.textContent = "Load Historic Addons";
+        element.textContent = "Load Addons";
         return;
     }
-    var NetowrkCurrentlySelected = document.getElementById('NetworkNameLabelUniqueNetwork').textContent.split(" ")[1];
-    var NetworkData = CustomerSearchModelData.networkData.find(xx => xx.networkName.toLowerCase() === NetowrkCurrentlySelected.toLowerCase());
-    var HistoricAddons = NetworkData.allAddons;
-    if(HistoricAddonsTable.querySelector('thead').querySelector('tr') === null){
+    const NetowrkCurrentlySelected = document.getElementById('NetworkNameLabelUniqueNetwork').textContent.split(" ")[1];
+    const NetworkData = CustomerSearchModelData.networkData.find(xx => xx.networkName.toLowerCase() === NetowrkCurrentlySelected.toLowerCase());
+    const HistoricAddons = NetworkData.allAddons;
+    if (HistoricAddonsTable.querySelector('thead').querySelector('tr') === null) {
         LoadHistoricAddonsHeades(HistoricAddonsTable);
-
     }
-
 
     const tbody = HistoricAddonsTable.querySelector('tbody');
     HistoricAddons.forEach((addon) => {
@@ -362,15 +505,9 @@ function LoadHistoricAddons(element){
         row.appendChild(cell2);
         tbody.appendChild(row);
     });
-
 }
 
-
-
-
-
-
-function LoadHistoricAddonsHeades(HistoricAddonsTable){
+function LoadHistoricAddonsHeades(HistoricAddonsTable) {
     const thead = HistoricAddonsTable.querySelector('thead');
     const rthead = createElement('tr');
     const addonHeader = createElement('th', {}, 'Addon');
@@ -378,12 +515,32 @@ function LoadHistoricAddonsHeades(HistoricAddonsTable){
     rthead.appendChild(addonHeader);
     rthead.appendChild(effectiveDateHeader);
     thead.appendChild(rthead);
-
 }
 
-function LoadUniqueNetworkOverlayData(data,element){
+function LoadUniqueNetworkOverlayData(data, element) {
+
+
     const Table = document.getElementById('UniqueNetworkTable');
     const TableBody = Table.querySelector('tbody');
+    var DataArrToTakeFrom  = GetAccountListFromNetworkName(element.textContent);
+    DataArrToTakeFrom.forEach((Userinputtedaccountdata) => {
+        const row = createElement('tr');
+        const cell1 = createElement('td', {}, Userinputtedaccountdata.account);
+        const cell2 = createElement('td', {}, Userinputtedaccountdata.toEmail);
+        const cell3 = createElement('td', {}, Userinputtedaccountdata.ccEmail);
+        const cell4 = createElement('td', {}, Userinputtedaccountdata.bccEmail);
+        const cell5 = createElement('td', {}, Userinputtedaccountdata.paymentTerm);
+        const cell6 = createElement('td', {}, Userinputtedaccountdata.invoiceFormatType);
+        const label = createElement('label', { class: 'label-new' }, 'NEW');
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        row.appendChild(cell3);
+        row.appendChild(cell4);
+        row.appendChild(cell5);
+        row.appendChild(cell6);
+        row.appendChild(label);
+        TableBody.appendChild(row);
+    });
 
     data.forEach((networkData) => {
         const row = createElement('tr');
@@ -394,7 +551,6 @@ function LoadUniqueNetworkOverlayData(data,element){
         const cell7 = createElement('td', {}, networkData.paymentTerms);
         const cell8 = createElement('td', {}, networkData.invoiceFormatType);
 
-
         row.appendChild(cell1);
         row.appendChild(cell4);
         row.appendChild(cell5);
@@ -404,42 +560,11 @@ function LoadUniqueNetworkOverlayData(data,element){
         TableBody.appendChild(row);
     });
 
+    
 
 
-    // Modified $SELECTION_PLACEHOLDER$ code
-    /*
-    const NetworkData = data.networkData.find(xx => xx.networkName.toLowerCase() === element.value.toLowerCase());
-    NetworkData.allAddons.forEach((addon, index) => {
-        const row = createElement('tr');
-        const cell1 = createElement('td', {}, NetworkData.account);
-        const cell2 = createElement('td', {}, addon.addon);
-        const cell3 = createElement('td', {}, addon.effectiveDate);
-        const cell4 = createElement('td', {}, NetworkData.email.to);
-        const cell5 = createElement('td', {}, NetworkData.email.cc);
-        const cell6 = createElement('td', {}, NetworkData.email.bcc);
-
-        row.appendChild(cell1);
-        row.appendChild(cell2);
-        row.appendChild(cell3);
-        row.appendChild(cell4);
-        row.appendChild(cell5);
-        row.appendChild(cell6);
-        TableBody.appendChild(row);
-
-        if (index !== 0) {
-            row.hidden = true;
-            row.classList.add("Historicaddons");
-        }
-    });
-   
-
-    var ListOfNewAddonsFromUser = GetNetworkAddonListFromNetName(element.value);
-    ListOfNewAddonsFromUser.forEach(addon => {
-        const row = createAddonTableRow(addon);
-        TableBody.appendChild(row);
-    });
-     */
 }
+
 function createAddonTableRow(data) {
     const newRow = document.createElement('tr');
     newRow.appendChild(createElement('td', {}, data.addon));
@@ -450,16 +575,16 @@ function createAddonTableRow(data) {
     const label = createElement('label', { class: 'label-new' }, 'NEW');
     cell.appendChild(label);
     newRow.appendChild(cell);
-    var Network = document.getElementById('NetworkNameLabelUniqueNetwork').textContent.split(" ")[1];
-    var ListToPushTo;
-    ListToPushTo = GetNetworkAddonListFromNetName(Network);
+    const Network = document.getElementById('NetworkNameLabelUniqueNetwork').textContent.split(" ")[1];
+    const ListToPushTo = GetNetworkAddonListFromNetName(Network);
     if (!ListToPushTo.includes(data)) {
         ListToPushTo.push(data);
     }
     return newRow;
 }
-function GetNetworkAddonListFromNetName(NetworkName){
-    switch(NetworkName.toLowerCase()){
+
+function GetNetworkAddonListFromNetName(NetworkName) {
+    switch (NetworkName.toLowerCase()) {
         case "keyfuels":
             return NewKeyFuelsAddonList;
         case "texaco":
@@ -470,6 +595,7 @@ function GetNetworkAddonListFromNetName(NetworkName){
             return NewFuelGenieAddonList;
     }
 }
+
 function createElement(type, attributes = {}, textContent = '') {
     const element = document.createElement(type);
     for (const attr in attributes) {
@@ -487,20 +613,21 @@ function createElement(type, attributes = {}, textContent = '') {
     return element;
 }
 
-function LoadUniqueNetworkOverlayHeaders(){
+function LoadUniqueNetworkOverlayHeaders() {
     const Table = document.getElementById('UniqueNetworkTable');
     const TableHead = Table.querySelector('thead');
     const TableheadRow = createElement('tr');
-    
-    const headers = ['Account Number', 'Email To', 'Email CC', 'Email BCC','Payment Terms','Invoice fomat type']; 
-    
+
+    const headers = ['Account Number', 'Email To', 'Email CC', 'Email BCC', 'Payment Terms', 'Invoice format type'];
+
     headers.forEach(header => {
         const th = createElement('th', {}, header);
         TableheadRow.appendChild(th);
     });
-    
+
     TableHead.appendChild(TableheadRow);
 }
+
 function ClearUniqueNetworkOverlayTable() {
     const table = document.getElementById('UniqueNetworkTable');
     const TableheadRow = table.querySelector('thead');
@@ -508,83 +635,76 @@ function ClearUniqueNetworkOverlayTable() {
     const tableBody = table.querySelector('tbody');
     tableBody.innerHTML = '';
 }
+
 function closeUniqueNetworkOverlay(element) {
     document.getElementById('UniqueNetworkOverlay').hidden = true;
 
-    var UniqueNetworkTable =  document.getElementById('UniqueNetworkTable').hidden = true;
+    const UniqueNetworkTable = document.getElementById('UniqueNetworkTable').hidden = true;
     clearTable(UniqueNetworkTable);
-    var HistoricAddonsTable = document.getElementById('HistoricAddons');
+    const HistoricAddonsTable = document.getElementById('HistoricAddons');
     clearTable(HistoricAddonsTable);
-
 }
 
-
-
-function ShowNewFix(element){
+function ShowNewFix(element) {
     RemoveSelectElementFromNewFixForm();
     const SelectEleForUsers = GetSelectOptionForUserForNewFixForm();
 
     const parentElement = document.getElementById("NewFixSelectParent");
     parentElement.appendChild(SelectEleForUsers);
-    var overlayElement = document.getElementById("overlay");
+    const overlayElement = document.getElementById("overlay");
     overlayElement.classList = "";
     overlayElement.classList.add("animate__zoomInRight");
     overlayElement.classList.add("animate__animated");
     overlayElement.classList.add("overlay");
 
     overlayElement.hidden = false;
-   
 }
-function AddNewFix(event){
+
+function AddNewFix(event) {
     event.preventDefault();
     const form = document.getElementById("NewFixForm");
     if (form) {
         const formData = new FormData(form);
         const values = Object.fromEntries(formData.entries());
-        
+
         const selectElement = document.getElementById("NewFixNetworkSelect");
         const selectedOption = selectElement.options[selectElement.selectedIndex].value;
         values["network"] = selectedOption;
-        
+
         const periodElement = document.getElementById("period");
         const selectedPeriod = periodElement.options[periodElement.selectedIndex].value;
         values["period"] = selectedPeriod;
-        
+
         const gradeElement = document.getElementById("grade");
         const selectedGrade = gradeElement.options[gradeElement.selectedIndex].value;
         values["grade"] = selectedGrade;
-        console.log(values);
-        
-        var NetworkUserSelected = values["network"];
-        var FixsListToAddTo = GetFixListToAddTo(NetworkUserSelected);
+
+        const NetworkUserSelected = values["network"];
+        const FixsListToAddTo = GetFixListToAddTo(NetworkUserSelected);
         console.log("Adding the fix to the network of " + NetworkUserSelected);
-        FixsListToAddTo.push(values); 
+        FixsListToAddTo.push(values);
         ChangeLabelToShowPlus1Fix(NetworkUserSelected);
         console.log("KeyFuelsFixs: " + KeyFuelsFixs);
-        
-        var overlayElement = document.getElementById("overlay");
+
+        const overlayElement = document.getElementById("overlay");
         overlayElement.hidden = true;
     }
-
-
-
-       
 }
-function ChangeLabelToShowPlus1Fix(NetworkUserSelected){
+
+function ChangeLabelToShowPlus1Fix(NetworkUserSelected) {
     const labelElement = document.getElementById("NewFixCount");
-    var SpanText = labelElement.innerText
-    if(SpanText === "0 New Fixs"){
+    const SpanText = labelElement.innerText;
+    if (SpanText === "0 New Fixs") {
         labelElement.textContent = "1 Fix";
-    }
-    else{
-        var CurrentFixNum = SpanText.split(" ")[0];
-        var NewFixNum = parseInt(CurrentFixNum) + 1;
+    } else {
+        const CurrentFixNum = SpanText.split(" ")[0];
+        const NewFixNum = parseInt(CurrentFixNum) + 1;
         labelElement.textContent = NewFixNum + " Fixes";
     }
 }
 
-function GetFixListToAddTo(NetworkUserSelected){
-    switch(NetworkUserSelected.toLowerCase()){
+function GetFixListToAddTo(NetworkUserSelected) {
+    switch (NetworkUserSelected.toLowerCase()) {
         case "keyfuels":
             return KeyFuelsFixs;
         case "texaco":
@@ -595,9 +715,11 @@ function GetFixListToAddTo(NetworkUserSelected){
             return FuelGenieFixs;
         case "ukfuel":
             return UkFuelsFixs;
+
     }
 }
-function GetSelectOptionForUserForNewFixForm(){
+
+function GetSelectOptionForUserForNewFixForm() {
     const Options = ['KeyFuels', 'FuelGenie', 'Texaco', 'UkFuels'];
 
     const selectElement = document.createElement("select");
@@ -612,24 +734,14 @@ function GetSelectOptionForUserForNewFixForm(){
     return selectElement;
 }
 
-
-function RemoveSelectElementFromNewFixForm(){
+function RemoveSelectElementFromNewFixForm() {
     const selectElement = document.getElementById("NewFixNetworkSelect");
-    if(selectElement === null){
+    if (selectElement === null) {
         return;
-    }
-    else{
+    } else {
         selectElement.remove();
-
     }
 }
-
-
-
-
-
-
-
 
 
 const Toast = Swal.mixin({
@@ -639,8 +751,7 @@ const Toast = Swal.mixin({
     timer: 3500,
     timerProgressBar: true,
     didOpen: (toast) => {
-      toast.onmouseenter = Swal.stopTimer;
-      toast.onmouseleave = Swal.resumeTimer;
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
     }
-  });
- 
+});
