@@ -15,6 +15,8 @@ const NewFuelGenieAccountList = [];
 
 let CustomerSearchModelData;
 
+let IsUpdateOrNot = false;
+
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('AddOrEditCustomerForm').addEventListener('submit', async function(event) {
         event.preventDefault();
@@ -66,7 +68,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function animateButton(button) {
         button.classList.add('animate');
-        button.innerHTML = 'Submitting...<div class="loader"></div>';
+        var startText = button.textContent;
+        startText = startText + '...<div class="loader"></div>';
+        button.innerHTML = startText;
         button.disabled = true;
     }
 
@@ -74,7 +78,13 @@ document.addEventListener('DOMContentLoaded', function() {
         button.disabled = true;
         button.classList.remove('animate');
         button.classList.add('success');
-        button.innerHTML = 'Submitted<div class="success-icon"><i class="fas fa-check"></i></div>';
+        if(IsUpdateOrNot){
+            button.innerHTML = 'Updated<div class="success-icon"><i class="fas fa-check"></i></div>';
+        }else{
+            button.innerHTML = 'Submitted<div class="success-icon"><i class="fas fa-check"></i></div>';
+
+        }
+
         setTimeout(function() {
             button.classList.remove('success');
             button.innerHTML = 'Submit';
@@ -104,6 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(JSON.stringify(values, null, 2));
         var AddEditCustomerFormData = {
             customerName: document.getElementById('customerName').value,
+            isUpdateCustomer:IsUpdateOrNot,
             keyFuelsInfo: {
                 newFixesForcustomer: KeyFuelsFixs,
                 newAccountInfo: NewKeyFuelsAccountList,
@@ -155,6 +166,7 @@ async function CustomerSearchInput(element) {
             const stringifyData = JSON.stringify(response, null, 2);
             CustomerSearchModelData = JSON.parse(stringifyData);
             SortDataAndPopulateFromSearch(CustomerSearchModelData);
+            IsUpdateOrNot = true;
           
             Toast.fire({
                 icon: 'success',
@@ -178,8 +190,13 @@ async function CustomerSearchInput(element) {
 function SortDataAndPopulateFromSearch(data) {
     clearAllInputsOnCustomerDetailsPage();
     FillCustomerName(data.customerName);
+    ChangeFormToBeUpdate();
     //FillInvoiceOrderType(data.invoiceOrderType);
     //FillPaymentTerm(data.paymentTerm);
+}
+function ChangeFormToBeUpdate(){
+    const submitButton = document.getElementById("SubmitButton");
+    submitButton.textContent = "Update";
 }
 
 function clearAllInputsOnCustomerDetailsPage() {
@@ -639,7 +656,11 @@ function ClearUniqueNetworkOverlayTable() {
 function closeUniqueNetworkOverlay(element) {
     document.getElementById('UniqueNetworkOverlay').hidden = true;
 
-    const UniqueNetworkTable = document.getElementById('UniqueNetworkTable').hidden = true;
+    var LoadHistoricButton = document.getElementById('LoadHistoricAddonsButton')
+    LoadHistoricButton.style.backgroundColor = "";
+    LoadHistoricButton.textContent = "Load Addons";
+    const UniqueNetworkTable = document.getElementById('UniqueNetworkTable');
+    UniqueNetworkTable.hidden = true;
     clearTable(UniqueNetworkTable);
     const HistoricAddonsTable = document.getElementById('HistoricAddons');
     clearTable(HistoricAddonsTable);

@@ -11,7 +11,6 @@ body{
 
 .NetworkToInvoice {
     background-color: transparent;
-    border: 1px solid #f8f9fa;
     border-radius: 5px;
     padding: 10px;
     margin: 0 auto; 
@@ -30,19 +29,12 @@ body{
     margin-bottom: 20px;
 }
 
-.NetworkToInvoice select {
-    color: white !important;
+.NetworkToInvoice select{
+    width: 20%;
     padding: 10px;
-    margin: 10px;
     border-radius: 5px;
     border: 1px solid #f8f9fa;
-    width: 20%;
-    font-size: 1.2em;
-    background-color: transparent;
+
 }
 
-.NetworkToInvoice select option {
-    color: white !important;
-    background-color: transparent !important;
-}
 

@@ -6,11 +6,13 @@
         {
             //Do not touch this class with a 10ft pole it is used in js and is strongly typed in js so if you change it will break
             public string? customerName { get; set; }
-
+            public bool? isUpdateCustomer { get; set; }
             public NetworkInfo? keyFuelsInfo { get; set; }
             public NetworkInfo? texacoInfo { get; set; }
             public NetworkInfo? uKFuelsInfo { get; set; }
             public NetworkInfo? fuelGenieInfo { get; set; }
+
+
         }
 
 
