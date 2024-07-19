@@ -19,7 +19,7 @@ namespace Fuelcards.Repositories
         double? GetDieselBand7Texaco();
         List<CustomerInvoice>? GetCustomersToInvoice(int network, DateOnly invoiceDate, double? BasePrice);
         List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network);
-        void UpdateAddon(CustomerDetailsModels.AddonFromJs? customerPricingAddon);
+        //void UpdateAddon(CustomerDetailsModels.AddonFromJs? customerPricingAddon);
         List<int> GetFailedSiteBanding(int network);
         double? GetProductVolume(EnumHelper.Products product);
         int? GetPortlandIdFromAccount(int account);
@@ -28,5 +28,6 @@ namespace Fuelcards.Repositories
         List<List<GenericTransactionFile>> GroupTransactionsByCustomer(List<GenericTransactionFile> transactions);
         EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId);
         string? GetXeroIdFromPortlandId(int? portlandId);
+        void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, List<NewCustomerDetailsModel.AccountInfo>? newAccountInfo);
     }
 }

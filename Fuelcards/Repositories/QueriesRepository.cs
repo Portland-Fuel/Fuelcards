@@ -138,46 +138,43 @@ namespace Fuelcards.Repositories
             }
             return Customers;
         }
-        public void UpdateAddon(CustomerDetailsModels.AddonFromJs? data)
+        public void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, List<NewCustomerDetailsModel.AccountInfo>? newAccountInfo)
         {
-            if(data == null) return;
+            if(newAccountInfo == null) return;
             try
             {
-                ProcessAddonList(data.Value.keyFuels);
-                ProcessAddonList(data.Value.uKFuels);
-                ProcessAddonList(data.Value.texaco);
+                foreach (var account in newAccountInfo)
+                {
+                    ProcessAddonList(newAddon, account.account);
+                }
             }
             catch (Exception e)
             {
                 throw new ArgumentException(e.Message);
             }
         }
-        private void ProcessAddonList(List<AddonDataFromJS>? addonList)
+        private void ProcessAddonList(NewCustomerDetailsModel.AddonData newAddon, string account)
         {
-            if (addonList == null) return;
-
-            foreach (var addon in addonList)
-            {
+            if (newAddon == null) return;
                 CustomerPricingAddon model = new();
 
-                model.EffectiveDate = DateOnly.Parse(addon.effectiveFrom);
+                model.EffectiveDate = DateOnly.Parse(newAddon.effectiveFrom);
                 if (model.EffectiveDate == null)
                     throw new ArgumentException("Problem mapping the effective date from the Json object to the CustomerPricingAddon model");
 
-                model.Addon = Convert.ToDouble(addon.addon);
+                model.Addon = Convert.ToDouble(newAddon.addon);
                 if (model.Addon == null)
                     throw new ArgumentException("Problem converting the addon from a string to a double");
 
-                var networkEntry = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(addon.account));
+                var networkEntry = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(account));
                 if (networkEntry == null)
-                    throw new ArgumentException($"Could not pull out the network and Portland ID for the following account number {addon.account}");
+                    throw new ArgumentException($"Could not pull out the network and Portland ID for the following account number {account}");
 
                 model.Network = (int)networkEntry.Network;
                 model.PortlandId = (int)networkEntry.PortlandId;
 
                 _db.CustomerPricingAddons.Add(model);
                 _db.SaveChanges();
-            }
         }
         public List<int> GetFailedSiteBanding(int network)
         {

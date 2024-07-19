@@ -55,13 +55,23 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                _db.UpdateAddon(AddEditCustomerFormData.addons);
+                SortChanges(AddEditCustomerFormData.keyFuelsInfo);
+                SortChanges(AddEditCustomerFormData.uKFuelsInfo);
+                SortChanges(AddEditCustomerFormData.texacoInfo);
                 return Json("JsonResult");
             }
             catch (Exception e)
             {
                 Response.StatusCode = 443;
                 return Json(new { error = e.Message });
+            }
+        }
+
+        private void SortChanges(NewCustomerDetailsModel.NetworkInfo? networkInfo)
+        {
+            foreach (var NewAddon in networkInfo.newAddons)
+            {
+                _db.UpdateAddon(NewAddon, networkInfo.newAccountInfo);
             }
         }
     }
