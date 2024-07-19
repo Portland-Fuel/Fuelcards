@@ -479,5 +479,23 @@ namespace Fuelcards.Repositories
             if (DisplayGroup == 1) return EnumHelper.InvoiceFormatType.Pan;
             else return null;
         }
+        public List<int?>? CheckForDuplicateTransactions(EnumHelper.Network network)
+        {
+            List<int?> duplicateTransactions = new();
+            switch (network)
+            {
+                case EnumHelper.Network.Keyfuels:
+
+                     duplicateTransactions = _db.KfE1E3Transactions.AsEnumerable().Where(e=>e.Invoiced != true).GroupBy(e => e.TransactionNumber).Where(g => g.Count() > 1).SelectMany(g => g).Select(e => e.TransactionNumber).ToList();
+                    return duplicateTransactions;
+                case EnumHelper.Network.UkFuel:
+                    duplicateTransactions = _db.UkfTransactions.AsEnumerable().Where(e => e.Invoiced != true).GroupBy(e => e.TranNoItem).Where(g => g.Count() > 1).SelectMany(g => g).Select(e => e.TranNoItem).ToList();
+                    return duplicateTransactions;
+                case EnumHelper.Network.Texaco:
+                    duplicateTransactions = _db.TexacoTransactions.AsEnumerable().Where(e => e.Invoiced != true).GroupBy(e => e.TranNoItem).Where(g => g.Count() > 1).SelectMany(g => g).Select(e => e.TranNoItem).ToList();
+                    return duplicateTransactions;
+                default:return null;
+            }
+        }
     }
 }

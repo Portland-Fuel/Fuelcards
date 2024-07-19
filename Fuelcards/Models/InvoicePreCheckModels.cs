@@ -27,6 +27,9 @@ namespace Fuelcards.Models
         public List<int> FailedUkfuelSites { get => _db.GetFailedSiteBanding(1); }
         public List<int> FailedTexacoSites { get => _db.GetFailedSiteBanding(2); }
         public TexacoVolumes texacoVolume { get; set; }
+        public List<int?>? KeyfuelsDuplicates { get => _db.CheckForDuplicateTransactions(EnumHelper.Network.Keyfuels); }
+        public List<int?>? UkFuelDuplicates { get => _db.CheckForDuplicateTransactions(EnumHelper.Network.UkFuel); }
+        public List<int?>? TexacoDuplicates { get => _db.CheckForDuplicateTransactions(EnumHelper.Network.Texaco); }
     }
     public class CustomerInvoice
     {
