@@ -29,5 +29,6 @@ namespace Fuelcards.Repositories
         EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId);
         string? GetXeroIdFromPortlandId(int? portlandId);
         void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network);
+        List<int?>? CheckForDuplicateTransactions(EnumHelper.Network network);
     }
 }
