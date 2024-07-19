@@ -11,7 +11,7 @@ namespace Fuelcards.Models
         {
             _db = db;
         }
-        public DateOnly invoiceDate { get; set; }
+        public DateOnly invoiceDate { get => InvoiceMethods.Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now)); }
         public double? BasePrice { get => _db.GetBasePrice(invoiceDate); }
         public double?  PlattsPrice { get => BasePrice - 52.95; }
         public int? KeyfuelImports { get => _db.GetTotalEDIs(0); }

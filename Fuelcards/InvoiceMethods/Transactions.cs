@@ -9,9 +9,9 @@ namespace Fuelcards.InvoiceMethods
     {
        
         
-        private static DateOnly GetMostRecentMonday(DateOnly currentDate, string network)
+        public static DateOnly GetMostRecentMonday(DateOnly currentDate)
         {
-            if (network == "Fuelgenie") return currentDate;
+            //if (network == "Fuelgenie") return currentDate;
             int daysUntilMonday = ((int)currentDate.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
             DateOnly mostRecentMonday = currentDate.AddDays(-daysUntilMonday);
             return mostRecentMonday;
