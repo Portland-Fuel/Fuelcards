@@ -1,13 +1,32 @@
 ﻿@model InvoicePreCheckModels;
 <script src="~/js/invoicing.js"></script>
 <link href="~/css/invoicing.css" rel="stylesheet" />
+@{
+    var jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(Model);
+}
 
+<script>
+    var model = JSON.parse('@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(jsonModel))');
+    console.log(model);
+</script>
 <div class="NetworkToInvoice" id="NetworkToInvoice">
     <h1>Please Select a netwok to check</h1>
     <select>
-        <option value="Keyfuels">Keyfuels</option>
-        <option value="Texaco">Texaco</option>
-        <option value="UkFuels">UkFuels</option>
-        <option value="FuelGenie">FuelGenie</option>
+        <option hidden disabled selected value="">Please Select a option to start</option>
+        <option onclick="ShowSelectedNetworkCheckList(this)" value="Keyfuels">Keyfuels</option>
+        <option onclick="ShowSelectedNetworkCheckList(this)" value="Texaco">Texaco</option>
+        <option onclick="ShowSelectedNetworkCheckList(this)" value="UkFuels">UkFuels</option>
+        <option onclick="ShowSelectedNetworkCheckList(this)" value="FuelGenie">FuelGenie</option>
     </select>
+</div>
+
+<div id="CheckListTable" class="ChecListTableContainer" hidden>
+    <table id="CheckListTable" class="ChecListTable">
+        <thead>
+
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
 </div>
