@@ -7,6 +7,7 @@ namespace Fuelcards.Models
     public class InvoicePreCheckModels
     {
         private readonly IQueriesRepository _db;
+
         public InvoicePreCheckModels(IQueriesRepository db) 
         {
             _db = db;
