@@ -15,7 +15,6 @@
 
         }
 
-
         public class NetworkInfo
         {
             //Do not touch this class with a 10ft pole it is used in js and is strongly typed in js so if you change it will break
