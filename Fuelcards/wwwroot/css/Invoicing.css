@@ -1,12 +1,15 @@
-body{
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-family: 'Arial', sans-serif;
     font-size: 14px;
     color: #333;
-    background: linear-gradient(to bottom, #c83d3d, #cfadbe);
-    margin: 0;
-    padding: 0;
+    background: linear-gradient(to bottom, #c83d3d, #b77275);
 }
-
 
 
 .NetworkToInvoice {
@@ -30,7 +33,7 @@ body{
 }
 
 .NetworkToInvoice select{
-    width: 20%;
+    width: 100%;
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #f8f9fa;
@@ -38,41 +41,68 @@ body{
 }
 
 
-.ChecListTableContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+.CheckListContainer {
+    width: 150%;
+    margin: auto;
+    text-align: center;
 }
 
-.ChecListTable {
+.CheckListTable {
     border-collapse: collapse;
     background-color: transparent;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 25%;
+    width: 100%;
+    margin-bottom: 20px; 
 }
 
-.ChecListTable thead {
+.CheckListTable thead {
     background-color: transparent;
 }
-.ChecListTable th {
-    width: 10%;
-    color: white;
-    
 
+.CheckListTable th {
+    color: white;
 }
-.ChecListTable th,
-.ChecListTable td {
+
+.CheckListTable th,
+.CheckListTable td {
     padding: 10px;
     text-align: left;
     color: white;
     border: 3px solid #f8f9fa;
-    width: 15px;
 }
 
-
-.ChecListTable tbody tr:hover {
+.CheckListTable tbody tr:hover {
     cursor: pointer;
     background-color: #511212;
+}
+
+.CheckListCheckBox {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    align-items: center;
+}
+
+.ButtonContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ButtonContainer button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    width: 200px;
+    border: none; 
+    background-color: #4b7baa;
+    color: white;
+    cursor: pointer;
+    margin: 10px;
+}
+.ButtonContainer button:hover {
+    background-color: #194979;
+    color: #f8f9fa;
 }

@@ -12,17 +12,18 @@ function SetModelAsGloabJson(){
     console.log("GCB" + GCB);
 }
 
-function ShowInvoicingCheckList(model, selectedNetwork){
-    var Table = document.getElementById("CheckListTable");
-    CreateChecListHeaders(Table,selectedNetwork);   
+function ShowInvoicingCheckList(model, selectedNetwork) {
+    var container = document.getElementById("CheckListContainer");
+    var table = document.getElementById("CheckListTable");
+    CreateCheckListHeaders(table, selectedNetwork);   
     CreateCheckListRows(model, selectedNetwork);
 
-
     document.getElementById("NetworkToInvoice").hidden = true;
-    Table.hidden = false;
-}   
-function CreateChecListHeaders(Table, network){
-    var thead = Table.getElementsByTagName("thead")[0];
+    container.hidden = false;
+}
+
+function CreateCheckListHeaders(table, network) {
+    var thead = table.getElementsByTagName("thead")[0];
     var th = document.createElement("th");
     th.innerHTML = "Check List"; // Create an empty cell
     thead.appendChild(th);
@@ -30,12 +31,22 @@ function CreateChecListHeaders(Table, network){
     th.innerHTML = network;
     thead.appendChild(th);
 }
+function GetImportsList(network){
+    switch(network.toLowerCase()){
+        case "keyfuels":
+            return model.KeyfuelImports;
+        case "ukfuels":
+            return model.UkfuelImports;
+        case "texaco":
+            return model.TexacoImports;
+    }
+}
 
-function CreateCheckListRows(model, network){
-    var VerticalRowsHeaders = ["Floating price data","Invoice period","Number of imports","Errors in v+w", "Duplicates", "Product 18"];
-    var Table = document.getElementById("CheckListTable");
-    var tbody = Table.getElementsByTagName("tbody")[0];
-    VerticalRowsHeaders.forEach(function(header){
+function CreateCheckListRows(model, network) {
+    var VerticalRowsHeaders = ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Product 18"];
+    var table = document.getElementById("CheckListTable");
+    var tbody = table.getElementsByTagName("tbody")[0];
+    VerticalRowsHeaders.forEach(function(header) {
         var tr = document.createElement("tr");
         var th = document.createElement("th");
         th.innerHTML = header;
@@ -49,15 +60,15 @@ function CreateCheckListRows(model, network){
     tr[0].appendChild(td);
 
     td = document.createElement("td");
-    td.innerHTML = model.InvoicePeriod;
+    td.innerHTML = model.invoiceDate;
     tr[1].appendChild(td);
 
     td = document.createElement("td");
-    td.innerHTML = "Not in model";
+    td.innerHTML = GetImportsList(network) || "Error";
     tr[2].appendChild(td);
 
     td = document.createElement("td");
-    td.innerHTML ="Not in model";
+    td.innerHTML = "Not in model";
     tr[3].appendChild(td);
 
     td = document.createElement("td");
@@ -68,6 +79,21 @@ function CreateCheckListRows(model, network){
     td.innerHTML = "Not in model";
     tr[5].appendChild(td);
 
-  
+    for (var i = 0; i < VerticalRowsHeaders.length; i++) {
+        var td = document.createElement("td");
+        td.innerHTML = "<input onclick='ShowApproveIfCheckboxesAllChecked()' type='checkbox' class='CheckListCheckBox' id='CheckList" + i + "' name='CheckList" + i + "'>";
+        tr[i].appendChild(td);
+    }
+}
 
+function ShowApproveIfCheckboxesAllChecked() {
+    var checkboxes = document.getElementsByClassName("CheckListCheckBox");
+    var allChecked = true;
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (!checkboxes[i].checked) {
+            allChecked = false;
+            break;
+        }
+    }
+    document.getElementById("ApproveButton").hidden = !allChecked;
 }

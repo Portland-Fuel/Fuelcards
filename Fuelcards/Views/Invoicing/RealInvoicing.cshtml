@@ -12,7 +12,7 @@
 <div class="NetworkToInvoice" id="NetworkToInvoice">
     <h1>Please Select a netwok to check</h1>
     <select>
-        <option hidden disabled selected value="">Please Select a option to start</option>
+        <option disabled selected value="">Please Select a option to start</option>
         <option onclick="ShowSelectedNetworkCheckList(this)" value="Keyfuels">Keyfuels</option>
         <option onclick="ShowSelectedNetworkCheckList(this)" value="Texaco">Texaco</option>
         <option onclick="ShowSelectedNetworkCheckList(this)" value="UkFuels">UkFuels</option>
@@ -20,13 +20,14 @@
     </select>
 </div>
 
-<div id="CheckListTable" class="ChecListTableContainer" hidden>
-    <table id="CheckListTable" class="ChecListTable">
+<div id="CheckListContainer" class="CheckListContainer" hidden>
+    <table id="CheckListTable" class="CheckListTable">
         <thead>
-
         </thead>
         <tbody>
-
         </tbody>
     </table>
+    <div class="ButtonContainer">
+        <button id="ApproveButton" hidden>Approve</button>
+    </div>
 </div>

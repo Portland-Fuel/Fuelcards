@@ -61,7 +61,6 @@ namespace Fuelcards.GenericClassFiles
                 network.invoiceFormatType = _db.GetInvoiceFormatType(network.networkName, Customers.portlandId);
             }
             InvoicePreCheckModels _checks = new(_db);
-            _checks.invoiceDate = DateOnly.Parse("2024-07-15");
             var egg = _checks.FailedKeyfuelsSites;
             return Customers;
         }
