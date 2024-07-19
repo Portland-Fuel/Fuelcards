@@ -59,9 +59,9 @@ namespace Fuelcards.Controllers
         }
         public ActionResult Invoicing()
         {
-            return RedirectToAction("Invoicing", "Invoicing");
             ViewData["Title"] = "Invoicing";
-            return View();
+
+            return RedirectToAction("Invoicing", "Invoicing");
         }
         public async Task<IActionResult> Homepage()
         {

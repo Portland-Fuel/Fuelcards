@@ -337,11 +337,7 @@
     background-color: #28a745;
 
 }
-.button .loader, 
-.button .success-icon, 
-.button .error-icon {
-    display: none;
-}
+
 
 .button.animate .loader {
     display: inline-block;
