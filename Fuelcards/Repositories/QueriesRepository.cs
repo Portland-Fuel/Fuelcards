@@ -13,6 +13,7 @@ using Fuelcards.Models;
 using Xero.NetStandard.OAuth2.Client;
 using Fuelcards.InvoiceMethods;
 using System.Transactions;
+using Microsoft.Identity.Client;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -486,7 +487,7 @@ namespace Fuelcards.Repositories
             {
                 case EnumHelper.Network.Keyfuels:
 
-                     duplicateTransactions = _db.KfE1E3Transactions.AsEnumerable().Where(e=>e.Invoiced != true).GroupBy(e => e.TransactionNumber).Where(g => g.Count() > 1).SelectMany(g => g).Select(e => e.TransactionNumber).ToList();
+                    duplicateTransactions = _db.KfE1E3Transactions.AsEnumerable().Where(e => e.Invoiced != true).GroupBy(e => e.TransactionNumber).Where(g => g.Count() > 1).SelectMany(g => g).Select(e => e.TransactionNumber).ToList();
                     return duplicateTransactions;
                 case EnumHelper.Network.UkFuel:
                     duplicateTransactions = _db.UkfTransactions.AsEnumerable().Where(e => e.Invoiced != true).GroupBy(e => e.TranNoItem).Where(g => g.Count() > 1).SelectMany(g => g).Select(e => e.TranNoItem).ToList();
@@ -494,8 +495,31 @@ namespace Fuelcards.Repositories
                 case EnumHelper.Network.Texaco:
                     duplicateTransactions = _db.TexacoTransactions.AsEnumerable().Where(e => e.Invoiced != true).GroupBy(e => e.TranNoItem).Where(g => g.Count() > 1).SelectMany(g => g).Select(e => e.TranNoItem).ToList();
                     return duplicateTransactions;
-                default:return null;
+                default: return null;
             }
         }
+        public async void UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network)
+        {
+            FcEmail? ExistingEmail = _db.FcEmails.FirstOrDefault(e => e.Account == Convert.ToInt32(updatedAccount.account));
+            ExistingEmail.To = updatedAccount.toEmail;
+            ExistingEmail.Cc = updatedAccount.ccEmail;
+            ExistingEmail.Bcc = updatedAccount.BccEmail;
+            await FcEmailUpdateAsync(ExistingEmail);
+            _db.SaveChanges();
+        }
+        public async Task FcEmailUpdateAsync(FcEmail source)
+        {
+            var dbObj = _db.FcEmails.FirstOrDefault(s => s.Account == source.Account);
+            if (dbObj is null) await _db.FcEmails.AddAsync(source);
+            else FcEmailUpdateDbObject(dbObj, source);
+        }
+        public void FcEmailUpdateDbObject(FcEmail dbObj, FcEmail source)
+        {
+            dbObj.Account = dbObj.Account;
+            dbObj.To = source.To;
+            dbObj.Cc = source.Cc;
+            dbObj.Bcc = source.Bcc;
+        }
+       
     }
 }

@@ -30,5 +30,8 @@ namespace Fuelcards.Repositories
         string? GetXeroIdFromPortlandId(int? portlandId);
         void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network);
         List<int?>? CheckForDuplicateTransactions(EnumHelper.Network network);
+        void UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network);
+        
+        Task FcEmailUpdateAsync(FcEmail source);
     }
 }

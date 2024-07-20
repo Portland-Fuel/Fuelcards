@@ -35,8 +35,6 @@ namespace Fuelcards.Controllers
                     portlandId = Return.portlandId,
                     XeroId = Return.xeroID,
                     adress = Return.address,
-
-
                 };
 
                 return Json(JsonResult);
@@ -55,9 +53,16 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                SortChanges(AddEditCustomerFormData.keyFuelsInfo,AddEditCustomerFormData.customerName, EnumHelper.Network.Keyfuels);
-                SortChanges(AddEditCustomerFormData.uKFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.UkFuel);
-                SortChanges(AddEditCustomerFormData.texacoInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Texaco);
+                if(AddEditCustomerFormData.isUpdateCustomer == true)
+                {
+                    SortChanges(AddEditCustomerFormData.keyFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Keyfuels);
+                    SortChanges(AddEditCustomerFormData.uKFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.UkFuel);
+                    SortChanges(AddEditCustomerFormData.texacoInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Texaco);
+                }
+                else
+                {
+                    var newCustomer = "PLEASE CODE THIS";
+                }
                 return Json("JsonResult");
             }
             catch (Exception e)
@@ -72,6 +77,10 @@ namespace Fuelcards.Controllers
             foreach (var NewAddon in networkInfo.newAddons)
             {
                 _db.UpdateAddon(NewAddon, CustomerName, network);
+            }
+            foreach (var UpdatedAccount in networkInfo.newAccountInfo)
+            {
+                _db.UpdateAccount(UpdatedAccount,CustomerName, network);
             }
         }
     }
