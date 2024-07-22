@@ -82,6 +82,10 @@ namespace Fuelcards.Controllers
             {
                 _db.UpdateAccount(UpdatedAccount,CustomerName, network);
             }
+            foreach (var newFix in networkInfo.newFixesForCustomer)
+            {
+                _db.NewFix(newFix, CustomerName, network);
+            }
         }
     }
 }

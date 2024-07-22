@@ -520,6 +520,41 @@ namespace Fuelcards.Repositories
             dbObj.Cc = source.Cc;
             dbObj.Bcc = source.Bcc;
         }
-       
+        public async Task NewFix(NewCustomerDetailsModel.Fix item, string customerName, EnumHelper.Network network)
+        {
+            
+                FixedPriceContract model = new()
+                {
+
+                    TradeReference = Convert.ToDecimal(item.tradeReference),
+                    EffectiveFrom = DateOnly.Parse(item.effectiveFrom),
+                    EndDate = DateOnly.Parse(item.endDate),
+                    FixedPrice = Convert.ToDouble(item.fixedPrice),
+                    FixedVolume = Convert.ToInt32(item.fixedVolume),
+                    FixedPriceIncDuty = Convert.ToDouble(item.fixedPriceIncDuty),
+                    Grade = Convert.ToInt32(item.grade),
+                    //FrequencyId = Convert.ToInt32(item.)
+                };
+            await FixedPriceContractUpdateAsync(model);
+            _db.SaveChanges();
+        }
+        public async Task FixedPriceContractUpdateAsync(FixedPriceContract source)
+        {
+            var dbObj = _db.FixedPriceContracts.FirstOrDefault(s => s.TradeReference == source.TradeReference);
+            if (dbObj is null) await _db.FixedPriceContracts.AddAsync(source);
+            else FixedPriceContractUpdateDbObject(dbObj, source);
+        }
+        public void FixedPriceContractUpdateDbObject(FixedPriceContract dbObj, FixedPriceContract source)
+        {
+            dbObj.TradeReference = source.TradeReference;
+            dbObj.EffectiveFrom = source.EffectiveFrom;
+            dbObj.EndDate = source.EndDate;
+            dbObj.FixedPrice = source.FixedPrice;
+            dbObj.FixedPriceIncDuty = source.FixedPriceIncDuty;
+            dbObj.Grade = source.Grade;
+            dbObj.TerminationDate = source.TerminationDate;
+            dbObj.FcAccount = source.FcAccount;
+        }
+
     }
 }

@@ -33,5 +33,6 @@ namespace Fuelcards.Repositories
         void UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network);
         
         Task FcEmailUpdateAsync(FcEmail source);
+        Task NewFix(NewCustomerDetailsModel.Fix newFixesForCustomer, string customerName, EnumHelper.Network network);
     }
 }
