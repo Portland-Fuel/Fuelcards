@@ -41,6 +41,7 @@
         public class Fix
         {
             public string? selectedNetwork { get; set; }
+            public string? account { get; set; }
             public string? effectiveFrom { get; set; }
             public string? endDate { get; set; }
             public string? period { get; set; }
