@@ -28,6 +28,7 @@ namespace Fuelcards.Models
     {
         public string? Name { get; set; }
         public string? xeroId { get; set; }
+        
     }
 
     public struct HistoricAddon

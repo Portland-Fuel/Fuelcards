@@ -115,6 +115,7 @@ namespace Fuelcards.Repositories
                 model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == GetXeroIdFromPortlandId(item[0].PortlandId)).FirstOrDefault()?.Name;
                 model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 model.addon = BasePrice + model.addon;
+                model.account = item[0].CustomerAc;
                 Customers.Add(model);
             }
             return Customers;
