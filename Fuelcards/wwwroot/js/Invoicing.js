@@ -1,5 +1,40 @@
+document.addEventListener("DOMContentLoaded", function() {
+  
+    var modelKey = 'invoicePreCheckModel';
+    var storedModel = localStorage.getItem(modelKey);
+
+    if (!storedModel) {
+        // Model not in local storage, fetch from server
+        $.ajax({
+            url: '/Invoicing/GetInvoicePreCheckModel',
+            dataType: 'json',
+            success: function(data) {
+                localStorage.setItem(modelKey, JSON.stringify(data));
+                model = data; // No need to parse since data is already an object
+                console.log('Model fetched from server and stored in local storage:', model);
+                initializePage(model);
+            },
+            error: function(error) {
+                console.error('Error fetching model from server:', error);
+            }
+        });
+    } else {
+        model = JSON.parse(storedModel);
+        console.log('Model retrieved from local storage:', model);
+        initializePage(model);
+    }
+
+    function initializePage(model) {
+        document.getElementById("InitialPageLoad").hidden = true;
+        document.getElementById("NetworkToInvoice").hidden = false;
+        console.log(model);
+    }
+});
+var model = null;
 let GCB; // Global check model
 let selectedNetwork;
+
+let Invoicing = false;  
 function goBackFromNetworkCheck(buttonEle){
     document.getElementById("NetworkToInvoice").hidden = false;
     document.getElementById("CheckListContainer").hidden = true;
@@ -40,11 +75,11 @@ function createCheckListHeaders(table, network) {
 function getImportsList(network) {
     switch (network.toLowerCase()) {
         case "keyfuels":
-            return model.KeyfuelImports;
+            return model.keyfuelImports;
         case "ukfuels":
-            return model.UkfuelImports;
+            return model.ukfuelImports;
         case "texaco":
-            return model.TexacoImports;
+            return model.texacoImports;
         default:
             return "Error";
     }
@@ -52,11 +87,11 @@ function getImportsList(network) {
 function getFailedSiteList(network) {
     switch (network.toLowerCase()) {
         case "keyfuels":
-            return model.FailedKeyfuelsSites;
+            return model.failedKeyfuelsSites;
         case "ukfuels":
-            return model.FailedUkfuelSites;
+            return model.failedUkfuelSites;
         case "texaco":
-            return model.FailedTexacoSites;
+            return model.failedTexacoSites;
         default:
             return "Error";
     }
@@ -65,11 +100,11 @@ function getFailedSiteList(network) {
 function getDuplicatesSiteList(network) {
     switch (network.toLowerCase()) {
         case "keyfuels":
-            return model.KeyfuelsDuplicates;
+            return model.keyfuelsDuplicates;
         case "ukfuels":
-            return model.UkFuelDuplicates;
+            return model.ukFuelDuplicates;
         case "texaco":
-            return model.TexacoDuplicates;
+            return model.texacoDuplicates;
         default:
             return "Error";
     }
@@ -89,7 +124,14 @@ function getCustomerListFromNetwork(network) {
 
 }
 function createCheckListRows(model, network) {
-    const verticalRowsHeaders = ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Product 18","Customer List"];
+    let verticalRowsHeaders = [];
+    if(network.toLowerCase() === "ukfuels" || network.toLowerCase() === "ukfuel"){
+        verticalRowsHeaders = ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Product 18","Customer List"];
+    }
+    else{
+        verticalRowsHeaders = ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Customer List"];
+
+    }
     const table = document.getElementById("CheckListTable");
     const tbody = table.querySelector("tbody");
     tbody.innerHTML = ""; // Clear existing rows
@@ -104,7 +146,7 @@ function createCheckListRows(model, network) {
 
     const rows = tbody.querySelectorAll("tr");
 
-    rows[0].appendChild(createCell(model.BasePrice));
+    rows[0].appendChild(createCell(model.basePrice));
 
     const invoiceDate = new Date(model.invoiceDate);
     const dateFrom = new Date(invoiceDate);
@@ -115,7 +157,7 @@ function createCheckListRows(model, network) {
     rows[2].appendChild(createCell(getImportsList(network) || "Error"));
 
     const failedSiteList = getFailedSiteList(network);
-    if (failedSiteList.length > 0) {
+    if (failedSiteList.length > 0 || failedSiteList ===  undefined) {
         const TDButton = createButton("FailedSitesButton","View Failed Sites");
         rows[3].appendChild(TDButton);
     } else {
@@ -135,9 +177,17 @@ function createCheckListRows(model, network) {
         
     }
 
-    rows[5].appendChild(createCell("NEed to do this!"));
+    if(network.toLowerCase() === "ukfuels" || network.toLowerCase() === "ukfuel"){
+        rows[5].appendChild(createCell("NEed to do this!"));
+        rows[6].appendChild(createSelectCustomerList(network));
 
-    rows[6].appendChild(createSelectCustomerList(network));
+    }
+    else{
+        rows[5].appendChild(createSelectCustomerList(network));
+
+    }
+
+
 
     rows.forEach((row, index) => {
         const checkboxTd = document.createElement("td");
@@ -207,21 +257,109 @@ async function ApproveButtonClick() {
     document.getElementById("InvoiceSection").hidden = false;
     document.getElementById("InvoiceSection").scrollIntoView();
 }
-async function StartInvoicing(strtinvoicingbtn)
-{
-    strtinvoicingbtn.disabled = true;
-    var CustList = getCustomerListFromNetwork(selectedNetwork);
-    for (const customer of CustList) {
-        await SortPageText(customer);
-    }
 
-    async function SortPageText(customer) {
-        var StatusText = "Status:";
-        var CustText = customer.name;
-        var Addon = customer.addon;
-        var custnameH1 = document.createElement("CustNameInvoicing");
-        custnameH1.innerHTML = CustText;
-        var statusH3 = document.createElement("StatusInvoicing");
+async function StartInvoicing(btn) {
+    document.getElementById("StopInvoicingBTN").hidden = false;
+    document.getElementById("StartInvoicingBTN").hidden = true;
+    document.getElementById("StartInvoicingAgainBTN").hidden = true;
+    Invoicing = true;
+    var CustList = getCustomerListFromNetwork(selectedNetwork);
+    SetCustCountToBeInvoiced(CustList);
+    for (const customer of CustList) {
+        while (!Invoicing) {
+            console.log("Invoicing Stopped");
+            await new Promise(resolve => setTimeout(resolve, 500)); // Check every 500ms if Invoicing is true
+        }
+        console.log("Invoicing Resumed");
+        await DisplayPageText(customer);
+
+        await InvoiceCustomer(customer);
+
+        MinusCustCountToBeinvoiced();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
     }
+    InvoicingCompletion();
+    
+    document.getElementById("StopInvoicingBTN").hidden = true;
+    document.getElementById("StartInvoicingAgainBTN").hidden = true;
+    document.getElementById("StartInvoicingBTN").hidden = false;
+}
+async function InvoiceCustomer(customer) {
+    ChangeStatusText("Invoicing Customer");
+    console.log(customer);
+    try {
+        let response = await $.ajax({
+            url: '/Invoicing/InvoiceCustomer',
+            type: 'POST',
+            data: JSON.stringify(customer),
+            contentType: 'application/json',
+            success: function(data) {
+                console.log(data);
+            },
+        })
+    }
+    catch(xhr){
+        HandleInvoicingError(xhr);
+        console.error('Error Invoicing Customer:', error);
+    }
+    
+    ChangeStatusText("Customer Invoiced");
 }
 
+async function InvoicingCompletion() {
+    ChangeStatusText("Invoicing Completed");
+    document.getElementById("InvoiceSection").hidden = true;
+    document.getElementById("AfterInvoicingCompletion").hidden = false;
+    document.getElementById("AfterInvoicingCompletion").scrollIntoView();
+    document.getElementById("InvoicingCompletionMessage").textContent = "Invoicing Completed";
+}
+
+async function MinusCustCountToBeinvoiced(){
+    var CustCountH3 = document.getElementById("CountOfCustomersToBeInvoiced");
+    var CustCount = CustCountH3.textContent;
+    CustCount = CustCount.replace("Number of Customers to be Invoiced: ","");
+    CustCount = parseInt(CustCount);
+    CustCount = CustCount - 1;
+    if(CustCount == 0){
+        CustCountH3.hidden = true;
+    }else{
+        var CustText = "Number of Customers to be Invoiced: " + CustCount;
+        CustCountH3.textContent = CustText;
+    }
+
+}
+async function SetCustCountToBeInvoiced(CustList) {
+    var CustCount = CustList.length;
+    var CustCountH3 = document.getElementById("CountOfCustomersToBeInvoiced");
+    CustCountH3.hidden = false;
+    var CustText = "Number of Customers to be Invoiced: " + CustCount;
+    CustCountH3.textContent = CustText;
+    console.log(CustCount);
+    
+}
+async function StartInvoicingAgain(btn) {
+    Invoicing = true;
+    document.getElementById("StopInvoicingBTN").hidden = false;
+    document.getElementById("StartInvoicingAgainBTN").hidden = true;
+}
+
+async function DisplayPageText(customer) {
+    var CustText = customer.name;
+    var Addon = customer.addon;
+    var custnameH1 = document.getElementById("CustNameInvoicing");
+    custnameH1.textContent = CustText;
+    ChangeStatusText("Loading....");
+}
+
+async function ChangeStatusText(StatusText) {
+    var statusH3 = document.getElementById("StatusInvoicing");
+    statusH3.textContent = StatusText;
+}
+
+async function StopInvoicingbtn() {
+    Invoicing = false;
+    ChangeStatusText("Invoicing Stopped");
+    document.getElementById("StartInvoicingAgainBTN").hidden = false;
+    document.getElementById("StopInvoicingBTN").hidden = true;
+}

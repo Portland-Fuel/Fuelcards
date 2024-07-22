@@ -1,18 +1,32 @@
 ﻿@model InvoicePreCheckModels;
 <script src="~/js/invoicing.js"></script>
+<script src="~/js/invoicingerrorhandling.js"></script>
 <link href="~/css/invoicing.css" rel="stylesheet" />
-@{
-    var jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(Model);
-}
-
 <script>
-    var model = JSON.parse('@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(jsonModel))');
-    console.log(model);
+ 
 </script>
-<div class="NetworkToInvoice" id="NetworkToInvoice">
-    <h1>Please Select a netwok to check</h1>
+
+<div id="InitialPageLoad">
+    <div class="container">
+        <div class="loader">
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--text1"></div>
+            <div class="loader--text"></div>
+
+        </div>
+    </div>
+
+    
+</div>
+<div hidden class="NetworkToInvoice" id="NetworkToInvoice">
+    <h1>Please Select a network to check</h1>
     <select>
-        <option disabled selected value="">Please Select a option to start</option>
+        <option disabled selected value="">Please Select an option to start</option>
         <option onclick="showSelectedNetworkCheckList(this)" value="Keyfuels">Keyfuels</option>
         <option onclick="showSelectedNetworkCheckList(this)" value="Texaco">Texaco</option>
         <option onclick="showSelectedNetworkCheckList(this)" value="UkFuels">UkFuels</option>
@@ -34,8 +48,15 @@
 </div>
 
 <div hidden id="InvoiceSection" class="InvoiceSection">
-    <h1 id="CustNameInvoicing">Customer Name goes here</h1>
-    <h3 id="StatusInvoicing">Status:</h3>
-    <button onclick="StartInvoicing(this)" id="StartInvoicingBTN">StartInvoicing</button>
-
+    <div id="PreInvoicing" class="InvoiceSection">
+        <h1 hidden id="CountOfCustomersToBeInvoiced"></h1>
+        <h1 id="CustNameInvoicing">Customer Name</h1>
+        <h3 id="StatusInvoicing">Status:</h3>
+        <button class="Invoicingbtn" onclick="StartInvoicing(this)" id="StartInvoicingBTN">Start Invoicing</button>
+        <button class="StopInvoicingbtn" onclick="StopInvoicingbtn(this)" id="StopInvoicingBTN" hidden>Stop Invoicing</button>
+        <button class="Invoicingbtn" onclick="StartInvoicingAgain(this)" id="StartInvoicingAgainBTN" hidden>Start Invoicing Again</button>
+    </div>
+</div>
+<div hidden id="AfterInvoicingCompletion">
+    <h1 class="InvoiceCompleteMSG" id="InvoicingCompletionMessage"></h1>
 </div>

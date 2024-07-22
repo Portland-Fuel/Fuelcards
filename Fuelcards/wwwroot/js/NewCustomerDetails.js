@@ -19,7 +19,27 @@ let MostRecentSelectedNetwork;
 
 let IsUpdateOrNot = false;
 
+
 document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('customerName').addEventListener('input', function() {
+        var options = document.getElementById('customerOptions').options;
+        var customerIdField = document.getElementById('customerId');
+        var customerNameInput = document.getElementById('customerName');
+        var found = false;
+    
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].value === customerNameInput.value) {
+                customerIdField.value = options[i].value;
+                customerNameInput.value = options[i].text;
+                found = true;
+                break;
+            }
+        }
+    
+        if (!found) {
+            customerIdField.value = '';
+        }
+    });
     document.getElementById('AddOrEditCustomerForm').addEventListener('submit', async function(event) {
         event.preventDefault();
 
@@ -409,7 +429,10 @@ function getInitialInputsHtml(data) {
         <input id="ccEmailInput" class="swal2-input" value="${data.ccEmail}" placeholder="CC Email">
         <input id="bccEmailInput" class="swal2-input" value="${data.bccEmail}" placeholder="BCC Email">
         <input id="paymentTermsInput" class="swal2-input" value="${data.paymentTerm}" placeholder="Payment Terms">
-        <input id="invoiceFormatTypeInput" class="swal2-input" value="${data.invoiceFormatType}" placeholder="Invoice Format type">
+        <select id="invoiceFormatTypeInput" class="swal2-input" value="${data.invoiceFormatType}" placeholder="Invoice Format type">
+        <option value="Default">Default</option>
+        <option value="Card">Card</option>
+        </select>
     `;
 }
 
