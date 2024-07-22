@@ -12,14 +12,36 @@ namespace Fuelcards.Controllers
         {
             _db = db;
         }
-        
+
 
         public IActionResult Invoicing()
         {
-            InvoicePreCheckModels _checks = new(_db);
-            _checks.texacoVolume = new(_db);
-            var egg = _checks.keyfuelsInvoiceList;
-            return View("/Views/Invoicing/RealInvoicing.cshtml", _checks);
+            // Return the view without the model, as the model will be fetched via AJAX if needed
+            return View("/Views/Invoicing/RealInvoicing.cshtml");
+        }
+        [HttpPost]
+        public JsonResult InvoiceCustomer([FromBody] CustomerInvoice customer)
+        {
+            try
+            {
+                throw new Exception("This is a test exception");    
+                //do invoicing 
+
+                return Json("True");
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return Json("Error:" + e.Message);
+            }
+        }
+        [HttpGet]
+        public IActionResult GetInvoicePreCheckModel()
+        {
+            InvoicePreCheckModels checks = new(_db);
+            checks.texacoVolume = new(_db);
+            var egg = checks.keyfuelsInvoiceList;
+            return Json(checks);
         }
 
     }
