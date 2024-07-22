@@ -113,10 +113,13 @@ namespace Fuelcards.Repositories
             {
                 CustomerInvoice model = new();
                 model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == GetXeroIdFromPortlandId(item[0].PortlandId)).FirstOrDefault()?.Name;
+                if (model.name.ToLower().Contains("aquaid")) model.name = PortlandQuerks.AquaidSorter(item[0].CustomerAc);
                 model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 model.addon = BasePrice + model.addon;
                 model.account = item[0].CustomerAc;
                 Customers.Add(model);
+                if (model.addon is null) { var egg = ""; }
+                    
             }
             return Customers;
         }
