@@ -4,6 +4,7 @@ using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Graph;
 using Fuelcards.Models;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 //using static Fuelcards.Models.CustomerDetailsModels;
 
 namespace Fuelcards.Controllers
@@ -61,7 +62,7 @@ namespace Fuelcards.Controllers
                 }
                 else
                 {
-                    var newCustomer = "PLEASE CODE THIS";
+                    var help = "THIS STILL NEEDS CODING";
                 }
                 return Json("JsonResult");
             }

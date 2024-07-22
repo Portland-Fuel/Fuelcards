@@ -14,6 +14,7 @@ using Xero.NetStandard.OAuth2.Client;
 using Fuelcards.InvoiceMethods;
 using System.Transactions;
 using Microsoft.Identity.Client;
+using Microsoft.Graph;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -113,16 +114,38 @@ namespace Fuelcards.Repositories
             {
                 CustomerInvoice model = new();
                 model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == GetXeroIdFromPortlandId(item[0].PortlandId)).FirstOrDefault()?.Name;
-                if (model.name.ToLower().Contains("aquaid")) model.name = PortlandQuerks.AquaidSorter(item[0].CustomerAc);
-                model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                if (model.name.ToLower().Contains("aquaid"))
+                {
+                    model.name = getAquidNameFromAccount(item[0].CustomerCode);
+                    int? portlandID = GetAquaidPortlandIdFromName(model.name);
+                    model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == portlandID && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                }
+                else
+                {
+                    model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                }
+               
                 model.addon = BasePrice + model.addon;
-                model.account = item[0].CustomerAc;
+                model.account = item[0].CustomerCode;
                 Customers.Add(model);
-                if (model.addon is null) { var egg = ""; }
-                    
             }
             return Customers;
         }
+
+        private int? GetAquaidPortlandIdFromName(string? name)
+        {
+            int? portlandId = _db.FcHiddenCards.FirstOrDefault(e => e.CostCentre == name)?.PortlandId;
+            if (portlandId is null) throw new ArgumentException($"Aquaid customers portland Id cannot be established from the cost centre name {name}.");
+            return portlandId;
+        }
+
+        private string? getAquidNameFromAccount(int? customerAc)
+        {
+            string? name = _db.FcHiddenCards.FirstOrDefault(e => e.AccountNo == customerAc)?.CostCentre;
+            if (name is null) throw new ArgumentException("Aquaid customer still cannot be established.");
+            return name;
+        }
+
 
         public string? GetXeroIdFromPortlandId(int? portlandId)
         {
@@ -526,22 +549,47 @@ namespace Fuelcards.Repositories
         }
         public async Task NewFix(NewCustomerDetailsModel.Fix item, string customerName, EnumHelper.Network network)
         {
-            
-                FixedPriceContract model = new()
-                {
-
-                    TradeReference = Convert.ToDecimal(item.tradeReference),
-                    EffectiveFrom = DateOnly.Parse(item.effectiveFrom),
-                    EndDate = DateOnly.Parse(item.endDate),
-                    FixedPrice = Convert.ToDouble(item.fixedPrice),
-                    FixedVolume = Convert.ToInt32(item.fixedVolume),
-                    FixedPriceIncDuty = Convert.ToDouble(item.fixedPriceIncDuty),
-                    Grade = Convert.ToInt32(item.grade),
-                    //FrequencyId = Convert.ToInt32(item.)
-                };
+            FixedPriceContract model = new();
+            model.TradeReference = Convert.ToDecimal(item.tradeReference);
+            model.EffectiveFrom = DateOnly.Parse(item.effectiveFrom);
+            model.EndDate = DateOnly.Parse(item.endDate);
+            model.FixedPrice = Convert.ToDouble(item.fixedPrice);
+            model.FixedVolume = Convert.ToInt32(item.fixedVolume);
+            model.FixedPriceIncDuty = Convert.ToDouble(item.fixedPriceIncDuty);
+            model.Grade = GetGradeIdFromGradeString(item.grade);
+            model.FcAccount = Convert.ToInt32(item.account);
+            model.FrequencyId = GetFrequencyIdFromStringPeriod(item.period);
+            model.Network = GetNetworkArrayFromAccountNumber(Convert.ToInt32(item.account)).ToList();
+            model.PortlandId = GetPortlandIdFromAccount(Convert.ToInt32(item.account));
             await FixedPriceContractUpdateAsync(model);
             _db.SaveChanges();
         }
+
+        private int[]? GetNetworkArrayFromAccountNumber(int? account)
+        {
+            int[] Returner = new int[1];
+           int? network = Convert.ToInt32(_db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == account)?.Network);
+            if (network.HasValue)
+            {
+                Returner[0] = network.Value;
+            }
+            return Returner;
+        }
+
+        private int? GetGradeIdFromGradeString(string? grade)
+        {
+            int? id = _db.FcGrades.FirstOrDefault(e => e.Grade == grade)?.Id;
+            if (id is null) throw new ArgumentException($"Grade Id could not be established from the grade string {grade}");
+            return id;
+        }
+
+        private int? GetFrequencyIdFromStringPeriod(string? period)
+        {
+            int? id = _db.FixFrequencies.FirstOrDefault(e => e.FrequencyPeriod == period)?.FrequencyId;
+            if (id is null) throw new ArgumentException($"Frequency ID could not be established from the frequency period of {period}");
+            return id;
+        }
+
         public async Task FixedPriceContractUpdateAsync(FixedPriceContract source)
         {
             var dbObj = _db.FixedPriceContracts.FirstOrDefault(s => s.TradeReference == source.TradeReference);
