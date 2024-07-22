@@ -21,6 +21,7 @@
 </div>
 
 <div id="CheckListContainer" class="CheckListContainer" hidden>
+    <button class="back-button" onclick="goBackFromNetworkCheck(this)">Back</button>
     <table id="CheckListTable" class="CheckListTable">
         <thead>
         </thead>
@@ -28,6 +29,13 @@
         </tbody>
     </table>
     <div class="ButtonContainer">
-        <button id="ApproveButton" hidden>Approve</button>
+        <button onclick="ApproveButtonClick()" id="ApproveButton" hidden>Approve</button>
     </div>
+</div>
+
+<div hidden id="InvoiceSection" class="InvoiceSection">
+    <h1 id="CustNameInvoicing">Customer Name goes here</h1>
+    <h3 id="StatusInvoicing">Status:</h3>
+    <button onclick="StartInvoicing(this)" id="StartInvoicingBTN">StartInvoicing</button>
+
 </div>

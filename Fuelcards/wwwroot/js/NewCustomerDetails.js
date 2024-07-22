@@ -14,6 +14,8 @@ const NewUkFuelsAccountList = [];
 const NewFuelGenieAccountList = [];
 
 let CustomerSearchModelData;
+let MostRecentSelectedNetwork;
+
 
 let IsUpdateOrNot = false;
 
@@ -215,7 +217,7 @@ function clearAllInputsOnCustomerDetailsPage() {
     addOrEditSectionSelects.forEach(select => {
         select.selectedIndex = 0;
     });
-
+    
     // Clear all input fields in the CustomerFixSection
     const customerFixSectionInputs = document.querySelectorAll('#CustomerFixSection input');
     customerFixSectionInputs.forEach(input => {
@@ -264,6 +266,7 @@ function FillCustomerName(customerName) {
 }
 
 async function openUniqueNetworkOverlay(element) {
+    MostRecentSelectedNetwork = element.value;
     if (document.getElementById('customerName').value === "") {
         element.checked = false;
         await Swal.fire({
@@ -300,6 +303,14 @@ async function openUniqueNetworkOverlay(element) {
         document.getElementById('UniqueNetworkTable').style.display = "block";
 
         document.getElementById('UniqueNetworkOverlay').hidden = false;
+    }
+    else{
+        ClearUniqueNetworkOverlayTable();
+        document.getElementById('UniqueNetworkTable').hidden = false;
+        document.getElementById('UniqueNetworkTable').style.display = "block";
+
+        document.getElementById('UniqueNetworkOverlay').hidden = false;
+
     }
 }
 
@@ -665,7 +676,25 @@ function closeUniqueNetworkOverlay(element) {
     const HistoricAddonsTable = document.getElementById('HistoricAddons');
     clearTable(HistoricAddonsTable);
 }
+function CalculateFixedPriceIncDuty(element) {
+    var fixedPriceIncDutyElement = document.getElementById('fixedPriceIncDuty');
 
+    var fixPrice = element.value;
+    if(element.value == ""){
+        fixedPriceIncDutyElement.value = "";
+        fixedPriceIncDutyElement.disabled = false;
+        return;
+    }
+    if (isNaN(fixPrice)) {
+        return;
+    }
+    var fixedPriceIncDuty = parseFloat(fixPrice) + 52.95;
+    if (isNaN(fixedPriceIncDuty)) {
+        return;
+    }
+    fixedPriceIncDutyElement.readOnly = true; 
+    fixedPriceIncDutyElement.value = fixedPriceIncDuty;
+}
 function ShowNewFix(element) {
     RemoveSelectElementFromNewFixForm();
     const SelectEleForUsers = GetSelectOptionForUserForNewFixForm();
@@ -688,9 +717,10 @@ function AddNewFix(event) {
         const formData = new FormData(form);
         const values = Object.fromEntries(formData.entries());
 
+        values["selectedNetwork"] = MostRecentSelectedNetwork;
         const selectElement = document.getElementById("NewFixNetworkSelect");
-        const selectedOption = selectElement.options[selectElement.selectedIndex].value;
-        values["network"] = selectedOption;
+        const selectedOption = selectElement.value;
+        values["account"] = selectedOption;
 
         const periodElement = document.getElementById("period");
         const selectedPeriod = periodElement.options[periodElement.selectedIndex].value;
@@ -700,7 +730,8 @@ function AddNewFix(event) {
         const selectedGrade = gradeElement.options[gradeElement.selectedIndex].value;
         values["grade"] = selectedGrade;
 
-        const NetworkUserSelected = values["network"];
+
+        const NetworkUserSelected = values["selectedNetwork"];
         const FixsListToAddTo = GetFixListToAddTo(NetworkUserSelected);
         console.log("Adding the fix to the network of " + NetworkUserSelected);
         FixsListToAddTo.push(values);
@@ -741,7 +772,24 @@ function GetFixListToAddTo(NetworkUserSelected) {
 }
 
 function GetSelectOptionForUserForNewFixForm() {
-    const Options = ['KeyFuels', 'FuelGenie', 'Texaco', 'UkFuels'];
+    const Options = []
+
+    var Table = document.getElementById('UniqueNetworkTable');
+    var TableBody = Table.querySelector('tbody');
+    var Rows = TableBody.querySelectorAll('tr');
+    Rows.forEach((row) => {
+        const Cells = row.querySelectorAll('td');
+        const AccountNumber = Cells[0].textContent;
+        Options.push(AccountNumber);
+    });
+
+    if (Options.length === 0) {
+        const inputElement = document.createElement("input");
+        inputElement.type = "text";
+        inputElement.placeholder = "No Accounts";
+        inputElement.id = "NewFixNetworkSelect";
+        return inputElement;
+    }
 
     const selectElement = document.createElement("select");
     selectElement.id = "NewFixNetworkSelect";
