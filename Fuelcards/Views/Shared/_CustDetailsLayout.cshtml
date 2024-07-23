@@ -20,6 +20,7 @@
             var customerDictionary = Model.CustomerLists.ToDictionary(e => e.Name, e => e.xeroId);
             var sortedCustomerDictionary = customerDictionary.OrderBy(e => e.Key).ToDictionary(e => e.Key, e => e.Value);
         }
+
         @foreach (var customer in sortedCustomerDictionary)
         {
             <option value="@customer.Key" data-id="@customer.Value"></option>

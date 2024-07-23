@@ -16,30 +16,18 @@ const NewFuelGenieAccountList = [];
 let CustomerSearchModelData;
 let MostRecentSelectedNetwork;
 
-
+let changes = 0
 let IsUpdateOrNot = false;
+window.addEventListener('beforeunload', async function(e) {
+    var myPageIsDirty = changes == 0 ? false : true;
 
+    if(myPageIsDirty) {
+        e.preventDefault();
+    }
+    
+  });
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('customerName').addEventListener('input', function() {
-        var options = document.getElementById('customerOptions').options;
-        var customerIdField = document.getElementById('customerId');
-        var customerNameInput = document.getElementById('customerName');
-        var found = false;
-    
-        for (var i = 0; i < options.length; i++) {
-            if (options[i].value === customerNameInput.value) {
-                customerIdField.value = options[i].value;
-                customerNameInput.value = options[i].text;
-                found = true;
-                break;
-            }
-        }
-    
-        if (!found) {
-            customerIdField.value = '';
-        }
-    });
     document.getElementById('AddOrEditCustomerForm').addEventListener('submit', async function(event) {
         event.preventDefault();
 
@@ -167,7 +155,25 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+async function HandleCustomerNameInput(element) {
+    var options = document.getElementById('customerOptions').options;
+    var customerIdField = document.getElementById('customerId');
+    var customerNameInput = document.getElementById('customerName');
+    var found = false;
 
+    for (var i = 0; i < options.length; i++) {
+        if (options[i].value === customerNameInput.value) {
+            customerIdField.value = options[i].getAttribute('data-id');
+            customerNameInput.value = options[i].value;
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        customerIdField.value = '';
+    }
+}
 
 
 
@@ -179,10 +185,22 @@ async function CustomerSearchInput(element) {
     if (element.value === "") {
         return;
     }
+    var XeroId = null;
+    var options = document.getElementById('customerOptions').options;
+    var customerNameInput = element.value;
+    for (var i = 0; i < options.length; i++) {
+        if (options[i].value === customerNameInput) {
+            XeroId = options[i].getAttribute('data-id');
+            break;
+        }
+    }
+
+
+    var DataID = XeroId;
     await $.ajax({
         url: '/CustomerDetails/SearchCustomer',
         type: 'POST',
-        data: JSON.stringify(element.value),
+        data: JSON.stringify(DataID),
         contentType: 'application/json;charset=utf-8',
         success: async function (response) {
             const stringifyData = JSON.stringify(response, null, 2);
@@ -363,6 +381,7 @@ function clearTable(table) {
 }
 
 async function AddNewAddon(element) {
+    changes += 1;
     const table = document.getElementById('HistoricAddons');
     const tablehead = table.querySelector('thead');
     const tableBody = table.querySelector('tbody');
@@ -450,6 +469,8 @@ function CloseNewFixOverlay(){
 }
 
 async function AddNewAccount(btnelement) {
+
+    changes += 1;
     const data = GetFirstAccountRowFromTable();
     const result = await promptForInputs('Enter Details', getInitialInputsHtml(data));
     if (result.isConfirmed) {
@@ -735,6 +756,7 @@ function ShowNewFix(element) {
 
 function AddNewFix(event) {
     event.preventDefault();
+    changes += 1;
     const form = document.getElementById("NewFixForm");
     if (form) {
         const formData = new FormData(form);

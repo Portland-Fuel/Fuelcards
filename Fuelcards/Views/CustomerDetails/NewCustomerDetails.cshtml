@@ -109,7 +109,7 @@
             <div class="form-row">
                 <div class="form-group ">
                     <label for="customerName">Name of Customer:</label>
-                    <input type="text" id="customerName" list="customerOptions" name="customerName" autocomplete="off" required value="">
+                    <input type="text" id="customerName" oninput="HandleCustomerNameInput(this)" list="customerOptions" name="customerName" autocomplete="off" required value="">
 
                
                     <datalist id="customerOptions">
