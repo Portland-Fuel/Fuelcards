@@ -24,7 +24,6 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                throw new Exception("This is a test exception");    
                 //do invoicing 
 
                 return Json("True");
