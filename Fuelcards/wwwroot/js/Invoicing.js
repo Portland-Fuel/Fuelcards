@@ -240,13 +240,13 @@ function createSelectCustomerList(network) {
     select.id = "CustomerList";
     select.name = "CustomerList";
     select.classList.add("CustomerListSelect");
-    if(CustList.length == 0|| CustList == "Error"){
+    if(CustList.result.length == 0|| CustList == "Error"){
         const option = document.createElement("option");
         option.value = "No Customers";
         option.text = "No Customers";
         select.appendChild(option);
     }else{
-        CustList.forEach(customer => {
+        CustList.result.forEach(customer => {
             const option = document.createElement("option");
             const Val = customer.name + " - " + customer.addon;
             option.value = Val;
@@ -288,7 +288,7 @@ async function StartInvoicing(btn) {
     Invoicing = true;
     var CustList = getCustomerListFromNetwork(selectedNetwork);
     SetCustCountToBeInvoiced(CustList);
-    for (const customer of CustList) {
+    for (const customer of CustList.result) {
         while (!Invoicing) {
             console.log("Invoicing Stopped");
             await new Promise(resolve => setTimeout(resolve, 500)); // Check every 500ms if Invoicing is true
@@ -353,7 +353,7 @@ async function MinusCustCountToBeinvoiced(){
 
 }
 async function SetCustCountToBeInvoiced(CustList) {
-    var CustCount = CustList.length;
+    var CustCount = CustList.result.length;
     var CustCountH3 = document.getElementById("CountOfCustomersToBeInvoiced");
     CustCountH3.hidden = false;
     var CustText = "Number of Customers to be Invoiced: " + CustCount;
