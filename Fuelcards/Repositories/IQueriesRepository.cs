@@ -21,14 +21,14 @@ namespace Fuelcards.Repositories
         Task<List<CustomerInvoice>?> GetCustomersToInvoice(int network, DateOnly invoiceDate, double? BasePrice);
         List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network);
         //void UpdateAddon(CustomerDetailsModels.AddonFromJs? customerPricingAddon);
-        List<int> GetFailedSiteBanding(int network);
+        Task<List<int>> GetFailedSiteBanding(int network);
         double? GetProductVolume(EnumHelper.Products product);
         Task<int>? GetPortlandIdFromAccount(int account);
         Task<IEnumerable<FgTransaction>> GetAllFGTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate);
         void UpdatePortlandIdOnTransaction(GenericTransactionFile item, int? portlandId);
         List<List<GenericTransactionFile>> GroupTransactionsByCustomer(List<GenericTransactionFile> transactions);
         EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId);
-        IQueryable<PortlandIdToXeroId>? GetXeroIdFromPortlandId();
+        Task<List<PortlandIdToXeroId>?> GetXeroIdFromPortlandId();
         void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network);
         List<int?>? CheckForDuplicateTransactions(EnumHelper.Network network);
         void UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network);

@@ -60,8 +60,8 @@ namespace Fuelcards.GenericClassFiles
                 Customers.networks.Add(network);
                 network.invoiceFormatType = _db.GetInvoiceFormatType(network.networkName, Customers.portlandId);
             }
-            InvoicePreCheckModels _checks = new(_db);
-            var egg = _checks.FailedKeyfuelsSites;
+            //InvoicePreCheckModels _checks = new();
+            //var egg = _checks.FailedKeyfuelsSites;
             return Customers;
         }
         private string GenerateAddress(Xero.NetStandard.OAuth2.Model.Accounting.Contact? item)
