@@ -111,10 +111,12 @@ namespace Fuelcards.Repositories
             }
             if (PortlandTransaction is null) return null;
             TransactionsByCustomerAndNetwork = GroupTransactionsByCustomer(PortlandTransaction);
+            IQueryable<PortlandIdToXeroId>? PortlandIdsToXeroIds = GetXeroIdFromPortlandId();
+
             foreach (var item in TransactionsByCustomerAndNetwork)
             {
                 CustomerInvoice model = new();
-                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == GetXeroIdFromPortlandId(item[0].PortlandId)).FirstOrDefault()?.Name;
+                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == PortlandIdsToXeroIds.Where(e => e.PortlandId == item[0].PortlandId && e.XeroTennant == 0).FirstOrDefault()?.XeroId).FirstOrDefault()?.Name;
                 if (model.name.ToLower().Contains("aquaid"))
                 {
                     model.name = getAquidNameFromAccount(item[0].CustomerCode);
@@ -127,6 +129,8 @@ namespace Fuelcards.Repositories
                 }
                 model.addon = BasePrice + model.addon;
                 model.account = item[0].CustomerCode;
+                model.CustomerTransactions = new();
+                model.CustomerTransactions = item;
                 Customers.Add(model);
             }
             return Customers;
@@ -148,10 +152,9 @@ namespace Fuelcards.Repositories
         }
 
 
-        public string? GetXeroIdFromPortlandId(int? portlandId)
+        public IQueryable<PortlandIdToXeroId>? GetXeroIdFromPortlandId()
         {
-            string? xero = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.PortlandId == portlandId && e.XeroTennant == 0)?.XeroId;
-            return xero;
+            return _Cdb.PortlandIdToXeroIds.Where(e => e.Id > -1);
         }
 
         public List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network)
@@ -475,9 +478,10 @@ namespace Fuelcards.Repositories
                 .ToList();
             if (AllAquaid.Count > 0)
             {
+                var AllFcHiddenCardData = GetAccountFromCostCentre(); 
                 foreach (var CostCentre in AllAquaid)
                 {
-                    CostCentre.CustomerCode = GetAccountFromCostCentre(CostCentre.CardNumber);
+                    CostCentre.CustomerCode = AllFcHiddenCardData.Where(e=>e.CardNo == CostCentre.CardNumber.ToString()).FirstOrDefault()?.AccountNo;
                 }
                 var groupedAquaid = AllAquaid.GroupBy(e => e.CustomerCode).ToList();
                 foreach (var aquaidList in AllAquaid)
@@ -494,17 +498,18 @@ namespace Fuelcards.Repositories
 
         }
 
-        private int? GetAccountFromCostCentre(decimal? cardNumber)
+        private IQueryable<FcHiddenCard>? GetAccountFromCostCentre()
         {
             var AllCards = _db.FcHiddenCards.Where(e => e.Id > -1);
-            foreach (var item in AllCards)
-            {
-                if (cardNumber.ToString().Contains(item.CardNo))
-                {
-                    return item.AccountNo;
-                }
-            }
-            throw new Exception($"Error on masked card {cardNumber}");
+            return AllCards;
+            //foreach (var item in AllCards)
+            //{
+            //    if (cardNumber.ToString().Contains(item.CardNo))
+            //    {
+            //        return item.AccountNo;
+            //    }
+            //}
+            //throw new Exception($"Error on masked card {cardNumber}");
         }
         public EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId)
         {

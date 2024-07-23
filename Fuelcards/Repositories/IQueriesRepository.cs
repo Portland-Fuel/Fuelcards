@@ -2,6 +2,7 @@
 using DataAccess.Fuelcards;
 using Fuelcards.GenericClassFiles;
 using Fuelcards.Controllers;
+using DataAccess.Cdata;
 
 namespace Fuelcards.Repositories
 {
@@ -27,7 +28,7 @@ namespace Fuelcards.Repositories
         void UpdatePortlandIdOnTransaction(GenericTransactionFile item, int? portlandId);
         List<List<GenericTransactionFile>> GroupTransactionsByCustomer(List<GenericTransactionFile> transactions);
         EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId);
-        string? GetXeroIdFromPortlandId(int? portlandId);
+        IQueryable<PortlandIdToXeroId>? GetXeroIdFromPortlandId();
         void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network);
         List<int?>? CheckForDuplicateTransactions(EnumHelper.Network network);
         void UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network);

@@ -36,6 +36,7 @@ namespace Fuelcards.Models
         public string? name { get; set; }
         public double? addon { get; set; }
         public int? account { get; set; }
+       public List<GenericTransactionFile>? CustomerTransactions { get; set; }
     }
 
     public class TexacoVolumes
