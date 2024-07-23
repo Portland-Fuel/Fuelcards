@@ -15,6 +15,7 @@ using Fuelcards.InvoiceMethods;
 using System.Transactions;
 using Microsoft.Identity.Client;
 using Microsoft.Graph;
+using Microsoft.EntityFrameworkCore;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -88,7 +89,7 @@ namespace Fuelcards.Repositories
             double? quantity = (_db.TexacoTransactions.Where(e => controlIds.Contains((int)e.ControlId) && e.ProdNo == 1 && Band7.Contains((int?)e.Site)).Sum(e => e.Quantity)) / 100;
             return quantity;
         }
-        public List<CustomerInvoice>? GetCustomersToInvoice(int network, DateOnly invoiceDate, double? BasePrice)
+        public async Task<List<CustomerInvoice>?> GetCustomersToInvoice(int network, DateOnly invoiceDate, double? BasePrice)
         {
             List<GenericTransactionFile> PortlandTransaction = new();
             List<List<GenericTransactionFile>> TransactionsByCustomerAndNetwork = new();
@@ -124,7 +125,6 @@ namespace Fuelcards.Repositories
                 {
                     model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 }
-               
                 model.addon = BasePrice + model.addon;
                 model.account = item[0].CustomerCode;
                 Customers.Add(model);
@@ -289,20 +289,20 @@ namespace Fuelcards.Repositories
         public async Task<IEnumerable<KfE1E3Transaction>> GetAllKeyfuelTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate)
         {
 
-            var controlIds = _db.FcControls.Where(e => e.CreationDate <= InvoiceDate && e.Invoiced != true)
+            var controlIds = await _db.FcControls.Where(e => e.CreationDate <= InvoiceDate && e.Invoiced != true)
                 .OrderByDescending(e => e.ControlId)
                 .Select(e => e.ControlId)
-                .ToList();
+                .ToListAsync();
 
-            var TransactionsToUse = _db.KfE1E3Transactions.Where(e => e.Invoiced != true || controlIds.Contains(e.ControlId)).ToList();
-            var PotentialSundrySales = _db.KfE4SundrySales.Where(e => e.Invoiced != true);
+            var TransactionsToUse = await _db.KfE1E3Transactions.Where(e => e.Invoiced != true || controlIds.Contains(e.ControlId)).ToListAsync();
+            var PotentialSundrySales = await _db.KfE4SundrySales.Where(e => e.Invoiced != true).ToListAsync();
             if (PotentialSundrySales?.Any() == true)
             {
                 // Ensure transactionsToUse is a List (if it's not already)
                 var editableTransactions = TransactionsToUse as List<KfE1E3Transaction> ?? TransactionsToUse.ToList();
                 foreach (var item in PotentialSundrySales)
                 {
-                    editableTransactions.Add(ConvertSundryToTransaction(item));
+                    editableTransactions.Add(await ConvertSundryToTransaction(item));
                 }
                 TransactionsToUse = editableTransactions;
             }
@@ -327,49 +327,55 @@ namespace Fuelcards.Repositories
             var Transactions = _db.TexacoTransactions.Where(e => e.Invoiced != true || controlIds.Contains((int)e.ControlId));
             return Transactions;
         }
-        public int? GetPortlandIdFromAccount(int account)
+        public async Task<int>? GetPortlandIdFromAccount(int account)
         {
-            int? portlandId = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == account)?.PortlandId;
-            return portlandId;
-        }
-        public KfE1E3Transaction ConvertSundryToTransaction(KfE4SundrySale sundrysale)
-        {
-
-            KfE1E3Transaction model = new()
+            try
             {
-                AccurateMileage = null,
-                CardNumber = sundrysale.CardNumber,
-                CardRegistration = null,
-                Commission = null,
-                ControlId = (int)sundrysale.ControlId,
-                CostSign = null,
-                Cost = sundrysale.Value,
-                CustomerAc = sundrysale.CustomerAc,
-                CustomerCode = sundrysale.CustomerCode,
-                FleetNumber = null,
-                Invoiced = sundrysale.Invoiced,
-                InvoiceNumber = null,
-                InvoicePrice = null,
-                Mileage = null,
-                Period = sundrysale.Period,
-                PortlandId = GetPortlandIdFromAccount((int)sundrysale.CustomerAc),
-                PrimaryRegistration = null,
-                ProductCode = sundrysale.ProductCode,
-                PumpNumber = null,
-                Quantity = sundrysale.Quantity,
-                ReportType = null,
-                Sign = null,
-                SiteCode = null,
-                TransactionDate = sundrysale.TransactionDate,
-                TransactionTime = sundrysale.TransactionTime,
-                TransactionId = sundrysale.Id,
-                TransactionNumber = sundrysale.TransactionNumber,
-                TransactionSequence = sundrysale.TransactionSequence,
-                TransactionType = sundrysale.TransactionType,
-                TransactonRegistration = sundrysale.VehicleRegistration,
+                var portlandId = await _db.FcNetworkAccNoToPortlandIds.FirstOrDefaultAsync(e => e.FcAccountNo == account);
+                return portlandId.PortlandId;
+            }
+            catch (Exception chuckles)
+            {
 
+                throw;
+            }
 
-            };
+        }
+        public async Task<KfE1E3Transaction> ConvertSundryToTransaction(KfE4SundrySale sundrysale)
+        {
+
+            KfE1E3Transaction model = new();
+            model.AccurateMileage = null;
+            model.CardNumber = sundrysale.CardNumber;
+            model.CardRegistration = null;
+            model.Commission = null;
+            model.ControlId = (int)sundrysale.ControlId;
+            model.CostSign = null;
+            model.Cost = sundrysale.Value;
+            model.CustomerAc = sundrysale.CustomerAc;
+            model.CustomerCode = sundrysale.CustomerCode;
+            model.FleetNumber = null;
+            model.Invoiced = sundrysale.Invoiced;
+            model.InvoiceNumber = null;
+            model.InvoicePrice = null;
+            model.Mileage = null;
+            model.Period = sundrysale.Period;
+            model.PortlandId = await GetPortlandIdFromAccount((int)sundrysale.CustomerCode);
+            model.PrimaryRegistration = null;
+            model.ProductCode = sundrysale.ProductCode;
+            model.PumpNumber = null;
+            model.Quantity = sundrysale.Quantity;
+            model.ReportType = null;
+            model.Sign = null;
+            model.SiteCode = null;
+            model.TransactionDate = sundrysale.TransactionDate;
+            model.TransactionTime = sundrysale.TransactionTime;
+            model.TransactionId = sundrysale.Id;
+            model.TransactionNumber = sundrysale.TransactionNumber;
+            model.TransactionSequence = sundrysale.TransactionSequence;
+            model.TransactionType = sundrysale.TransactionType;
+            model.TransactonRegistration = sundrysale.VehicleRegistration;
+
             return model;
 
         }
@@ -560,7 +566,7 @@ namespace Fuelcards.Repositories
             model.FcAccount = Convert.ToInt32(item.account);
             model.FrequencyId = GetFrequencyIdFromStringPeriod(item.period);
             model.Network = GetNetworkArrayFromAccountNumber(Convert.ToInt32(item.account)).ToList();
-            model.PortlandId = GetPortlandIdFromAccount(Convert.ToInt32(item.account));
+            model.PortlandId = await GetPortlandIdFromAccount(Convert.ToInt32(item.account));
             await FixedPriceContractUpdateAsync(model);
             _db.SaveChanges();
         }
@@ -568,7 +574,7 @@ namespace Fuelcards.Repositories
         private int[]? GetNetworkArrayFromAccountNumber(int? account)
         {
             int[] Returner = new int[1];
-           int? network = Convert.ToInt32(_db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == account)?.Network);
+            int? network = Convert.ToInt32(_db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == account)?.Network);
             if (network.HasValue)
             {
                 Returner[0] = network.Value;

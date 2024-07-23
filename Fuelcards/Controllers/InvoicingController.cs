@@ -38,10 +38,18 @@ namespace Fuelcards.Controllers
         [HttpGet]
         public IActionResult GetInvoicePreCheckModel()
         {
-            InvoicePreCheckModels checks = new(_db);
-            checks.texacoVolume = new(_db);
-            var egg = checks.keyfuelsInvoiceList;
-            return Json(checks);
+            try
+            {
+                InvoicePreCheckModels checks = new(_db);
+                checks.texacoVolume = new(_db);
+                //var egg = checks.keyfuelsInvoiceList;
+                return Json(checks);
+            }
+            catch (Exception e)
+            {
+                
+                throw;
+            }
         }
 
     }

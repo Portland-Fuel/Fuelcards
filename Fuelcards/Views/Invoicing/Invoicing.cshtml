@@ -51,7 +51,7 @@
 
             <h3> Keyfuels Customers To Invoice </h3>
             <select>
-                @foreach (var item in Model.keyfuelsInvoiceList)
+                @foreach (var item in Model.keyfuelsInvoiceList.Result)
                 {
                     <option>@item.name : @item.addon</option>
                 }
@@ -62,7 +62,7 @@
             <br />
             <h3> Uk fuels Customers To Invoice </h3>
             <select>
-                @foreach (var item in Model.ukFuelInvoiceList)
+                @foreach (var item in Model.ukFuelInvoiceList.Result)
                 {
                     <option>@item.name : @item.addon</option>
                 }
@@ -72,7 +72,7 @@
             <br />
             <h3> Texaco Customers To Invoice </h3>
             <select>
-                @foreach (var item in Model.texacoInvoiceList)
+                @foreach (var item in Model.texacoInvoiceList.Result)
                 {
                     <option>@item.name : @item.addon</option>
                 }

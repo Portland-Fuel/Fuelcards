@@ -18,10 +18,10 @@ namespace Fuelcards.Models
         public int? KeyfuelImports { get => _db.GetTotalEDIs(0); }
         public int? UkfuelImports { get => _db.GetTotalEDIs(1); }
         public int? TexacoImports { get => _db.GetTotalEDIs(2); }
-        public List<CustomerInvoice>? keyfuelsInvoiceList { get => _db.GetCustomersToInvoice(0, invoiceDate, BasePrice); }
+        public Task<List<CustomerInvoice>?>? keyfuelsInvoiceList { get => _db.GetCustomersToInvoice(0, invoiceDate, BasePrice); }
 
-        public List<CustomerInvoice>? ukFuelInvoiceList { get => _db.GetCustomersToInvoice(1, invoiceDate, BasePrice); }
-        public List<CustomerInvoice>? texacoInvoiceList { get => _db.GetCustomersToInvoice(2, invoiceDate, BasePrice); }
+        public Task<List<CustomerInvoice>?> ukFuelInvoiceList { get => _db.GetCustomersToInvoice(1, invoiceDate, BasePrice); }
+        public Task<List<CustomerInvoice>>? texacoInvoiceList { get => _db.GetCustomersToInvoice(2, invoiceDate, BasePrice); }
         public List<CustomerInvoice>? fuelgenieInvoiceList { get; set; }
         public List<int> FailedKeyfuelsSites { get => _db.GetFailedSiteBanding(0); }
         public List<int> FailedUkfuelSites { get => _db.GetFailedSiteBanding(1); }

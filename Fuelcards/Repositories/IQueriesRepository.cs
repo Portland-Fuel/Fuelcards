@@ -17,12 +17,12 @@ namespace Fuelcards.Repositories
         double? GetBasePrice(DateOnly invoiceDate);
         int? GetTotalEDIs(int network);
         double? GetDieselBand7Texaco();
-        List<CustomerInvoice>? GetCustomersToInvoice(int network, DateOnly invoiceDate, double? BasePrice);
+        Task<List<CustomerInvoice>?> GetCustomersToInvoice(int network, DateOnly invoiceDate, double? BasePrice);
         List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network);
         //void UpdateAddon(CustomerDetailsModels.AddonFromJs? customerPricingAddon);
         List<int> GetFailedSiteBanding(int network);
         double? GetProductVolume(EnumHelper.Products product);
-        int? GetPortlandIdFromAccount(int account);
+        Task<int>? GetPortlandIdFromAccount(int account);
         Task<IEnumerable<FgTransaction>> GetAllFGTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate);
         void UpdatePortlandIdOnTransaction(GenericTransactionFile item, int? portlandId);
         List<List<GenericTransactionFile>> GroupTransactionsByCustomer(List<GenericTransactionFile> transactions);
