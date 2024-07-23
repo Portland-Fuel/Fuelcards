@@ -217,7 +217,7 @@ html, body {
 
 .InvoiceCompleteMSG{
     background-color: #318f36;
-    color: white;
+    color: #f8f9fa;
     padding: 10px 20px;
     border-radius: 5px;
     border: none;
@@ -314,7 +314,7 @@ html, body {
     right: 0;
     width: 20rem;
     margin: auto;
-    color: white;
+    color:white;
     text-align: center;
 }
 
@@ -377,4 +377,43 @@ html, body {
     75% {
         content: "Getting data from the database...";
     }
+}
+
+
+
+
+.ModelLoadError{
+    background-color: #c83d3d;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    margin: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.ErrorOptions{
+    background-color: #318f36;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+  
+}
+
+.ErrorOptions.ErrorOptions-Report{
+    background-color: indianred;
+}
+
+.ErrorOptions.ErrorOptions-Report:hover{
+    background-color: #a31e1e;
+    color: white;
+}
+
+.ErrorOptions:hover{
+    background-color: #24842a;
+    color: #f8f9fa;
 }

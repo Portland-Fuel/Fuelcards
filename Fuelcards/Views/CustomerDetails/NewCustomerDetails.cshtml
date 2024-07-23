@@ -109,9 +109,9 @@
             <div class="form-row">
                 <div class="form-group ">
                     <label for="customerName">Name of Customer:</label>
-                    <input type="text" id="customerName" list="customerOptions" name="customerName" autocomplete="on" required value="">
+                    <input type="text" id="customerName" list="customerOptions" name="customerName" autocomplete="off" required value="">
 
-                    <!-- Datalist with customer names and data-id for their IDs -->
+               
                     <datalist id="customerOptions">
                         @{
                             var customerDictionary = Model.CustomerLists.ToDictionary(e => e.Name, e => e.xeroId);
@@ -124,7 +124,7 @@
                         }
                     </datalist>
 
-                    <!-- Hidden input to store the selected customer's ID -->
+           
                     <input type="hidden" id="customerId" name="customerId">
                 </div>
             </div>

@@ -20,10 +20,18 @@
 
         </div>
     </div>
+</div>
 
-    
+<div id="ModelError"  class="ModelLoadError" hidden>
+    <h1>There was an error loading the page data</h1>
+    <button class="ErrorOptions" onclick="history.back()">Home Page</button>
+    <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
+    <button class="ErrorOptions ErrorOptions-Report" onclick="window.location.href = 'https://192.168.0.17:666/Home/ReportIssue'">Report It to IT</button>
+
+
 </div>
 <div hidden class="NetworkToInvoice" id="NetworkToInvoice">
+    <button class="RefreshPageBtn" onclick="RefreshPage()">Refresh Page</button>
     <h1>Please Select a network to check</h1>
     <select>
         <option disabled selected value="">Please Select an option to start</option>

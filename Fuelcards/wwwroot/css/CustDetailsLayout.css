@@ -1,56 +1,102 @@
 ﻿body{
     background-image: none;
-    background-color: #004080;
+    background: linear-gradient(to bottom, #528cc7, #4a6169);
 }
-
-
 .sidenav {
     height: 100%;
-    width: 280px;
+    width: 250px;
     position: fixed;
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: #302929;
+    background-color: #4a6169;
     overflow-x: hidden;
-    padding-top: 20px;
+    transition: 0.5s;
 }
 
-.sidenav .back-arrow {
-    display: inline-block;
-    font-size: 22px;
-    color: white;
-    cursor: pointer;
-    position: absolute;
+.sidenav .BackButtonContainer {
+    padding: 10px;
 }
 
-.sidenav h1 {
-    color: #85d1d1;
-    font-size: 30px;
-}
-
-.sidenav a {
+.sidenav h1, .sidenav a {
     padding: 10px 15px;
     text-decoration: none;
-    font-size: 22px;
-    color: white !important; 
+    font-size: 25px;
+    color: white !important;
     display: block;
-    cursor: pointer;
+    transition: 0.3s;
+}
+
+.sidenav input{
+    padding: 10px 15px;
+    text-decoration: none;
 }
 
 .sidenav a:hover {
     color: #f1f1f1;
-    background-color: #464949;
+    cursor: pointer;
+    transform: scale(1.05);
 }
 
+.Pagebody {
+    transition: margin-left 0.5s;
+    padding: 16px;
+    margin-left: 270px;
+}
 
-.Section{
+.openclosebtn {
+    font-size: 12px; 
+    cursor: pointer;
+    background-color: #942e2e; 
+    color: white;
+    border: none;
+    border-radius: 4px; 
+    padding: 8px 12px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s; 
+    top: 10px;
+    z-index: 1000; 
+}
+.openclosebtn-close {
     display: none;
-    width: 100%;
 }
-.Section .ChoiceButtonGrouping {
-    flex-basis: 100%;
+
+.openclosebtn-back{
+    background-color: #305539; 
+    color: white;
+    border: none;
+    border-radius: 4px; 
+    padding: 8px 12px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s; 
+    top: 10px;
+    z-index: 1000; 
+
+}
+
+.openclosebtn-back:hover{
+    background-color: #203626; 
+    transform: scale(1.05);
+
+}
+.openclosebtn:hover {
+    background-color: #694848; 
+    transform: scale(1.05);
+}
+
+.sidenav-closed .sidenav {
+    width: 0;
+}
+
+.sidenav-closed .Pagebody {
+    margin-left: 0;
+}
+
+.sidenav-closed .openclosebtn {
+    display: block;
+}
+.BackButtonContainer{
     justify-content: space-between;
     display: flex;
-    margin-top: 20px;
+
 }
