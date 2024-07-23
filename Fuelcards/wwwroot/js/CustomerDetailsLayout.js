@@ -5,7 +5,7 @@ function ToggleSection(SectionElement, buttonElement) {
         element.style.display = "none";
     });
 
-    buttonElement.style.backgroundColor = "#464949";
+    buttonElement.style.backgroundColor = "#4875a1";
     const element = document.getElementById(SectionElement);
     if (element.style.display === "none") {
         element.style.display = "block";
@@ -28,4 +28,13 @@ function RemoveColorFromAllOtherbuttonsAndCloseAllSections() {
     sections.forEach(section => {
         section.style.display = "none";
     });
+}
+
+
+function CloseNav() {
+    document.body.classList.add("sidenav-closed");
+}
+
+function OpenNav() {
+    document.body.classList.remove("sidenav-closed");
 }

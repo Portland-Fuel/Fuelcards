@@ -14,7 +14,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.log('Model fetched from server and stored in local storage:', model);
                 initializePage(model);
             },
-            error: function(error) {
+            error: async function(error) {
+                document.getElementById("InitialPageLoad").hidden = true;
+                document.getElementById("ModelError").hidden = false;
+
+                var ParsedError = JSON.stringify(error.responseText);
+                Swal.fire({
+                    backdrop: false,
+                    icon: "error",
+                    title: "Sorry there has been a big error",
+                    text: 'error loading model from server',
+                    footer: '<a href="https://192.168.0.17:666/" target="_blank">Report it here!</a>'
+                });
                 console.error('Error fetching model from server:', error);
             }
         });
@@ -35,7 +46,13 @@ let GCB; // Global check model
 let selectedNetwork;
 
 let Invoicing = false;  
+
+async function RefreshPage(){
+    window.location.reload(true);
+    localStorage.removeItem('invoicePreCheckModel');
+}
 function goBackFromNetworkCheck(buttonEle){
+    document.getElementById('ApproveButton').hidden = true; 
     document.getElementById("NetworkToInvoice").hidden = false;
     document.getElementById("CheckListContainer").hidden = true;
 
@@ -159,6 +176,9 @@ function createCheckListRows(model, network) {
     const failedSiteList = getFailedSiteList(network);
     if (failedSiteList.length > 0 || failedSiteList ===  undefined) {
         const TDButton = createButton("FailedSitesButton","View Failed Sites");
+        TDButton.onclick = function() {
+            ShowSiteErrorForm(failedSiteList);
+        };
         rows[3].appendChild(TDButton);
     } else {
 
@@ -195,6 +215,9 @@ function createCheckListRows(model, network) {
         row.appendChild(checkboxTd);
     });
 }
+
+
+
 function createCell(content,color) {
     if(color === undefined) color = "white";
     const td = document.createElement("td");

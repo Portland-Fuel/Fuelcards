@@ -1,20 +1,20 @@
 ﻿@model CustomerDetailsModels
 
-
 @{
     Layout = "_Layout.cshtml";
 }
 <link href="~/css/CustDetailsLayout.css" rel="stylesheet" />
 <script src="~/js/customerdetailslayout.js"></script>
+
 <div id="sidenav" class="sidenav">
-    <div>
-
-        <h1>
-            Customer Details
-        </h1>
+    <div class="BackButtonContainer">
+        <button class="openclosebtn-back" onclick="history.back();">Back</button>
+        <button class="openclosebtn" onclick="CloseNav()">Close Nav</button>
     </div>
-
-    <input id="CustomerSearch" style="width:100%" type="text" class="form-control" placeholder="Search for a customer" list="customerOptions" autocomplete="off" onchange="CustomerSearchInput(this)" />
+    <div>
+        <h1>Customer Details</h1>
+    </div>
+    <input id="CustomerSearch" style="width:100%" type="text" class="form-control" placeholder="Search for a customer" list="customerOptions" autocomplete="on" onchange="CustomerSearchInput(this)" />
     <datalist id="customerOptions">
         @{
             var customerDictionary = Model.CustomerLists.ToDictionary(e => e.Name, e => e.xeroId);
@@ -23,12 +23,14 @@
 
         @foreach (var customer in sortedCustomerDictionary)
         {
-            <option value="@customer.Value">@customer.Key</option>
+            <option value="@customer.Key" data-id="@customer.Value"></option>
         }
     </datalist>
-    <a onclick="ToggleSection('AddOrEditSection',this);">Add/Edit Customer</a>
-    <a onclick="ToggleSection('CustomerFixSection',this)"> Customer fix</a>
+    <a onclick="ToggleSection('AddOrEditSection', this);">Add/Edit Customer</a>
+    <a onclick="ToggleSection('CustomerFixSection', this)">Customer fix</a>
 </div>
-<div class="Pagebody">
+
+<div class="Pagebody" id="main">
+    <button class="openclosebtn openclosebtn-close" id="OpenNav" onclick="OpenNav()">Open Nav</button>
     @RenderBody()
 </div>
