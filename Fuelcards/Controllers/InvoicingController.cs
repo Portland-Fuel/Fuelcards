@@ -35,13 +35,35 @@ namespace Fuelcards.Controllers
             }
         }
         [HttpGet]
-        public IActionResult GetInvoicePreCheckModel()
+        public async Task<IActionResult> GetInvoicePreCheckModel()
         {
             try
             {
-                InvoicePreCheckModels checks = new(_db);
-                checks.texacoVolume = new(_db);
-                //var egg = checks.keyfuelsInvoiceList;
+                InvoicePreCheckModels checks = new();
+                checks.InvoiceDate = DateOnly.FromDateTime(DateTime.Now);
+                checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);
+                checks.PlattsPrice = checks.BasePrice - 52.95;
+                checks.KeyfuelImports = _db.GetTotalEDIs(0);
+                checks.UkfuelImports = _db.GetTotalEDIs(1);
+                checks.TexacoImports = _db.GetTotalEDIs(2);
+                checks.KeyfuelsInvoiceList = await _db.GetCustomersToInvoice(0, checks.InvoiceDate, checks.BasePrice);
+                checks.UkFuelInvoiceList = await _db.GetCustomersToInvoice(1, checks.InvoiceDate, checks.BasePrice);
+                checks.TexacoInvoiceList = await _db.GetCustomersToInvoice(2, checks.InvoiceDate, checks.BasePrice);
+                checks.FailedKeyfuelsSites = await _db.GetFailedSiteBanding(0);
+                checks.FailedUkfuelSites = await _db.GetFailedSiteBanding(1);
+                checks.FailedTexacoSites = await _db.GetFailedSiteBanding(2);
+                checks.TexacoVolume = new();
+                checks.TexacoVolume.DieselBand7 = _db.GetDieselBand7Texaco();
+                checks.TexacoVolume.Unleaded = _db.GetProductVolume(EnumHelper.Products.ULSP);
+                checks.TexacoVolume.Adblue = _db.GetProductVolume(EnumHelper.Products.Adblue);
+                checks.TexacoVolume.SuperUnleaded = _db.GetProductVolume(EnumHelper.Products.SuperUnleaded);
+                checks.TexacoVolume.Diesel = _db.GetProductVolume(EnumHelper.Products.Diesel);
+
+
+
+                checks.KeyfuelsDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Keyfuels);
+                checks.UkFuelDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.UkFuel);
+                checks.TexacoDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Texaco);
                 return Json(checks);
             }
             catch (Exception e)

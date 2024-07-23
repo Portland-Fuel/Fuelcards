@@ -75,8 +75,12 @@ namespace Fuelcards.Repositories
         }
         public double? GetBasePrice(DateOnly invoiceDate)
         {
-            return _db.FuelcardBasePrices.FirstOrDefault(e => e.EffectiveFrom <= invoiceDate && e.EffectiveTo >= invoiceDate)?.BasePrice;
+            var fuelcardBasePrice = _db.FuelcardBasePrices
+                                             .FirstOrDefault(e => e.EffectiveFrom <= invoiceDate && e.EffectiveTo >= invoiceDate);
+            return fuelcardBasePrice?.BasePrice;
         }
+
+
         public int? GetTotalEDIs(int network)
         {
             int? NumberOfImports = _db.FcControls.Where(e => e.Invoiced != true && e.Network == network).Count();
@@ -109,24 +113,31 @@ namespace Fuelcards.Repositories
                     PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, null, GetAllFGTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList());
                     break;
             }
+            List<FcHiddenCard> aquaid = await GetAquaidInfo();
+            List<PortlandIdToXeroId>? PortlandIdsToXeroIds = await GetXeroIdFromPortlandId();
+            List<CustomerPricingAddon>? customerAddons = await GetCustomerAddons(EnumHelper.NetworkEnumFromInt(network));
+
             if (PortlandTransaction is null) return null;
             TransactionsByCustomerAndNetwork = GroupTransactionsByCustomer(PortlandTransaction);
+
             foreach (var item in TransactionsByCustomerAndNetwork)
             {
                 CustomerInvoice model = new();
-                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == GetXeroIdFromPortlandId(item[0].PortlandId)).FirstOrDefault()?.Name;
+                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == PortlandIdsToXeroIds.Where(e => e.PortlandId == item[0].PortlandId && e.XeroTennant == 0).FirstOrDefault()?.XeroId).FirstOrDefault()?.Name;
                 if (model.name.ToLower().Contains("aquaid"))
                 {
-                    model.name = getAquidNameFromAccount(item[0].CustomerCode);
-                    int? portlandID = GetAquaidPortlandIdFromName(model.name);
-                    model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == portlandID && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                    model.name = aquaid.FirstOrDefault(e => e.AccountNo == item[0].CustomerCode)?.CostCentre;
+                    int? portlandID = aquaid.FirstOrDefault(e => e.CostCentre == model.name)?.PortlandId;
+                    model.addon = (customerAddons.Where(e => e.PortlandId == portlandID && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 }
                 else
                 {
-                    model.addon = (_db.CustomerPricingAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                    model.addon = (customerAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 }
                 model.addon = BasePrice + model.addon;
                 model.account = item[0].CustomerCode;
+                model.CustomerTransactions = new();
+                model.CustomerTransactions = item;
                 Customers.Add(model);
             }
             return Customers;
@@ -139,19 +150,18 @@ namespace Fuelcards.Repositories
             if (portlandId is null) throw new ArgumentException($"Aquaid customers portland Id cannot be established from the cost centre name {name}.");
             return portlandId;
         }
-
-        private string? getAquidNameFromAccount(int? customerAc)
+        public async Task<List<FcHiddenCard>> GetAquaidInfo()
         {
-            string? name = _db.FcHiddenCards.FirstOrDefault(e => e.AccountNo == customerAc)?.CostCentre;
-            if (name is null) throw new ArgumentException("Aquaid customer still cannot be established.");
-            return name;
+            return await _db.FcHiddenCards.Where(e => e.Id > -1).ToListAsync();
+        }
+        public async Task<List<CustomerPricingAddon>> GetCustomerAddons(EnumHelper.Network network)
+        {
+            return await _db.CustomerPricingAddons.Where(e => e.Network == (int)network).ToListAsync();
         }
 
-
-        public string? GetXeroIdFromPortlandId(int? portlandId)
+        public async Task<List<PortlandIdToXeroId>?> GetXeroIdFromPortlandId()
         {
-            string? xero = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.PortlandId == portlandId && e.XeroTennant == 0)?.XeroId;
-            return xero;
+            return await _Cdb.PortlandIdToXeroIds.Where(e => e.Id > -1).ToListAsync();
         }
 
         public List<int>? GetAllFixedCustomers(DateOnly InvoiceDate, int network)
@@ -208,21 +218,21 @@ namespace Fuelcards.Repositories
             _db.CustomerPricingAddons.Add(model);
             _db.SaveChanges();
         }
-        public List<int> GetFailedSiteBanding(int network)
+        public async Task<List<int>> GetFailedSiteBanding(int network)
         {
             List<int> Failed = new();
             List<int?> Sites = new();
-            List<int> fcControls = _db.FcControls.Where(e => e.Invoiced != true).Select(e => e.ControlId).ToList();
+            List<int> fcControls = await _db.FcControls.Where(e => e.Invoiced != true).Select(e => e.ControlId).ToListAsync();
             switch (network)
             {
                 case 0:
-                    Sites = _db.KfE1E3Transactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => e.SiteCode).Distinct().ToList();
+                    Sites = await _db.KfE1E3Transactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => e.SiteCode).Distinct().ToListAsync();
                     break;
                 case 1:
-                    Sites = _db.UkfTransactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => (int?)e.Site).Distinct().ToList();
+                    Sites = await _db.UkfTransactions.Where(e => fcControls.Contains(e.ControlId)).Select(e => (int?)e.Site).Distinct().ToListAsync();
                     break;
                 case 2:
-                    Sites = _db.TexacoTransactions.Where(e => fcControls.Contains((int)e.ControlId)).Select(e => (int?)e.Site).Distinct().ToList();
+                    Sites = await _db.TexacoTransactions.Where(e => fcControls.Contains((int)e.ControlId)).Select(e => (int?)e.Site).Distinct().ToListAsync();
                     break;
                 case 3:
                     break;
@@ -475,9 +485,10 @@ namespace Fuelcards.Repositories
                 .ToList();
             if (AllAquaid.Count > 0)
             {
+                var AllFcHiddenCardData = GetAccountFromCostCentre();
                 foreach (var CostCentre in AllAquaid)
                 {
-                    CostCentre.CustomerCode = GetAccountFromCostCentre(CostCentre.CardNumber);
+                    CostCentre.CustomerCode = AllFcHiddenCardData.Where(e => e.CardNo == CostCentre.CardNumber.ToString()).FirstOrDefault()?.AccountNo;
                 }
                 var groupedAquaid = AllAquaid.GroupBy(e => e.CustomerCode).ToList();
                 foreach (var aquaidList in AllAquaid)
@@ -494,17 +505,18 @@ namespace Fuelcards.Repositories
 
         }
 
-        private int? GetAccountFromCostCentre(decimal? cardNumber)
+        private IQueryable<FcHiddenCard>? GetAccountFromCostCentre()
         {
             var AllCards = _db.FcHiddenCards.Where(e => e.Id > -1);
-            foreach (var item in AllCards)
-            {
-                if (cardNumber.ToString().Contains(item.CardNo))
-                {
-                    return item.AccountNo;
-                }
-            }
-            throw new Exception($"Error on masked card {cardNumber}");
+            return AllCards;
+            //foreach (var item in AllCards)
+            //{
+            //    if (cardNumber.ToString().Contains(item.CardNo))
+            //    {
+            //        return item.AccountNo;
+            //    }
+            //}
+            //throw new Exception($"Error on masked card {cardNumber}");
         }
         public EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId)
         {
