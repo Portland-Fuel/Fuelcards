@@ -309,7 +309,7 @@ async function StartInvoicing(btn) {
     document.getElementById("StartInvoicingBTN").hidden = false;
 }
 async function InvoiceCustomer(customer) {
-    ChangeStatusText("Invoicing Customer");
+    ChangeStatusText("Invoicing Customer...");
     console.log(customer);
     try {
         let response = await $.ajax({
