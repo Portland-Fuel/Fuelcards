@@ -44,7 +44,7 @@ html, body {
     margin: auto;
     text-align: center;
 }
-.back-button{
+.button{
     background-color: #4b7baa;
     color: white;
     padding: 10px 20px;
@@ -53,6 +53,13 @@ html, body {
     cursor: pointer;
     margin: 10px;
 
+}
+.button:hover{
+    background-color: #194979;
+    color: #f8f9fa;
+}
+.button.active {
+    animation: flash 1s infinite;
 }
 .CheckListContainer .FailedSitesButton {
     background-color: #c83d3d;
@@ -185,6 +192,8 @@ html, body {
     box-shadow: 0 2px 4px rgba(209, 202, 202, 0.1);
     width: 100%;
     margin-bottom: 20px; 
+    overflow:  auto;
+    max-height: 500px;
 
 }
 #InvoiceSectionTransactionTable thead {
@@ -242,13 +251,13 @@ html, body {
 
 @keyframes flash {
     0% {
-        opacity: 1;
+        filter: brightness(100%);
     }
     50% {
-        opacity: 0.5;
+        filter: brightness(50%);
     }
     100% {
-        opacity: 1;
+        filter: brightness(100%);
     }
 }
 
@@ -256,7 +265,7 @@ html, body {
     animation: flash 1s infinite;
 }
 .StopInvoicingbtn {
-    background-color: #c83d3d;
+    background-color: #521010;
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
@@ -269,6 +278,136 @@ html, body {
     background-color: #a31e1e;
     color: white;
 }
+
+.EmailOutSection {
+    background-color: transparent;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+.EmailOutSection .CustDetailsContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 300px;
+    width: 100%;
+
+}
+
+.EmailOutSection .CustDetailsContainer label{
+    color: white;
+    margin-bottom: 10px;
+    font-size: 18px;
+    text-align: center;
+    width: 100%;
+
+
+}
+.EmailOutSection .CustDetailsContainer input{
+    width: 100%;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    text-align: center;
+    margin-bottom: 10px;
+    background-color: transparent;
+
+}
+
+
+
+.EmailOutSection .section {
+    margin-bottom: 20px;
+}
+
+.EmailOutSection .DisplayItemsContainer {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 1200px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.EmailOutSection .HtmlOrPdf {
+    width: 48%;
+    box-sizing: border-box;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.EmailOutSection .HtmlOrPdf label{
+    color: white;
+    font-size: 18px;
+    margin-bottom: 10px;
+    text-align: center;
+
+}
+
+
+.EmailOutSection .HtmlOrPdf .PDFImageContainer:hover {
+    transform: scale(1.10);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.EmailOutSection .HtmlOrPdf .PDFImageContainer,
+.EmailOutSection .HtmlOrPdf .EmailContainer {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.EmailOutSection .HtmlOrPdf img {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+}
+
+.EmailOutSection .HtmlOrPdf #EmailHtml {
+    background-color: white;
+    color: black;
+    width: 100%;
+    max-height: 500px; 
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+.EmailOutSection .HtmlOrPdf .PDFImageContainer label,
+.EmailOutSection .HtmlOrPdf #EmailHtml  label{
+    background-color: white;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.EmailOutSection .EmailDetails {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;
+    height: 100%;
+    gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.EmailOutSection .EmailDetails label {
+    font-weight: bold;
+    color: white;
+    width: 100%; 
+    text-align: left; 
+}
+
+.EmailOutSection .EmailDetails input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
 
 * {
     box-sizing: border-box;
