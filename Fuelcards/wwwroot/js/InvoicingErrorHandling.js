@@ -69,7 +69,14 @@ async function ShowSiteErrorForm(FailedSites){
     }
 }
 
-
+async function showErrorBox(Msg){
+    await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: Msg,
+        footer: "Contact IT if you have issues <a href='https://192.168.0.142:666/Home/ReportIssue'>Report Issue</a>"
+    })
+}
 
 const Toast = Swal.mixin({
     toast: true,

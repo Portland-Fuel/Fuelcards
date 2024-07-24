@@ -5,7 +5,7 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Calibri';
     font-size: 14px;
     color: #333;
     background: linear-gradient(to bottom, #c83d3d, #b77275);
@@ -149,7 +149,6 @@ html, body {
 }
 
 
-/* InvoicingSection css */
 
 .InvoiceSection{
     background-color: transparent;
@@ -162,13 +161,70 @@ html, body {
     align-items: center; 
     height: 100vh;
     flex-direction: column;
+    width: 100%;
 }
-.InvoiceSection h1,h3{
-    font-size: 2em;
-    color: #fff;
-    margin-bottom: 20px;
+.CustomerDetails{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 300px;
+    margin-bottom: 50px;
+
+}
+.InvoiceSection .CustomerDetails label{
+    color: white;
+    margin-bottom: 10px;
+    font-size: 18px;
 }
 
+#InvoiceSectionTransactionTable{
+    border-collapse: collapse;
+    background-color: transparent;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(209, 202, 202, 0.1);
+    width: 100%;
+    margin-bottom: 20px; 
+
+}
+#InvoiceSectionTransactionTable thead {
+    background-color: transparent;
+}
+#InvoiceSectionTransactionTable th {
+    color: white;
+    font-size: 20px;
+    border: 2px solid #f8f9fa;
+    padding: 10px;
+    font: bold;
+}
+
+#InvoiceSectionTransactionTable td {
+    font-size: 18px;
+    color: white;
+    overflow: auto;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid #f8f9fa;
+    text-overflow:ellipsis;
+}
+
+.CustomerDetails .CustomerDetails-item{
+    background-color: transparent;  
+    width: 100%;  
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #f8f9fa;
+    color: white;
+    margin-bottom: 10px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.CustomerDetails .CustomerDetails-item label{
+    color: white;
+    font-size: 25px;
+
+}
 
 .Invoicingbtn{
     background-color: #318f36;
@@ -214,18 +270,144 @@ html, body {
     color: white;
 }
 
-
-.InvoiceCompleteMSG{
-    background-color: #318f36;
-    color: #f8f9fa;
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    margin: 10px;
-}
-
-
+* {
+    box-sizing: border-box;
+  }
+  
+  
+  .s2 {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    background-color: transparent;
+    top: 50vh;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .s1 {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    top: 50vh;
+    left: 50%;
+    transform-origin: center;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background-color: transparent;
+  }
+  
+  .bigcon {
+    position: absolute;
+    height: 95px;
+    width: 95px;
+    top: 50vh;
+    left: 50%;
+    transform-origin: center;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    background-color: transparent;
+    animation: bigcon 2s infinite linear;
+    animation-delay: 0.25s;
+  }
+  
+  .b {
+    border-radius: 50%;
+    position: absolute;
+  }
+  
+  .s {
+    width: 25px;
+    height: 25px;
+    animation: small 2s infinite ease;
+    box-shadow: 0px 2px rgba(0,0,0,0.3);
+  }
+  
+  .s:nth-child(1) {
+    top: 0%;
+    left: 0%;
+  }
+  
+  .s:nth-child(2) {
+    top: 0%;
+    right: 0%;
+  }
+  
+  .s:nth-child(3) {
+    right: 0%;
+    bottom: 0%;
+  }
+  
+  .s:nth-child(4) {
+    bottom: 0%;
+    left: 0%;
+  }
+  
+  .big {
+    width: 20px;
+    height: 20px;
+    border-radius: 15px;
+    box-shadow:0px 0px 10px #f85454, 0px 0px 20px #f85454, 0px 0px 30px #f85454, 0px 0px 50px #f85454, 0px 0px 60px #f85454 ;
+    z-index: 1;
+    background-color: #912222;
+    animation: bigball 1s infinite linear;
+  }
+  
+  .sb1{
+    animation-delay: -1.75s;
+  }
+  .sb6{
+    animation-delay: -1.5s;
+  }
+  .sb2{
+    animation-delay: -1.25s;
+  }
+  .sb7{
+    animation-delay: -1s;
+  }
+  .sb3{
+    animation-delay: -0.75s;
+  }
+  .sb8{
+    animation-delay: -0.5s;
+  }
+  .sb4{
+    animation-delay: -0.25s;
+  }
+  .sb5{
+    animation-delay: -0s;
+  }
+  
+  @keyframes bigcon {
+    0% {
+      transform-origin: center;
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+    100% {
+      transform-origin: center;
+      transform: translate(-50%, -50%) rotate(405deg);
+    }
+  }
+  
+  @keyframes small {
+    0% {
+      transform: scale(1);
+       background-color: #f85454;
+    }
+    10% {
+      transform: scale(1.3);
+      background-color: #912222;
+    }
+    15% {
+      transform: scale(1);
+    }
+    25%{
+  transform: scale(1);
+       background-color: #f85454;
+    }
+    100%{
+      transform: scale(1);
+       background-color: #f85454;
+    }
+  }
 
 :root {
     --loader-width: 250px;
@@ -235,7 +417,6 @@ html, body {
 .container {
     height: 100vh;
     width: 100vw;
-    font-family: Helvetica;
 }
 
 .loader {
