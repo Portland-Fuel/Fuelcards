@@ -127,6 +127,7 @@ namespace Fuelcards.Repositories
                 if (model.name.ToLower().Contains("aquaid"))
                 {
                     model.name = aquaid.FirstOrDefault(e => e.AccountNo == item[0].CustomerCode)?.CostCentre;
+                    
                     int? portlandID = aquaid.FirstOrDefault(e => e.CostCentre == model.name)?.PortlandId;
                     model.addon = (customerAddons.Where(e => e.PortlandId == portlandID && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 }
@@ -488,7 +489,7 @@ namespace Fuelcards.Repositories
                 var AllFcHiddenCardData = GetAccountFromCostCentre();
                 foreach (var CostCentre in AllAquaid)
                 {
-                    CostCentre.CustomerCode = AllFcHiddenCardData.Where(e => e.CardNo == CostCentre.CardNumber.ToString()).FirstOrDefault()?.AccountNo;
+                    CostCentre.CustomerCode = AllFcHiddenCardData.Where(e => CostCentre.CardNumber.ToString().Contains(e.CardNo)).FirstOrDefault()?.AccountNo;
                 }
                 var groupedAquaid = AllAquaid.GroupBy(e => e.CustomerCode).ToList();
                 foreach (var aquaidList in AllAquaid)

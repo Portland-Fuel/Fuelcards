@@ -26,7 +26,7 @@ namespace Fuelcards.Models
     }
     public class CustomerInvoice
     {
-        public string? name { get; set; }
+        public string name { get; set; }
         public double? addon { get; set; }
         public int? account { get; set; }
        public List<GenericTransactionFile>? CustomerTransactions { get; set; }
