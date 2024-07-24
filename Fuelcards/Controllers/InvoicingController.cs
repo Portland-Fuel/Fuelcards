@@ -74,11 +74,6 @@ namespace Fuelcards.Controllers
                 checks.KeyfuelsInvoiceList = await _db.GetCustomersToInvoice(0, checks.InvoiceDate, checks.BasePrice);
                 checks.UkFuelInvoiceList = await _db.GetCustomersToInvoice(1, checks.InvoiceDate, checks.BasePrice);
                 checks.TexacoInvoiceList = await _db.GetCustomersToInvoice(2, checks.InvoiceDate, checks.BasePrice);
-
-                foreach (var item in checks.TexacoInvoiceList)
-                {
-                    if (item.name is null) { var egg = "egg"; }
-                }
                 checks.FailedKeyfuelsSites = await _db.GetFailedSiteBanding(0);
                 checks.FailedUkfuelSites = await _db.GetFailedSiteBanding(1);
                 checks.FailedTexacoSites = await _db.GetFailedSiteBanding(2);
