@@ -1,6 +1,7 @@
 ﻿@model InvoicePreCheckModels;
 <script src="~/js/invoicing.js"></script>
 <script src="~/js/invoicingerrorhandling.js"></script>
+<script src="~/js/emailinvoicing.js"></script>
 <link href="~/css/invoicing.css" rel="stylesheet" />
 <script>
 
@@ -43,8 +44,8 @@
 </div>
 
 <div id="CheckListContainer" class="CheckListContainer" hidden>
-    <button class="back-button" onclick="goBackFromNetworkCheck(this)">Back</button>
-    <button class="back-button" onclick="selectAllCheckBoxes(this)">Select All</button>
+    <button class="button" onclick="goBackFromNetworkCheck(this)">Back</button>
+    <button class="button" onclick="selectAllCheckBoxes(this)">Select All</button>
 
     <table id="CheckListTable" class="CheckListTable">
         <thead>
@@ -120,16 +121,42 @@
     </div>
 
 </div>
-@* <div hidden id="InvoiceSection" class="InvoiceSection">
-    <div id="PreInvoicing" class="InvoiceSection">
-        <h1 hidden id="CountOfCustomersToBeInvoiced"></h1>
-        <h1 id="CustNameInvoicing">Customer Name</h1>
-        <h3 id="StatusInvoicing">Status:</h3>
-        <button class="Invoicingbtn" onclick="StartInvoicing(this)" id="StartInvoicingBTN">Start Invoicing</button>
-        <button class="StopInvoicingbtn" onclick="StopInvoicingbtn(this)" id="StopInvoicingBTN" hidden>Stop Invoicing</button>
-        <button class="Invoicingbtn" onclick="StartInvoicingAgain(this)" id="StartInvoicingAgainBTN" hidden>Start Invoicing Again</button>
+
+<div hidden id="EmailOutSection" class="EmailOutSection">
+    <button onclick="StartSendingEmails()" class="button">Start Sending Emails</button>
+
+    <div class="section">
+        <div class="CustDetailsContainer">
+            <div>
+                <label>Customer Name:</label>
+                <input id="EmailCustomerName"readonly type="text" name="name" value="" />
+            </div>
+            <div>
+                <label >Account Number:</label>
+                <input id="EmailAccountNumber" readonly type="text" name="name" value="" />
+            </div>
+        </div>
     </div>
+    <div class="DisplayItemsContainer" hidden id="DisplayEmailItemsContainer">
+        <div id="HtmlCon" class="HtmlOrPdf">
+            <div class="EmailContainer">
+                <div id="EmailHtml" class="EmailHtml">
+                </div>
+            </div>
+            <div class="EmailDetails" hidden id="EmailDetails">
+                <label>To</label>
+                <input type="text" id="EmailTo" />
+                <label>CC</label>
+                <input  type="text" id="EmailCC" />
+                <label>BCC</label>
+                <input type="text" id="EmailBCC" />
+            </div>
+
+        </div>
+        <div id="PFfCon" class="HtmlOrPdf">
+            <div id="PDFImgContainer" class="PDFImageContainer">
+            </div>
+        </div>
+    </div>
+
 </div>
-<div hidden id="AfterInvoicingCompletion">
-    <h1 class="InvoiceCompleteMSG" id="InvoicingCompletionMessage"></h1>
-</div>*@

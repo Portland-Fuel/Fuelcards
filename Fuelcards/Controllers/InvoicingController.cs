@@ -25,6 +25,63 @@ namespace Fuelcards.Controllers
         }
 
         [HttpPost]
+        public JsonResult GetEmailBody([FromBody] CustomerInvoice customerInvoice)
+        {
+            try
+            {
+                throw new Exception("Error getting Email body");
+
+                return Json("");
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return Json("Error:" + e.Message);
+            }
+        }
+
+
+        public struct EmailDetails
+        {
+            public string? htmlbody { get; set; }
+            public string emailTo { get; set; }
+            public string emailCc { get; set; }
+            public string emailBcc { get; set; }
+            public string emailSubject { get; set; }
+
+        }
+        [HttpPost]
+        public JsonResult GetInvoicePng([FromBody] CustomerInvoice customerInvoice)
+        {
+            try
+            {
+                throw new Exception("Error getting Png");
+                return Json("");
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return Json("Error:" + e.Message);
+            }
+        }
+        [HttpPost]
+        public JsonResult CompleteInvoicing([FromBody] CustomerInvoice customerInvoice)
+        {
+            try
+            {
+                //do Transaction faff
+
+
+                return Json("");
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return Json("Error:" + e.Message);
+            }
+        }
+
+        [HttpPost]
         public JsonResult ProcessTransactionFromPage([FromBody] TransactionDataFromView transactionDataFromView)
         {
             try

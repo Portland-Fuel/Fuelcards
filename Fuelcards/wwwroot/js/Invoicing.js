@@ -1,3 +1,8 @@
+window.onload = function() {
+    window.zoomlevel = "90%";
+}
+
+
 document.addEventListener("DOMContentLoaded", function() {
   
     var modelKey = 'invoicePreCheckModel';
@@ -305,6 +310,10 @@ async function StartInvoicing(btn) {
     var CustList = getCustomerListFromNetwork(selectedNetwork);
     for (const customer of CustList) {
         clearTransactionTable();
+        while (!Invoicing) {
+            console.log("Invoicing Stopped");
+            await new Promise(resolve => setTimeout(resolve, 500)); // Check every 500ms if Invoicing is true
+        }
         console.log("Invoicing Resumed");
         await DisplayIntialPageText(customer);
         
@@ -312,11 +321,13 @@ async function StartInvoicing(btn) {
         await StartLoopThroughTransactions(customer);
         
         await MinusCustCountToBeinvoiced();
-        await Toast.fire({
+
+        await InvoiceCustomer(customer);
+        Toast.fire({
             icon: 'success',
             title: customer.name + ":" + "Invoiced Successfully"
         })
-        await new Promise(resolve => setTimeout(resolve, 1200));
+       /* await new Promise(resolve => setTimeout(resolve, 1200)); */
 
 
     }
@@ -325,13 +336,25 @@ async function StartInvoicing(btn) {
     document.getElementById("StartInvoicingAgainBTN").hidden = true;
     document.getElementById("StartInvoicingBTN").hidden = false;
 }
-
+async function InvoiceCustomer(Customer) {
+    try{
+        let response = await $.ajax({
+            url: '/Invoicing/CompleteInvoicing',
+            type: 'POST',
+            data: JSON.stringify(Customer),
+            contentType: 'application/json',
+            success: function(data) {
+         
+            },
+        })
+    }
+    catch{
+        console.error("Error Invoicing Customer");
+    }
+}
 async function StartLoopThroughTransactions(Customer){
     for (const transaction of Customer.customerTransactions) {
-        while (!Invoicing) {
-            console.log("Invoicing Stopped");
-            await new Promise(resolve => setTimeout(resolve, 500)); // Check every 500ms if Invoicing is true
-        }
+      
         await DisplayTransactionOnPage(transaction);
         
         var DataFromTReturn =  await SendTransactionToControllerToBeProcessed(transaction,Customer);
@@ -443,6 +466,7 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
 
 async function InvoicingCompletion() {
     document.getElementById("InvoiceSection").hidden = true;
+    document.getElementById('EmailOutSection').hidden = false;
     stopInvoicingLoader();
 }
 
@@ -453,7 +477,7 @@ async function MinusCustCountToBeinvoiced(){
     CustCount = parseInt(CustCount);
     CustCount = CustCount - 1;
     if(CustCount == 0){
-        CustCountH3.hidden = true;
+        CustCountH3.hidden = false;
     }else{
         var CustText = "Number of Customers to be Invoiced: " + CustCount;
         CustCountH3.textContent = CustText;
@@ -491,3 +515,5 @@ async function StopInvoicingbtn() {
     document.getElementById("StartInvoicingAgainBTN").hidden = false;
     document.getElementById("PauseInvoicingBTN").hidden = true;
 }
+
+
