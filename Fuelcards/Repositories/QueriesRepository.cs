@@ -627,6 +627,10 @@ namespace Fuelcards.Repositories
             dbObj.TerminationDate = source.TerminationDate;
             dbObj.FcAccount = source.FcAccount;
         }
+        public List<SiteNumberToBand> GetAllSiteInformation()
+        {
+           return _db.SiteNumberToBands.Where(e=>e.Active != false).ToList();
+        }
 
     }
 }

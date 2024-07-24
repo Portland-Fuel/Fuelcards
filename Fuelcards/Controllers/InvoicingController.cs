@@ -1,4 +1,6 @@
-﻿using Fuelcards.GenericClassFiles;
+﻿using DataAccess.Fuelcards;
+using Fuelcards.GenericClassFiles;
+using Fuelcards.InvoiceMethods;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -8,9 +10,11 @@ namespace Fuelcards.Controllers
     public class InvoicingController : Controller
     {
         private readonly IQueriesRepository _db;
+        private readonly List<SiteNumberToBand> _sites;
         public InvoicingController(IQueriesRepository db)
         {
             _db = db;
+            _sites = _db.GetAllSiteInformation();
         }
 
 
@@ -25,6 +29,8 @@ namespace Fuelcards.Controllers
         {
             try
             {
+                EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
+                TransactionBuilder tb = new(_sites);
                 //do Transaction faff
                 //
 
@@ -33,10 +39,10 @@ namespace Fuelcards.Controllers
 
 
                 DataToPassBack dataToPassBack = new();
-                dataToPassBack.SiteName = "SiteName";
-                dataToPassBack.InvoicePrice = "InvoicePrice";
-                dataToPassBack.UnitPrice = "UnitPrice";
-                dataToPassBack.Product = "Product";
+                dataToPassBack.SiteName = tb.getSiteName(transactionDataFromView.transaction.SiteCode, network);
+                dataToPassBack.InvoicePrice = (Convert.ToDouble(dataToPassBack.UnitPrice) * transactionDataFromView.transaction.Quantity).ToString();
+                dataToPassBack.UnitPrice = "1.2399";
+                dataToPassBack.Product = EnumHelper.GetProductFromProductCode(Convert.ToInt32(dataToPassBack.Product), network).ToString();
                 return Json(dataToPassBack);
             }
             catch (Exception e)
