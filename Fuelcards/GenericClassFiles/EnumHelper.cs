@@ -2,6 +2,7 @@
 
 namespace Fuelcards.GenericClassFiles
 {
+
     public class EnumHelper
     {
         public enum Products
