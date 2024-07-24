@@ -3,7 +3,7 @@
 <script src="~/js/invoicingerrorhandling.js"></script>
 <link href="~/css/invoicing.css" rel="stylesheet" />
 <script>
- 
+
 </script>
 
 <div id="InitialPageLoad">
@@ -22,7 +22,7 @@
     </div>
 </div>
 
-<div id="ModelError"  class="ModelLoadError" hidden>
+<div id="ModelError" class="ModelLoadError" hidden>
     <h1>There was an error loading the page data</h1>
     <button class="ErrorOptions" onclick="history.back()">Home Page</button>
     <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
@@ -44,6 +44,8 @@
 
 <div id="CheckListContainer" class="CheckListContainer" hidden>
     <button class="back-button" onclick="goBackFromNetworkCheck(this)">Back</button>
+    <button class="back-button" onclick="selectAllCheckBoxes(this)">Select All</button>
+
     <table id="CheckListTable" class="CheckListTable">
         <thead>
         </thead>
@@ -55,7 +57,70 @@
     </div>
 </div>
 
+
 <div hidden id="InvoiceSection" class="InvoiceSection">
+    <div id="ButtonGroupInvoicing" class="ChoiceButtonGrouping">
+        <button class="Invoicingbtn" onclick="StartInvoicing(this)" id="StartInvoicingBTN">Start Invoicing</button>
+        <button class="StopInvoicingbtn" onclick="StopInvoicingbtn(this)" id="PauseInvoicingBTN" hidden>Pause Invoicing</button>
+        <button class="Invoicingbtn" onclick="StartInvoicingAgain(this)" id="StartInvoicingAgainBTN" hidden>Start Invoicing Again</button>
+    </div>
+    <div id="CustomerDetails" class="CustomerDetails">
+        <div class="CustomerDetails-item">
+            <label id="CustNameInvoicing">Customer Name:</label>
+        </div>
+        <div class="CustomerDetails-item">
+            <label id="CountOfCustomersToBeInvoiced">Number of Customers to be Invoiced: 0</label>
+
+        </div>
+    </div>
+    <div id="TransactionsTableContainer">
+        <table id="InvoiceSectionTransactionTable">
+            <thead>
+                <tr>
+                    <th>TransactionNumber</th>
+                    <th>TransactionDate</th>
+                    <th>TransactionTime</th>
+                    <th>SiteCode</th>
+                    <th>CardNumber</th>
+                    <th>ProductCode</th>
+                    <th>Quantity</th>
+                    <th>Cost</th>
+                    <th>Site Name</th>
+                    <th>Invoice Price</th>
+                    <th>Unit Price</th>
+                    <th>Product</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div hidden class="InvoicingLoaderContainer" id="InvoiceingLoader">
+    <div class="s1">
+        <div class="s b sb1"></div>
+        <div class="s b sb2"></div>
+        <div class="s b sb3"></div>
+        <div class="s b sb4"></div>
+    </div>
+
+
+    <div class="s2">
+        <div class="s b sb5"></div>
+        <div class="s b sb6"></div>
+        <div class="s b sb7"></div>
+        <div class="s b sb8"></div>
+    </div>
+
+    <div class="bigcon">
+        <div class="big b"></div>
+    </div>
+
+</div>
+@* <div hidden id="InvoiceSection" class="InvoiceSection">
     <div id="PreInvoicing" class="InvoiceSection">
         <h1 hidden id="CountOfCustomersToBeInvoiced"></h1>
         <h1 id="CustNameInvoicing">Customer Name</h1>
@@ -67,4 +132,4 @@
 </div>
 <div hidden id="AfterInvoicingCompletion">
     <h1 class="InvoiceCompleteMSG" id="InvoicingCompletionMessage"></h1>
-</div>
+</div>*@

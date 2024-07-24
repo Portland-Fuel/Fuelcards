@@ -19,20 +19,45 @@ namespace Fuelcards.Controllers
             // Return the view without the model, as the model will be fetched via AJAX if needed
             return View("/Views/Invoicing/RealInvoicing.cshtml");
         }
+
         [HttpPost]
-        public JsonResult InvoiceCustomer([FromBody] CustomerInvoice customer)
+        public JsonResult ProcessTransactionFromPage([FromBody] TransactionDataFromView transactionDataFromView)
         {
             try
             {
-                //do invoicing 
+                //do Transaction faff
+                //
 
-                return Json("True");
+
+                //then fill datatopassback struct
+
+
+                DataToPassBack dataToPassBack = new();
+                dataToPassBack.SiteName = "SiteName";
+                dataToPassBack.InvoicePrice = "InvoicePrice";
+                dataToPassBack.UnitPrice = "UnitPrice";
+                dataToPassBack.Product = "Product";
+                return Json(dataToPassBack);
             }
             catch (Exception e)
             {
                 Response.StatusCode = 500;
                 return Json("Error:" + e.Message);
             }
+        }
+        public struct DataToPassBack
+        {
+            public string? SiteName { get; set; }
+            public string? InvoicePrice { get; set; }
+            public string? UnitPrice { get; set; }
+            public string? Product { get; set; }
+        }
+        public struct TransactionDataFromView
+        {
+            public string? name { get; set; }
+            public double? addon { get; set; }
+            public int? account { get; set; }
+            public GenericTransactionFile?  transaction { get; set; }
         }
         [HttpGet]
         public async Task<IActionResult> GetInvoicePreCheckModel()

@@ -240,13 +240,13 @@ function createSelectCustomerList(network) {
     select.id = "CustomerList";
     select.name = "CustomerList";
     select.classList.add("CustomerListSelect");
-    if(CustList.result.length == 0|| CustList == "Error"){
+    if(CustList.length == 0|| CustList == "Error"){
         const option = document.createElement("option");
         option.value = "No Customers";
         option.text = "No Customers";
         select.appendChild(option);
     }else{
-        CustList.result.forEach(customer => {
+        CustList.forEach(customer => {
             const option = document.createElement("option");
             const Val = customer.name + " - " + customer.addon;
             option.value = Val;
@@ -268,7 +268,16 @@ function showApproveIfCheckboxesAllChecked() {
 }
 
 
+async function selectAllCheckBoxes() {
+    var Checkboxs = document.querySelectorAll(".CheckListCheckBox");
+    Checkboxs.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    showApproveIfCheckboxesAllChecked();
 
+
+    
+}
 
 //InvoiceSectionFunctions
 
@@ -278,64 +287,163 @@ async function ApproveButtonClick() {
     document.getElementById("CheckListContainer").hidden = true;
     document.getElementById("NetworkToInvoice").hidden = true;
     document.getElementById("InvoiceSection").hidden = false;
-    document.getElementById("InvoiceSection").scrollIntoView();
+    var CustList = getCustomerListFromNetwork(selectedNetwork);
+    SetCustCountToBeInvoiced(CustList);
 }
-
+async function startInvoicingLoader(){
+    document.getElementById("InvoiceingLoader").hidden = false;
+}
+async function stopInvoicingLoader(){
+    document.getElementById("InvoiceingLoader").hidden = true;
+}
 async function StartInvoicing(btn) {
-    document.getElementById("StopInvoicingBTN").hidden = false;
+    startInvoicingLoader();
+    document.getElementById("PauseInvoicingBTN").hidden = false;
     document.getElementById("StartInvoicingBTN").hidden = true;
     document.getElementById("StartInvoicingAgainBTN").hidden = true;
     Invoicing = true;
     var CustList = getCustomerListFromNetwork(selectedNetwork);
-    SetCustCountToBeInvoiced(CustList);
-    for (const customer of CustList.result) {
+    for (const customer of CustList) {
+        clearTransactionTable();
+        console.log("Invoicing Resumed");
+        await DisplayIntialPageText(customer);
+        
+
+        await StartLoopThroughTransactions(customer);
+        
+        await MinusCustCountToBeinvoiced();
+        await Toast.fire({
+            icon: 'success',
+            title: customer.name + ":" + "Invoiced Successfully"
+        })
+        await new Promise(resolve => setTimeout(resolve, 1200));
+
+
+    }
+    InvoicingCompletion();
+    document.getElementById("PauseInvoicingBTN").hidden = true;
+    document.getElementById("StartInvoicingAgainBTN").hidden = true;
+    document.getElementById("StartInvoicingBTN").hidden = false;
+}
+
+async function StartLoopThroughTransactions(Customer){
+    for (const transaction of Customer.customerTransactions) {
         while (!Invoicing) {
             console.log("Invoicing Stopped");
             await new Promise(resolve => setTimeout(resolve, 500)); // Check every 500ms if Invoicing is true
         }
-        console.log("Invoicing Resumed");
-        await DisplayPageText(customer);
-
-        await InvoiceCustomer(customer);
-
-        MinusCustCountToBeinvoiced();
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
+        await DisplayTransactionOnPage(transaction);
+        
+        var DataFromTReturn =  await SendTransactionToControllerToBeProcessed(transaction,Customer);
+        var Data = JSON.parse(DataFromTReturn);
+        transaction.siteName = Data.siteName;
+        transaction.invoicePrice = Data.invoicePrice;
+        transaction.unitPrice = Data.unitPrice;
+        transaction.product = Data.product;
+        await PopulateAddtionalTransactionData(transaction);
     }
-    InvoicingCompletion();
-    
-    document.getElementById("StopInvoicingBTN").hidden = true;
-    document.getElementById("StartInvoicingAgainBTN").hidden = true;
-    document.getElementById("StartInvoicingBTN").hidden = false;
 }
-async function InvoiceCustomer(customer) {
-    ChangeStatusText("Invoicing Customer...");
-    console.log(customer);
+async function clearTransactionTable() {
+    const table = document.getElementById("InvoiceSectionTransactionTable");
+    const tbody = table.querySelector("tbody");
+    tbody.innerHTML = "";
+}
+
+async function PopulateAddtionalTransactionData(Transaction) {
+    const TransactionTable = document.getElementById("InvoiceSectionTransactionTable");
+    const tbody = TransactionTable.querySelector("tbody");
+    const rows = tbody.querySelectorAll("tr");
+
+    var RecentRow = rows[rows.length - 1];
+    if (RecentRow == undefined) {
+        showErrorBox("Error: Transaction not added to table");
+    }
+    else{
+        const cells = RecentRow.querySelectorAll("td");
+        cells[cells.length - 4].innerHTML = Transaction.siteName;
+        cells[cells.length - 3].innerHTML = Transaction.invoicePrice;
+        cells[cells.length - 2].innerHTML = Transaction.unitPrice;
+        cells[cells.length - 1].innerHTML = Transaction.product;
+        console.log("Transaction Added to Table");
+        
+    }
+}
+
+async function DisplayTransactionOnPage(Transaction) {
+    const {
+        transactionNumber,
+        transactionDate,
+        transactionTime,
+        siteCode,
+        cardNumber,
+        productCode,
+        quantity,
+        cost,
+        siteName,
+        invoicePrice,
+        unitPrice,
+        product
+    } = Transaction;
+
+    const TransactionTable = document.getElementById("InvoiceSectionTransactionTable");
+    const tbody = TransactionTable.querySelector("tbody");
+    const row = document.createElement("tr");
+
+    const createCell = (content) => {
+        const td = document.createElement("td");
+        td.textContent = content;
+        return td;
+    };
+
+    row.appendChild(createCell(transactionNumber));
+    row.appendChild(createCell(transactionDate));
+    row.appendChild(createCell(transactionTime));
+    row.appendChild(createCell(siteCode));
+    row.appendChild(createCell(cardNumber));
+    row.appendChild(createCell(productCode));
+    row.appendChild(createCell(quantity));
+    row.appendChild(createCell(cost));
+    row.appendChild(createCell(siteName));
+    row.appendChild(createCell(invoicePrice));
+    row.appendChild(createCell(unitPrice));
+    row.appendChild(createCell(product));
+
+    tbody.appendChild(row);
+    TransactionTable.hidden = false;
+}
+async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
+    var TransactionDataFromView = {
+        name: customer.name,
+        addon: customer.addon,
+        account: customer.account,
+        transaction: Transaction,
+    }
     try {
         let response = await $.ajax({
-            url: '/Invoicing/InvoiceCustomer',
+            url: '/Invoicing/ProcessTransactionFromPage',
             type: 'POST',
-            data: JSON.stringify(customer),
+            data: JSON.stringify(TransactionDataFromView),
             contentType: 'application/json',
             success: function(data) {
-                console.log(data);
+                var stringifyed = JSON.stringify(data)
+                var ParsedData = JSON.parse(stringifyed);
+                var stringifyedParse = JSON.stringify(ParsedData);
+                console.log("ParsedData" + stringifyedParse);
             },
         })
+
+        return JSON.stringify(response);
     }
     catch(xhr){
         HandleInvoicingError(xhr);
         console.error('Error Invoicing Customer:', error);
     }
     
-    ChangeStatusText("Customer Invoiced");
 }
 
 async function InvoicingCompletion() {
-    ChangeStatusText("Invoicing Completed");
     document.getElementById("InvoiceSection").hidden = true;
-    document.getElementById("AfterInvoicingCompletion").hidden = false;
-    document.getElementById("AfterInvoicingCompletion").scrollIntoView();
-    document.getElementById("InvoicingCompletionMessage").textContent = "Invoicing Completed";
+    stopInvoicingLoader();
 }
 
 async function MinusCustCountToBeinvoiced(){
@@ -353,7 +461,7 @@ async function MinusCustCountToBeinvoiced(){
 
 }
 async function SetCustCountToBeInvoiced(CustList) {
-    var CustCount = CustList.result.length;
+    var CustCount = CustList.length;
     var CustCountH3 = document.getElementById("CountOfCustomersToBeInvoiced");
     CustCountH3.hidden = false;
     var CustText = "Number of Customers to be Invoiced: " + CustCount;
@@ -363,26 +471,23 @@ async function SetCustCountToBeInvoiced(CustList) {
 }
 async function StartInvoicingAgain(btn) {
     Invoicing = true;
-    document.getElementById("StopInvoicingBTN").hidden = false;
+    startInvoicingLoader();
+    document.getElementById("PauseInvoicingBTN").hidden = false;
     document.getElementById("StartInvoicingAgainBTN").hidden = true;
 }
 
-async function DisplayPageText(customer) {
+async function DisplayIntialPageText(customer) {
     var CustText = customer.name;
     var Addon = customer.addon;
     var custnameH1 = document.getElementById("CustNameInvoicing");
     custnameH1.textContent = CustText;
-    ChangeStatusText("Loading....");
 }
 
-async function ChangeStatusText(StatusText) {
-    var statusH3 = document.getElementById("StatusInvoicing");
-    statusH3.textContent = StatusText;
-}
+
 
 async function StopInvoicingbtn() {
     Invoicing = false;
-    ChangeStatusText("Invoicing Stopped");
+    stopInvoicingLoader();
     document.getElementById("StartInvoicingAgainBTN").hidden = false;
-    document.getElementById("StopInvoicingBTN").hidden = true;
+    document.getElementById("PauseInvoicingBTN").hidden = true;
 }
