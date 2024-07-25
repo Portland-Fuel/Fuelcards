@@ -438,6 +438,7 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
         addon: customer.addon,
         account: customer.account,
         customerType: customer.customerType,
+        IfuelsCustomer: customer.IfuelsCustomer,
         fixedInformation: customer.fixedInformation,
         transaction: Transaction,
 

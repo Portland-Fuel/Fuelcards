@@ -29,7 +29,10 @@ namespace Fuelcards.InvoiceMethods
             {
                 var stuff = "Do Stuff";
             }
-
+            if(transactionDataFromView.IfuelsCustomer == true)
+            {
+                var egg = "Cluckles";
+            }
 
         }
 
