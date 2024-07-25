@@ -42,7 +42,7 @@ namespace Fuelcards.Controllers
         }
 
 
-        
+
         [HttpPost]
         public JsonResult GetInvoicePng([FromBody] CustomerInvoice customerInvoice)
         {
@@ -73,22 +73,36 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
+        [HttpPost]
+        public JsonResult SendEmail([FromBody] SendEmailInformation sendEmailInformation)
+        {
+            try
+            {
+                throw new Exception("Error sending email");
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return Json("Error:" + e.Message);
+            }
+        }
+
 
         [HttpPost]
         public JsonResult ProcessTransactionFromPage([FromBody] TransactionDataFromView transactionDataFromView)
         {
             try
             {
-                if(transactionDataFromView.fixedInformation is not null)
+                if (transactionDataFromView.fixedInformation is not null)
                 {
                     string egg = "Working";
                 }
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
                 TransactionBuilder tb = new(_sites, _db);
-                
+
                 DataToPassBack dataToPassBack = new();
                 dataToPassBack.SiteName = tb.getSiteName(transactionDataFromView.transaction.SiteCode, network);
-                tb.processTransaction(transactionDataFromView,network);
+                tb.processTransaction(transactionDataFromView, network);
 
                 dataToPassBack.InvoicePrice = "test";
                 dataToPassBack.UnitPrice = "1.2399";
@@ -113,9 +127,9 @@ namespace Fuelcards.Controllers
             public string? name { get; set; }
             public double? addon { get; set; }
             public int? account { get; set; }
-            public EnumHelper.CustomerType customerType {  get; set; }
+            public EnumHelper.CustomerType customerType { get; set; }
             public FixedInformation? fixedInformation { get; set; }
-            public GenericTransactionFile?  transaction { get; set; }
+            public GenericTransactionFile? transaction { get; set; }
         }
         [HttpGet]
         public async Task<IActionResult> GetInvoicePreCheckModel()
@@ -151,6 +165,13 @@ namespace Fuelcards.Controllers
                 throw;
             }
         }
+
+        public struct SendEmailInformation
+        {
+            public EmailDetails EmailDetails { get; set; }
+            public CustomerInvoice CustomerInvoice { get; set; }
+        }
+
         public struct EmailDetails
         {
             public string? htmlbody { get; set; }
