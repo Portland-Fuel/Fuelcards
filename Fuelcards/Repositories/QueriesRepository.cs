@@ -138,7 +138,13 @@ namespace Fuelcards.Repositories
                 model.addon = BasePrice + model.addon;
                 model.account = item[0].CustomerCode;
                 model.CustomerTransactions = new();
+                model.CustomerType = customerType((int)model.account,invoiceDate);
                 model.CustomerTransactions = item;
+                if(model.CustomerType == EnumHelper.CustomerType.Fix)
+                {
+                    model.fixedInformation = new();
+                    model.fixedInformation.Test = "Big Ol Test";
+                }
                 Customers.Add(model);
             }
             return Customers;
@@ -630,6 +636,32 @@ namespace Fuelcards.Repositories
         public List<SiteNumberToBand> GetAllSiteInformation()
         {
            return _db.SiteNumberToBands.Where(e=>e.Active != false).ToList();
+        }
+        
+        public EnumHelper.CustomerType customerType(int account, DateOnly invoiceDate)
+        {
+            IEnumerable<FixedPriceContract>? contracts = _db.FixedPriceContracts.Where(e => e.FcAccount == Convert.ToInt32(account) && e.EffectiveFrom < invoiceDate);
+            if (contracts == null || !contracts.Any())
+            {
+                return EnumHelper.CustomerType.Floating;
+            }
+            foreach (var contract in contracts)
+            {
+                if (contract.FrequencyId == 3)
+                {
+                    contract.EndDate = contract.EndDate.Value.AddMonths(1);
+                }
+                if (contract.FrequencyId == 1)
+                {
+                    contract.EndDate = contract.EndDate.Value.AddDays(7);
+                }
+                if (contract.EndDate >= invoiceDate)
+                {
+                    return EnumHelper.CustomerType.Fix;
+                }
+                //IEnumerable<AllocatedVolume>? volumes = _fuelcardRepo.AllocatedVolume.GetAll(v => v.TradeId == contract.Id);
+            }
+            return EnumHelper.CustomerType.Floating;
         }
 
     }

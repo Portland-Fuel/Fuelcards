@@ -4,6 +4,7 @@ using Fuelcards.InvoiceMethods;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Fuelcards.Controllers
 {
@@ -41,15 +42,7 @@ namespace Fuelcards.Controllers
         }
 
 
-        public struct EmailDetails
-        {
-            public string? htmlbody { get; set; }
-            public string emailTo { get; set; }
-            public string emailCc { get; set; }
-            public string emailBcc { get; set; }
-            public string emailSubject { get; set; }
-
-        }
+        
         [HttpPost]
         public JsonResult GetInvoicePng([FromBody] CustomerInvoice customerInvoice)
         {
@@ -86,20 +79,20 @@ namespace Fuelcards.Controllers
         {
             try
             {
+                if(transactionDataFromView.fixedInformation is not null)
+                {
+                    string egg = "Working";
+                }
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
-                TransactionBuilder tb = new(_sites);
-                //do Transaction faff
-                //
-
-
-                //then fill datatopassback struct
-
-
+                TransactionBuilder tb = new(_sites, _db);
+                
                 DataToPassBack dataToPassBack = new();
                 dataToPassBack.SiteName = tb.getSiteName(transactionDataFromView.transaction.SiteCode, network);
-                dataToPassBack.InvoicePrice = (Convert.ToDouble(dataToPassBack.UnitPrice) * transactionDataFromView.transaction.Quantity).ToString();
+                tb.processTransaction(transactionDataFromView,network);
+
+                dataToPassBack.InvoicePrice = "test";
                 dataToPassBack.UnitPrice = "1.2399";
-                dataToPassBack.Product = EnumHelper.GetProductFromProductCode(Convert.ToInt32(dataToPassBack.Product), network).ToString();
+                dataToPassBack.Product = "test";
                 return Json(dataToPassBack);
             }
             catch (Exception e)
@@ -120,6 +113,8 @@ namespace Fuelcards.Controllers
             public string? name { get; set; }
             public double? addon { get; set; }
             public int? account { get; set; }
+            public EnumHelper.CustomerType customerType {  get; set; }
+            public FixedInformation? fixedInformation { get; set; }
             public GenericTransactionFile?  transaction { get; set; }
         }
         [HttpGet]
@@ -156,6 +151,14 @@ namespace Fuelcards.Controllers
                 throw;
             }
         }
+        public struct EmailDetails
+        {
+            public string? htmlbody { get; set; }
+            public string emailTo { get; set; }
+            public string emailCc { get; set; }
+            public string emailBcc { get; set; }
+            public string emailSubject { get; set; }
 
+        }
     }
 }

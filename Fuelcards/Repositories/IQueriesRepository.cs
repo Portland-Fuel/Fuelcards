@@ -36,5 +36,6 @@ namespace Fuelcards.Repositories
         Task FcEmailUpdateAsync(FcEmail source);
         Task NewFix(NewCustomerDetailsModel.Fix newFixesForCustomer, string customerName, EnumHelper.Network network);
         List<SiteNumberToBand> GetAllSiteInformation();
+        EnumHelper.CustomerType customerType(int account, DateOnly invoiceDate);
     }
 }

@@ -29,9 +29,14 @@ namespace Fuelcards.Models
         public string name { get; set; }
         public double? addon { get; set; }
         public int? account { get; set; }
+       public EnumHelper.CustomerType CustomerType { get; set; }
+        public FixedInformation? fixedInformation { get; set; }
        public List<GenericTransactionFile>? CustomerTransactions { get; set; }
     }
-
+    public class FixedInformation()
+    {
+        public string Test { get; set; }
+    }
     public class TexacoVolumes
     {
         public double? DieselBand7 { get; set; }

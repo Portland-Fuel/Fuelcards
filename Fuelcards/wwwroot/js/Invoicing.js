@@ -439,7 +439,10 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
         name: customer.name,
         addon: customer.addon,
         account: customer.account,
+        customerType: customer.customerType,
+        fixedInformation: customer.fixedInformation,
         transaction: Transaction,
+
     }
     try {
         let response = await $.ajax({
