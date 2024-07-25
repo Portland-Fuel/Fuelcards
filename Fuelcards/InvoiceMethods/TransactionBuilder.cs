@@ -24,7 +24,7 @@ namespace Fuelcards.InvoiceMethods
         {
             EnumHelper.Products? product = EnumHelper.GetProductFromProductCode(Convert.ToInt32(transactionDataFromView.transaction.ProductCode), network);
             Models.Site? siteInfo = getSite(transactionDataFromView.transaction.SiteCode, network);
-            double? Addon = _db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.PortlandId,transactionDataFromView.transaction.TransactionDate,network);
+            double? Addon = _db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.PortlandId,transactionDataFromView.transaction.TransactionDate,network,transactionDataFromView.IfuelsCustomer);
             if(transactionDataFromView.customerType == EnumHelper.CustomerType.Fix)
             {
                 var stuff = "Do Stuff";

@@ -749,8 +749,16 @@ namespace Fuelcards.Repositories
             if (surcharge == null) throw new ArgumentException("Surcharge should not be null, even if it is 0");
             return surcharge;
         }
-        public double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network)
+        public double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network, bool isIfuels)
         {
+            if (isIfuels)
+            {
+                
+            }
+            else
+            {
+
+            }
             return 0;
         }
         public bool IfuelsCustomer(int account)

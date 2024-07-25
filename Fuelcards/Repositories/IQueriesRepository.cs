@@ -38,6 +38,6 @@ namespace Fuelcards.Repositories
         List<SiteNumberToBand> GetAllSiteInformation();
         EnumHelper.CustomerType customerType(int account, DateOnly invoiceDate);
         double? GetSurchargeFromBand(string? band, EnumHelper.Network network);
-        double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network);
+        double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network, bool isIfuels);
     }
 }
