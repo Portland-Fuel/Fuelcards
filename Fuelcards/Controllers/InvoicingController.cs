@@ -79,15 +79,9 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                if(transactionDataFromView.fixedInformation is not null)
-                {
-                    string egg = "Working";
-                }
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
                 TransactionBuilder tb = new(_sites, _db);
-                
                 DataToPassBack dataToPassBack = new();
-                dataToPassBack.SiteName = tb.getSiteName(transactionDataFromView.transaction.SiteCode, network);
                 tb.processTransaction(transactionDataFromView,network);
 
                 dataToPassBack.InvoicePrice = "test";
@@ -144,6 +138,7 @@ namespace Fuelcards.Controllers
                 checks.KeyfuelsDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Keyfuels);
                 checks.UkFuelDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.UkFuel);
                 checks.TexacoDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Texaco);
+                
                 return Json(checks);
             }
             catch (Exception e)

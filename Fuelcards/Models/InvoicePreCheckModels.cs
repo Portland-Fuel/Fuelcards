@@ -1,4 +1,5 @@
 ﻿
+using DataAccess.Fuelcards;
 using Fuelcards.GenericClassFiles;
 using Fuelcards.Repositories;
 
@@ -30,12 +31,19 @@ namespace Fuelcards.Models
         public double? addon { get; set; }
         public int? account { get; set; }
        public EnumHelper.CustomerType CustomerType { get; set; }
+        public bool IfuelsCustomer { get; set; }    
         public FixedInformation? fixedInformation { get; set; }
        public List<GenericTransactionFile>? CustomerTransactions { get; set; }
     }
     public class FixedInformation()
     {
-        public string Test { get; set; }
+        public List<FixedPriceContractVM>? AllFixes { get; set; }
+        public double? RolledVolume { get; set; }
+        public int? CurrentTradeId { get;set; }
+        public int CurrentAllocation { get; set; }
+        public double? FixedVolumeUsedOnThisInvoice { get; set; }
+        public double? RolledVolumeUsedOnThisInvoice { get; set; }
+
     }
     public class TexacoVolumes
     {

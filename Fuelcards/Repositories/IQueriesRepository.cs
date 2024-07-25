@@ -37,5 +37,7 @@ namespace Fuelcards.Repositories
         Task NewFix(NewCustomerDetailsModel.Fix newFixesForCustomer, string customerName, EnumHelper.Network network);
         List<SiteNumberToBand> GetAllSiteInformation();
         EnumHelper.CustomerType customerType(int account, DateOnly invoiceDate);
+        double? GetSurchargeFromBand(string? band, EnumHelper.Network network);
+        double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network);
     }
 }

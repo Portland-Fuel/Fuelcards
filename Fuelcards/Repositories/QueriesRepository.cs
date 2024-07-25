@@ -16,16 +16,20 @@ using System.Transactions;
 using Microsoft.Identity.Client;
 using Microsoft.Graph;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using DataAccess.Tickets;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
     {
         private readonly FuelcardsContext _db;
         private readonly CDataContext _Cdb;
-        public QueriesRepository(FuelcardsContext db, CDataContext cDb)
+        private readonly IfuelsContext _Idb;
+        public QueriesRepository(FuelcardsContext db, CDataContext cDb, IfuelsContext Idb)
         {
             _db = db;
             _Cdb = cDb;
+            _Idb = Idb;
         }
         public List<CustomerPricingAddon>? GetListOfAddonsForCustomer(int PortlandId, EnumHelper.Network network)
         {
@@ -127,7 +131,7 @@ namespace Fuelcards.Repositories
                 if (model.name.ToLower().Contains("aquaid"))
                 {
                     model.name = aquaid.FirstOrDefault(e => e.AccountNo == item[0].CustomerCode)?.CostCentre;
-                    
+
                     int? portlandID = aquaid.FirstOrDefault(e => e.CostCentre == model.name)?.PortlandId;
                     model.addon = (customerAddons.Where(e => e.PortlandId == portlandID && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 }
@@ -138,17 +142,93 @@ namespace Fuelcards.Repositories
                 model.addon = BasePrice + model.addon;
                 model.account = item[0].CustomerCode;
                 model.CustomerTransactions = new();
-                model.CustomerType = customerType((int)model.account,invoiceDate);
+                model.CustomerType = customerType((int)model.account, invoiceDate);
                 model.CustomerTransactions = item;
-                if(model.CustomerType == EnumHelper.CustomerType.Fix)
+                model.IfuelsCustomer = IfuelsCustomer((int)model.account);
+                if (model.CustomerType == EnumHelper.CustomerType.Fix)
                 {
-                    model.fixedInformation = new();
-                    model.fixedInformation.Test = "Big Ol Test";
+                    model.fixedInformation = new FixedInformation();
+                    model = FixedProperties(model, invoiceDate);
                 }
                 Customers.Add(model);
             }
             return Customers;
         }
+        private CustomerInvoice? FixedProperties(CustomerInvoice model, DateOnly invoiceDate)
+        {
+            try
+            {
+
+           
+            //model.fixedInformation.AllFixes
+                    
+                    List<FixedPriceContract> fixedContracts = _db.FixedPriceContracts
+                .Where(e => e.FcAccount == model.account)
+                .ToList();
+                model.fixedInformation.AllFixes = ConvertFixedPriceToVM(fixedContracts);
+
+                
+            
+                
+            var tradeIds = model.fixedInformation.AllFixes
+                .Select(f => f.Id) 
+                .ToList();
+            model.fixedInformation.CurrentAllocation = GetCurrentAllocation(invoiceDate, tradeIds);
+            model.fixedInformation.CurrentTradeId = GetTradeIdFromAllocationId(model.fixedInformation.CurrentAllocation);
+            model.fixedInformation.RolledVolume = _db.AllocatedVolumes
+                .Where(e => tradeIds.Contains((int)e.TradeId) && e.Volume > 0 && e.AllocationId < model.fixedInformation.CurrentAllocation)
+                .Sum(e => (double?)e.Volume) ?? 0;
+            return model;
+            }
+            catch (Exception)
+            {
+                throw new ArgumentException("Error getting fixed properties");
+            }
+        }
+
+        private List<FixedPriceContractVM>? ConvertFixedPriceToVM(List<FixedPriceContract> fixedContracts)
+        {
+            List<FixedPriceContractVM> vmList = new();
+            foreach (var item in fixedContracts)
+            {
+                FixedPriceContractVM model = new()
+                {
+                    TradeReference = item.TradeReference,
+                    EffectiveFrom = item.EffectiveFrom,
+                    EndDate = item.EndDate,
+                    FcAccount = item.FcAccount,
+                    FixedPrice = item.FixedPrice,
+                    FixedVolume = item.FixedVolume,
+                    FixedPriceIncDuty = item.FixedPriceIncDuty,
+                    Network = item.Network,
+                    FrequencyId = item.FrequencyId,
+                    Id = item.Id,
+                    Grade = item.Grade,
+                    TerminationDate = item.TerminationDate,
+                    Period = item.Period,
+                    PortlandId = item.PortlandId,
+                };
+                vmList.Add(model);
+            }
+            return vmList;
+        }
+
+        private int? GetTradeIdFromAllocationId(int currentAllocation)
+        {
+            return _db.AllocatedVolumes.FirstOrDefault(e => e.AllocationId == currentAllocation)?.TradeId;
+        }
+
+        public int GetCurrentAllocation(DateOnly InvoiceDate, List<int>? tradeIds)
+        {
+            DateOnly CurrentDate = InvoiceDate.AddDays(-3);
+
+            var id = _db.FixAllocationDates
+                .Where(e => e.NewAllocationDate <= CurrentDate && CurrentDate <= e.AllocationEnd && tradeIds.Contains((int)e.TradeId))
+                .Select(e => e.Id)
+                .FirstOrDefault();
+            return id;
+        }
+
 
 
         private int? GetAquaidPortlandIdFromName(string? name)
@@ -635,9 +715,9 @@ namespace Fuelcards.Repositories
         }
         public List<SiteNumberToBand> GetAllSiteInformation()
         {
-           return _db.SiteNumberToBands.Where(e=>e.Active != false).ToList();
+            return _db.SiteNumberToBands.Where(e => e.Active != false).ToList();
         }
-        
+
         public EnumHelper.CustomerType customerType(int account, DateOnly invoiceDate)
         {
             IEnumerable<FixedPriceContract>? contracts = _db.FixedPriceContracts.Where(e => e.FcAccount == Convert.ToInt32(account) && e.EffectiveFrom < invoiceDate);
@@ -663,6 +743,20 @@ namespace Fuelcards.Repositories
             }
             return EnumHelper.CustomerType.Floating;
         }
-
+        public double? GetSurchargeFromBand(string? band, EnumHelper.Network network)
+        {
+            double? surcharge = _db.SiteBandInfos.FirstOrDefault(e => e.NetworkId == (int)network && e.Band == band)?.CommercialPrice;
+            if (surcharge == null) throw new ArgumentException("Surcharge should not be null, even if it is 0");
+            return surcharge;
+        }
+        public double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network)
+        {
+            return 0;
+        }
+        public bool IfuelsCustomer(int account)
+        {
+            bool Exists = _Idb.IfuelsCustomers.FirstOrDefault(e => e.CustomerNumber == account) != null;
+            return Exists;
+        }
     }
 }

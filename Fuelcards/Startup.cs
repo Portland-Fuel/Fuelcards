@@ -29,6 +29,8 @@ namespace Fuelcards
                    Configuration.GetConnectionString("Cdata")));
             services.AddDbContext<FuelcardsContext>(options => options.UseNpgsql(
                    Configuration.GetConnectionString("FuelcardDb")));
+            services.AddDbContext<FuelcardsContext>(options => options.UseNpgsql(
+                   Configuration.GetConnectionString("Ifuels")));
             services.AddControllersWithViews(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()
