@@ -317,7 +317,6 @@ async function StartInvoicing(btn) {
         console.log("Invoicing Resumed");
         await DisplayIntialPageText(customer);
         
-
         await StartLoopThroughTransactions(customer);
         
         await MinusCustCountToBeinvoiced();
@@ -391,7 +390,6 @@ async function PopulateAddtionalTransactionData(Transaction) {
         
     }
 }
-
 async function DisplayTransactionOnPage(Transaction) {
     const {
         transactionNumber,

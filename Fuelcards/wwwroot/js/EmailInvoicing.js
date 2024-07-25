@@ -13,6 +13,9 @@ async function StartSendingEmails(){
         if(await getEmailBody(Customer)){
             await showErrorBox("Error loading PDF or HTML");
         };
+
+        await SendEmailToCustomer(Customer);
+
     
         document.getElementById('DisplayEmailItemsContainer').hidden = false;
     
@@ -22,7 +25,40 @@ async function StartSendingEmails(){
         })
     }
 }
+async function SendEmailToCustomer(Customer){
+    var SendEmailInformation = {
+        EmailDetails: {
+            htmlbody: document.getElementById('EmailHtml').innerHTML,
+            emailTo: document.getElementById("EmailTo").textContent,
+            emailCc: document.getElementById("EmailCc").textContent,
+            emailBcc: document.getElementById("EmailBcc").textContent,
+            emailSubject: document.getElementById("EmailSubject").value,
+        },
+        CustomerInvoice: Customer,
+    }
 
+
+
+
+    try {
+        let response = await $.ajax({
+            url: '/Invoicing/SendEmail',
+            type: 'POST',
+            data: JSON.stringify(SendEmailInformation),
+            contentType: 'application/json',
+        });
+
+        if (response && response.success) {
+            console.log('Email sent successfully:', response);
+        } else {
+            throw new Error('Invalid response data');
+        }
+    } catch (error) {
+        console.error('Error in SendEmailToCustomer:', error);
+        await showErrorBox("Error sending email to " + Customer.name);
+    }
+
+}
 
 async function fillInputs(Customer){
     document.getElementById('EmailCustomerName').value = Customer.name;
