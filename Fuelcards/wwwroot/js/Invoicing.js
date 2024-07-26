@@ -441,7 +441,6 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
         IfuelsCustomer: customer.ifuelsCustomer,
         fixedInformation: customer.fixedInformation,
         transaction: Transaction,
-
     }
     try {
         let response = await $.ajax({

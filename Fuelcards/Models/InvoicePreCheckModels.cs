@@ -31,7 +31,8 @@ namespace Fuelcards.Models
         public double? addon { get; set; }
         public int? account { get; set; }
        public EnumHelper.CustomerType CustomerType { get; set; }
-        public bool IfuelsCustomer { get; set; }    
+        public bool IfuelsCustomer { get; set; }
+        public double? BasePrice { get; set; }
         public FixedInformation? fixedInformation { get; set; }
        public List<GenericTransactionFile>? CustomerTransactions { get; set; }
     }
@@ -41,8 +42,7 @@ namespace Fuelcards.Models
         public double? RolledVolume { get; set; }
         public int? CurrentTradeId { get;set; }
         public int CurrentAllocation { get; set; }
-        public double? FixedVolumeUsedOnThisInvoice { get; set; }
-        public double? RolledVolumeUsedOnThisInvoice { get; set; }
+       
 
     }
     public class TexacoVolumes

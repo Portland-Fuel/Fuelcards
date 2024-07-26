@@ -143,7 +143,7 @@ namespace Fuelcards.Repositories
                 model.account = item[0].CustomerCode;
                 model.CustomerTransactions = new();
                 model.CustomerType = customerType((int)model.account, invoiceDate);
-                model.CustomerTransactions = item;
+                model.CustomerTransactions = item.OrderBy(e => e.TransactionDate).ThenBy(e => e.TransactionTime).ToList();
                 model.IfuelsCustomer = IfuelsCustomer((int)model.account);
                 if (model.CustomerType == EnumHelper.CustomerType.Fix)
                 {
@@ -158,27 +158,17 @@ namespace Fuelcards.Repositories
         {
             try
             {
-
-           
-            //model.fixedInformation.AllFixes
-                    
-                    List<FixedPriceContract> fixedContracts = _db.FixedPriceContracts
-                .Where(e => e.FcAccount == model.account)
-                .ToList();
+                List<FixedPriceContract> fixedContracts = _db.FixedPriceContracts.Where(e => e.FcAccount == model.account).ToList();
                 model.fixedInformation.AllFixes = ConvertFixedPriceToVM(fixedContracts);
-
-                
-            
-                
-            var tradeIds = model.fixedInformation.AllFixes
-                .Select(f => f.Id) 
-                .ToList();
-            model.fixedInformation.CurrentAllocation = GetCurrentAllocation(invoiceDate, tradeIds);
-            model.fixedInformation.CurrentTradeId = GetTradeIdFromAllocationId(model.fixedInformation.CurrentAllocation);
-            model.fixedInformation.RolledVolume = _db.AllocatedVolumes
-                .Where(e => tradeIds.Contains((int)e.TradeId) && e.Volume > 0 && e.AllocationId < model.fixedInformation.CurrentAllocation)
-                .Sum(e => (double?)e.Volume) ?? 0;
-            return model;
+                var tradeIds = model.fixedInformation.AllFixes
+                    .Select(f => f.Id)
+                    .ToList();
+                model.fixedInformation.CurrentAllocation = GetCurrentAllocation(invoiceDate, tradeIds);
+                model.fixedInformation.CurrentTradeId = GetTradeIdFromAllocationId(model.fixedInformation.CurrentAllocation);
+                model.fixedInformation.RolledVolume = _db.AllocatedVolumes
+                    .Where(e => tradeIds.Contains((int)e.TradeId) && e.Volume > 0 && e.AllocationId < model.fixedInformation.CurrentAllocation)
+                    .Sum(e => (double?)e.Volume) ?? 0;
+                return model;
             }
             catch (Exception)
             {
@@ -749,15 +739,16 @@ namespace Fuelcards.Repositories
             if (surcharge == null) throw new ArgumentException("Surcharge should not be null, even if it is 0");
             return surcharge;
         }
-        public double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network, bool isIfuels)
+        public double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network, bool isIfuels, int account)
         {
-            if (isIfuels)
+            if (!isIfuels)
             {
-                
+                if (portlandId is null) throw new ArgumentException("Portland ID should not be null at this stage.");
+                return _db.CustomerPricingAddons.Where(e => e.PortlandId == portlandId && e.Network == (int)network && e.EffectiveDate <= transactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon;
             }
             else
             {
-
+                return GetIfuelsAddon(account);
             }
             return 0;
         }
@@ -765,6 +756,29 @@ namespace Fuelcards.Repositories
         {
             bool Exists = _Idb.IfuelsCustomers.FirstOrDefault(e => e.CustomerNumber == account) != null;
             return Exists;
+        }
+        internal double? GetIfuelsAddon(int account)
+        {
+            return _Idb.IfuelsAddons
+                .Where(e => e.CustomerNumber == account)
+                .OrderByDescending(e => e.EffectiveFrom)
+                .Select(e => e.Addon)
+                .FirstOrDefault();
+        }
+        public double? TransactionalSiteSurcharge(EnumHelper.Network network, Models.Site site, int productCode)
+        {
+            if (network == EnumHelper.Network.Keyfuels || network == EnumHelper.Network.Fuelgenie) return 0;
+            TransactionalSite? result = _db.TransactionalSites.FirstOrDefault(e => e.SiteCode == site.code && e.Network == (int)network);
+            if (result != null || productCode == 70)
+            {
+                double? Surcharge = _db.TransactionSiteSurcharges.FirstOrDefault(e => e.Network == (int)network && e.ChargeType == null)?.Surcharge;
+                return Surcharge;
+            }
+            return 0;
+        }
+        public double? GetMissingProduct(EnumHelper.Network network, short? productCode)
+        {
+            return _db.MissingProductValues.FirstOrDefault(e => e.Network == (int)network && e.Product == productCode)?.Value;
         }
     }
 }

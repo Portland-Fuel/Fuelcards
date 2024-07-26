@@ -30,7 +30,7 @@ namespace Fuelcards.Controllers
             try
             {
                 InvoicePreCheckModels checks = new();
-                checks.InvoiceDate = DateOnly.FromDateTime(DateTime.Now);
+                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now));
                 checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);
                 checks.PlattsPrice = checks.BasePrice - 52.95;
                 checks.KeyfuelImports = _db.GetTotalEDIs(0);
@@ -129,13 +129,8 @@ namespace Fuelcards.Controllers
             {
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
                 TransactionBuilder tb = new(_sites, _db);
-                DataToPassBack dataToPassBack = new();
-                tb.processTransaction(transactionDataFromView,network);
-
-                dataToPassBack.InvoicePrice = "test";
-                dataToPassBack.UnitPrice = "1.2399";
-                dataToPassBack.Product = "test";
-                return Json(dataToPassBack);
+                DataToPassBack model = tb.processTransaction(transactionDataFromView,network);
+                return Json(model);
             }
             catch (Exception e)
             {
