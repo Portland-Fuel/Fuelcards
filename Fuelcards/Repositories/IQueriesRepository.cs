@@ -39,7 +39,7 @@ namespace Fuelcards.Repositories
         EnumHelper.CustomerType customerType(int account, DateOnly invoiceDate);
         double? GetSurchargeFromBand(string? band, EnumHelper.Network network);
         double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network, bool isIfuels, int account);
-        double? TransactionalSiteSurcharge(EnumHelper.Network network, Site site, int productCode);
+        double? TransactionalSiteSurcharge(EnumHelper.Network network, int site, int productCode);
         double? GetMissingProduct(EnumHelper.Network network, short? productCode);
     }
 }

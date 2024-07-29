@@ -5,6 +5,7 @@ using Fuelcards.Repositories;
 using Microsoft.Graph;
 using static Fuelcards.Controllers.InvoicingController;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Fuelcards.InvoiceMethods
 {
@@ -24,7 +25,7 @@ namespace Fuelcards.InvoiceMethods
         internal DataToPassBack processTransaction(InvoicingController.TransactionDataFromView transactionDataFromView, EnumHelper.Network network)
         {
             EnumHelper.Products? product = EnumHelper.GetProductFromProductCode(Convert.ToInt32(transactionDataFromView.transaction.ProductCode), network);
-            Models.Site? siteInfo = getSite(transactionDataFromView.transaction.SiteCode, network);
+            Models.Site? siteInfo = getSite(transactionDataFromView.transaction.SiteCode, network, (int)transactionDataFromView.transaction.ProductCode, (EnumHelper.Products)product);
             transactionDataFromView.transaction.Quantity = ConvertToLitresBasedOnNetwork(transactionDataFromView.transaction.Quantity, network);
             double? Addon = _db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.PortlandId, transactionDataFromView.transaction.TransactionDate, network, transactionDataFromView.IfuelsCustomer, (int)transactionDataFromView.account);
 
@@ -53,7 +54,7 @@ namespace Fuelcards.InvoiceMethods
                 ProductCalculations methodology = new();
                 switch (product)
                 {
-                    case EnumHelper.Products.Diesel: return methodology.Diesel(data, Addon, site, network, _db, (EnumHelper.Products)product);
+                    case EnumHelper.Products.Diesel: return DieselTransaction.DieselMethodology(data, Addon, site, network, _db, (EnumHelper.Products)product);
                     case EnumHelper.Products.Adblue: return methodology.AdblueMethodology(data.transaction, network);
                     case EnumHelper.Products.TescoDieselNewDiesel: return methodology.TescoNewDiesel(data.transaction, network);
                     case EnumHelper.Products.ULSP: return methodology.ULSP(data.transaction, network);
@@ -87,19 +88,43 @@ namespace Fuelcards.InvoiceMethods
             }
 
         }
-        private Models.Site? getSite(int? siteCode, EnumHelper.Network network)
+        private Models.Site? getSite(int? siteCode, EnumHelper.Network network, int product, EnumHelper.Products productName)
         {
+            if (siteCode == null && productName == EnumHelper.Products.EmailPinCharge) 
+            {
+                Models.Site _site = new()
+                {
+                    name = "EMAIL PIN CHARGE",
+                    band = null,
+                    Surcharge = null,
+                    transactionalSiteSurcharge = null,
+                    code = null
+                };
+                return _site;
+            }
+            if (siteCode == null && productName == EnumHelper.Products.Card)
+            {
+                Models.Site _site = new()
+                {
+                    name = "Card",
+                    band = null,
+                    Surcharge = null,
+                    transactionalSiteSurcharge = null,
+                    code = null
+                };
+                return _site;
+            }
+
             if (siteCode == null) throw new ArgumentNullException("The site code should not be null. now that it is - This needs to be coded...");
             SiteNumberToBand? site = _sites.Where(e => e.SiteNumber == siteCode && e.NetworkId == (int)network && e.Active != false).FirstOrDefault();
-
             Models.Site foundSite = new()
             {
                 name = site.Name,
                 band = site.Band,
                 code = (int)site.SiteNumber,
+                transactionalSiteSurcharge = _db.TransactionalSiteSurcharge(network, (int)site.SiteNumber, product)
             };
             foundSite.Surcharge = _db.GetSurchargeFromBand(foundSite.band, network);
-            if (site == null && network == EnumHelper.Network.Keyfuels) { foundSite.name = "EMAIL PIN CHARGE"; }
             return foundSite;
         }
         public static double? ConvertToLitresBasedOnNetwork(double? quantity, EnumHelper.Network network)

@@ -11,18 +11,21 @@ namespace Fuelcards.InvoiceMethods
 {
     public class ProductCalculations
     {
-        public double? Diesel(InvoicingController.TransactionDataFromView data, double? addon, Models.Site site, EnumHelper.Network network, IQueriesRepository _db,EnumHelper.Products product)
-        {
-            if(data.customerType == CustomerType.Fix)
-            {
-                FixedCustomer processFix = new();
-                return processFix.CalculateFixTransactionPrice(data, site, network, _db);
-            }
-            else
-            {
-                return DieselFloatingUnitPrice(_db,product,data,network,site,addon);
-            }
-        }
+        //public double? Diesel(InvoicingController.TransactionDataFromView data, double? addon, Models.Site site, EnumHelper.Network network, IQueriesRepository _db,EnumHelper.Products product)
+        //{
+        //    DieselTransaction diesel = new();
+            
+            
+        //    //if(data.customerType == CustomerType.Fix)
+        //    //{
+        //    //    FixedCustomer processFix = new();
+        //    //    return processFix.CalculateFixTransactionPrice(data, site, network, _db,addon,product);
+        //    //}
+        //    //else
+        //    //{
+        //    //    return DieselFloatingUnitPrice(_db,product,data,network,site,addon);
+        //    //}
+        //}
         public double? AdblueMethodology(GenericTransactionFile data, EnumHelper.Network network)
         {
             try
@@ -159,7 +162,8 @@ namespace Fuelcards.InvoiceMethods
                 {
                     case EnumHelper.Network.Keyfuels:
                         double? NewValue = 1.35 * (data.Cost / 1.15) / 100;
-                        return NewValue * 100;
+                        var price = NewValue * 100;
+                        return price / data.Quantity;
                     case EnumHelper.Network.UkFuel:
                         double? NewValue2 = 1.2 * (data.Cost / 1.05) / 100;
                         //return NewValue2 * 100;
@@ -256,7 +260,8 @@ namespace Fuelcards.InvoiceMethods
             {
                 double? NewValue = 1.2 * (data.Cost / 1.05) / 100;
 
-                return NewValue * 100;
+                var price = NewValue * 100;
+                return price / data.Quantity;
             }
             catch (Exception)
             {
@@ -268,7 +273,8 @@ namespace Fuelcards.InvoiceMethods
         {
             if (network != EnumHelper.Network.Keyfuels) throw new ArgumentException("So far only keyfuels transactions should be able to enter the calculation for a new card! something has gone badly wrong");
             double? NewValue = 1.25 * (data.Cost / 1.1) / 100;
-            return NewValue * 100;
+            var price =  NewValue * 100;
+            return price/data.Quantity;
         }
         public double? PackagedAdblue(GenericTransactionFile data, EnumHelper.Network network, IQueriesRepository _db)
         {
@@ -344,7 +350,7 @@ namespace Fuelcards.InvoiceMethods
             if (product == EnumHelper.Products.Diesel)
             {
                 double? basePrice = _db.GetBasePrice((DateOnly)data.transaction.TransactionDate);
-                double? transactionSite = _db.TransactionalSiteSurcharge(network, site, (int)data.transaction.ProductCode);
+                double? transactionSite = site.transactionalSiteSurcharge;
                 double? UnitPrice = basePrice + Addon + transactionSite + site.Surcharge;
                 UnitPrice = UnitPrice / 100;
                 return UnitPrice;

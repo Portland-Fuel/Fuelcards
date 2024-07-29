@@ -139,6 +139,7 @@ namespace Fuelcards.Repositories
                 {
                     model.addon = (customerAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 }
+                if (model.name.ToLower().Contains("portland")) model.name = "The Fuel Trading Company";
                 model.addon = BasePrice + model.addon;
                 model.account = item[0].CustomerCode;
                 model.CustomerTransactions = new();
@@ -765,10 +766,10 @@ namespace Fuelcards.Repositories
                 .Select(e => e.Addon)
                 .FirstOrDefault();
         }
-        public double? TransactionalSiteSurcharge(EnumHelper.Network network, Models.Site site, int productCode)
+        public double? TransactionalSiteSurcharge(EnumHelper.Network network, int site, int productCode)
         {
             if (network == EnumHelper.Network.Keyfuels || network == EnumHelper.Network.Fuelgenie) return 0;
-            TransactionalSite? result = _db.TransactionalSites.FirstOrDefault(e => e.SiteCode == site.code && e.Network == (int)network);
+            TransactionalSite? result = _db.TransactionalSites.FirstOrDefault(e => e.SiteCode == site && e.Network == (int)network);
             if (result != null || productCode == 70)
             {
                 double? Surcharge = _db.TransactionSiteSurcharges.FirstOrDefault(e => e.Network == (int)network && e.ChargeType == null)?.Surcharge;
