@@ -309,16 +309,18 @@ async function StartInvoicing(btn) {
     Invoicing = true;
     var CustList = getCustomerListFromNetwork(selectedNetwork);
     for (const customer of CustList) {
-        clearTransactionTable();
         while (!Invoicing) {
             console.log("Invoicing Stopped");
             await new Promise(resolve => setTimeout(resolve, 500)); // Check every 500ms if Invoicing is true
         }
+        clearTransactionTable();
+
         console.log("Invoicing Resumed");
         await DisplayIntialPageText(customer);
         
-        await StartLoopThroughTransactions(customer);
+        var updatedTransactionsWithData = await StartLoopThroughTransactions(customer);
         
+        customer.customerTransactions = updatedTransactionsWithData;
         await MinusCustCountToBeinvoiced();
 
         await InvoiceCustomer(customer);
@@ -351,19 +353,28 @@ async function InvoiceCustomer(Customer) {
         console.error("Error Invoicing Customer");
     }
 }
-async function StartLoopThroughTransactions(Customer){
+async function StartLoopThroughTransactions(Customer) {
+    const updatedTransactions = [];
+
     for (const transaction of Customer.customerTransactions) {
-      
         await DisplayTransactionOnPage(transaction);
         
-        var DataFromTReturn =  await SendTransactionToControllerToBeProcessed(transaction,Customer);
-        var Data = JSON.parse(DataFromTReturn);
+        const DataFromTReturn = await SendTransactionToControllerToBeProcessed(transaction, Customer);
+        const Data = JSON.parse(DataFromTReturn);
+        
         transaction.siteName = Data.siteName;
         transaction.invoicePrice = Data.invoicePrice;
         transaction.unitPrice = Data.unitPrice;
         transaction.product = Data.product;
+
         await PopulateAddtionalTransactionData(transaction);
+
+        // Add the updated transaction to the array
+        updatedTransactions.push(transaction);
     }
+
+    // Return the array of updated transactions
+    return updatedTransactions;
 }
 async function clearTransactionTable() {
     const table = document.getElementById("InvoiceSectionTransactionTable");
