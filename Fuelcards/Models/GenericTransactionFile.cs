@@ -45,5 +45,11 @@
 
         public bool? Invoiced { get; set; }
         public int? network { get; set; }
+
+        public string? SiteName { get; set; }
+        public double? InvoicePrice { get; set; }
+        public double? UnitPrice { get; set; }
+        public string? Product { get; set; }
+
     }
 }
