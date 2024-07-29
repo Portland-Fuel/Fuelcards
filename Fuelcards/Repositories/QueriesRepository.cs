@@ -140,7 +140,7 @@ namespace Fuelcards.Repositories
                     model.addon = (customerAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 }
                 if (model.name.ToLower().Contains("portland")) model.name = "The Fuel Trading Company";
-                model.addon = BasePrice + model.addon;
+                model.addon = Convert.ToDouble(Math.Round(Convert.ToDecimal(BasePrice + model.addon),2));
                 model.account = item[0].CustomerCode;
                 model.CustomerTransactions = new();
                 model.CustomerType = customerType((int)model.account, invoiceDate);
@@ -487,7 +487,7 @@ namespace Fuelcards.Repositories
                 {
                     try
                     {
-                        var PortlandId = GetPortlandIdFromMaskedCards(item.CardNumber);
+                        var PortlandId = GetPortlandIdFromMaskedCards(Convert.ToDecimal(item.CardNumber));
                         if (PortlandId is not null)
                         {
                             UpdatePortlandIdOnTransaction(item, PortlandId);

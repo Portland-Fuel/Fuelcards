@@ -32,7 +32,7 @@ namespace Fuelcards.InvoiceMethods
                     transactions.TransactionDate = item.TransactionDate;
                     transactions.TransactionTime = item.TransactionTime;
                     transactions.SiteCode = item.SiteCode;
-                    transactions.CardNumber = item.CardNumber;
+                    transactions.CardNumber = item.CardNumber.ToString();
                     transactions.CustomerCode = item.CustomerCode;
                     transactions.CustomerAc = item.CustomerAc;
                     transactions.PrimaryRegistration = item.PrimaryRegistration;
@@ -63,7 +63,7 @@ namespace Fuelcards.InvoiceMethods
                     transactions.TransactionDate = item.TranDate;
                     transactions.TransactionTime = item.TranTime;
                     transactions.SiteCode = (int)item.Site;
-                    transactions.CardNumber = item.PanNumber;
+                    transactions.CardNumber = item.PanNumber.ToString();
                     transactions.CustomerCode = (int)item.Customer;
                     transactions.CustomerAc = (short)item.Customer;
                     transactions.PrimaryRegistration = item.Registration;
@@ -90,7 +90,7 @@ namespace Fuelcards.InvoiceMethods
                     transactions.TransactionDate = item.TranDate;
                     transactions.TransactionTime = item.TranTime;
                     transactions.SiteCode = (int)item.Site;
-                    transactions.CardNumber = Convert.ToDecimal(item.IsoNumber.ToString() + item.Customer.ToString() + item.CardNo.ToString());
+                    transactions.CardNumber = item.IsoNumber.ToString() + item.Customer.ToString() + item.CardNo.ToString();
                     transactions.CustomerCode = (int)item.Customer;
                     transactions.PrimaryRegistration = item.Registration;
                     transactions.Mileage = item.Mileage;
@@ -117,7 +117,7 @@ namespace Fuelcards.InvoiceMethods
                     transactions.TransactionDate = item.TransactionDate;
                     transactions.TransactionTime = item.TransactionTime;
                     transactions.SiteCode = (int)item.MerchantId;
-                    transactions.CardNumber = Convert.ToDecimal(item.PanNumber);
+                    transactions.CardNumber = item.PanNumber;
                     transactions.CustomerCode = (int)item.PortlandId;
                     transactions.CustomerAc = (short)item.CustomerNumber;
                     transactions.PrimaryRegistration = item.RegNo;

@@ -15,7 +15,7 @@
         public TimeOnly? TransactionTime { get; set; }
 
         public int? SiteCode { get; set; }
-        public decimal? CardNumber { get; set; }
+        public string? CardNumber { get; set; }
 
         public int? CustomerCode { get; set; }
 
