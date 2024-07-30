@@ -109,7 +109,30 @@ namespace Fuelcards.Controllers
                 {
                     newInvoice.fixedBox = summary.GetFixedDetails(customerInvoice);
                 }
+                newInvoice.InvoiceDate = DateOnly.FromDateTime(DateTime.Now);
+                newInvoice.InvoiceType = 1;
                 invoices.Add(newInvoice);
+
+                #region PDF
+                //ProducingThePDF
+
+
+                try
+                {
+                    InvoiceGenerator invoiceGenerator = new(newInvoice);
+                    invoiceGenerator.generatePDF(newInvoice);
+                }
+                catch (Exception e)
+                {
+                    throw new Exception(e.Message);
+                }
+              
+
+
+                #endregion
+
+
+
                 return Json("");
             }
             catch (Exception e)
@@ -140,7 +163,7 @@ namespace Fuelcards.Controllers
             {
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
                 TransactionBuilder tb = new(_sites, _db);
-                DataToPassBack model = tb.processTransaction(transactionDataFromView,network);
+                DataToPassBack model = tb.processTransaction(transactionDataFromView, network);
                 return Json(model);
             }
             catch (Exception e)
@@ -156,6 +179,7 @@ namespace Fuelcards.Controllers
             public string? UnitPrice { get; set; }
             public string? Product { get; set; }
         }
+        
         public struct TransactionDataFromView
         {
             public string? name { get; set; }

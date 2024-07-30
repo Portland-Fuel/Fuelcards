@@ -39,11 +39,11 @@ namespace Fuelcards.InvoiceMethods
             
             try
             {
-                GetFixAndFloatingRate(FixedPrice, SiteInfo, addon, _db.GetBasePrice((DateOnly)data.transaction.TransactionDate),data.customerType);
+                GetFixAndFloatingRate(FixedPrice, SiteInfo, addon, _db.GetBasePrice((DateOnly)data.transaction.transactionDate),(EnumHelper.CustomerType)data.customerType);
 
                 if (data.customerType == GenericClassFiles.EnumHelper.CustomerType.Floating)
                 {
-                    VolumeChargedAtFloating = data.transaction.Quantity;
+                    VolumeChargedAtFloating = data.transaction.quantity;
                 }
                 else
                 {
@@ -72,7 +72,7 @@ namespace Fuelcards.InvoiceMethods
 
         private static async Task ProcessRolloverVolumes(InvoicingController.TransactionDataFromView data)
         {
-            double QuantityRemainingToBeAllocated = (double)data.transaction.Quantity;
+            double QuantityRemainingToBeAllocated = (double)data.transaction.quantity;
             while (QuantityRemainingToBeAllocated > 0)
             {
 
@@ -99,10 +99,10 @@ namespace Fuelcards.InvoiceMethods
             FixedVolumeUsedOnThisInvoice += VolumeChargedAtFix;
             double? FloatingPrice = (VolumeChargedAtFloating * FloatingRate) / 100;
 
-            if (network == EnumHelper.Network.Fuelgenie) FloatingPrice = data.transaction.Cost;
+            if (network == EnumHelper.Network.Fuelgenie) FloatingPrice = data.transaction.cost;
             if (FixPrice is null) FixPrice = 0;
             if (FloatingPrice is null) FloatingPrice = 0;
-            return (FixPrice + FloatingPrice)/data.transaction.Quantity;
+            return (FixPrice + FloatingPrice)/data.transaction.quantity;
         }
 
 

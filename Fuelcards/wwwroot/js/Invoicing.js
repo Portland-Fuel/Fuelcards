@@ -450,9 +450,12 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
         account: customer.account,
         customerType: customer.customerType,
         IfuelsCustomer: customer.ifuelsCustomer,
-        fixedInformation: customer.fixedInformation,
         transaction: Transaction,
     }
+
+   
+
+    console.log(TransactionDataFromView);
     try {
         let response = await $.ajax({
             url: '/Invoicing/ProcessTransactionFromPage',
@@ -471,7 +474,6 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
     }
     catch(xhr){
         HandleInvoicingError(xhr);
-        console.error('Error Invoicing Customer:', error);
     }
     
 }
