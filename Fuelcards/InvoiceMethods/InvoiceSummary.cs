@@ -72,9 +72,24 @@ namespace Fuelcards.InvoiceMethods
             details.paymentDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now)).AddDays((int)terms);
             details.Network = EnumHelper.NetworkEnumFromInt(network).ToString();
             var address = HomeController.PFLXeroCustomersData.Where(e=>e.Name == details.CompanyName).FirstOrDefault();
-            details.AddressArr = new string[] { address.Addresses[0].AddressLine1, address.Addresses[0].AddressLine2, address.Addresses[0].City, address.Addresses[0].Country, address.Addresses[0].PostalCode };
+            details.AddressArr = GetAddress(address);
+            
             return details;
         }
+
+        private string[] GetAddress(Xero.NetStandard.OAuth2.Model.Accounting.Contact? address)
+        {
+            if(address.Addresses[0].AddressLine1 is not null)
+            {
+                return new string[] { address.Addresses[0].AddressLine1, address.Addresses[0].AddressLine2, address.Addresses[0].City, address.Addresses[0].Country, address.Addresses[0].PostalCode };
+            }
+            else
+            {
+                return new string[] { address.Addresses[1].AddressLine1, address.Addresses[1].AddressLine2, address.Addresses[1].City, address.Addresses[1].Country, address.Addresses[1].PostalCode };
+
+            }
+        }
+
         public FixedBox GetFixedDetails(CustomerInvoice customerInvoice)
         {
             FixedBox fixedBox = new();
