@@ -92,7 +92,6 @@ namespace Fuelcards.InvoiceMethods
             return;
         }
 
-
         private static double? CalculatePrice(InvoicingController.TransactionDataFromView data, EnumHelper.Network network)
         {
             double? FixPrice = (VolumeChargedAtFix * FixRate) / 100;
