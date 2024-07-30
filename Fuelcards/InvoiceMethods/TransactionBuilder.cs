@@ -31,9 +31,6 @@ namespace Fuelcards.InvoiceMethods
 
             double? UnitPrice = Math.Round(Convert.ToDouble(CalculateUnitPrice(_db, product, transactionDataFromView, network, Addon, siteInfo)), 4, MidpointRounding.AwayFromZero);
 
-            {
-                var stuff = "CODE THIS SOON";
-            }
             double? invoicePrice = transactionDataFromView.transaction.Quantity * UnitPrice;
             invoicePrice = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoicePrice), 2, MidpointRounding.AwayFromZero));
             DataToPassBack model = new()

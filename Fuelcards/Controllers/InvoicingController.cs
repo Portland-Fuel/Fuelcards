@@ -12,6 +12,7 @@ namespace Fuelcards.Controllers
     {
         private readonly IQueriesRepository _db;
         private readonly List<SiteNumberToBand> _sites;
+        List<InvoicePDFModel> invoices = new();
         public InvoicingController(IQueriesRepository db)
         {
             _db = db;
@@ -30,7 +31,7 @@ namespace Fuelcards.Controllers
             try
             {
                 InvoicePreCheckModels checks = new();
-                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now));
+                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-5)));
                 checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);
                 checks.PlattsPrice = checks.BasePrice - 52.95;
                 checks.KeyfuelImports = _db.GetTotalEDIs(0);
@@ -94,11 +95,21 @@ namespace Fuelcards.Controllers
         [HttpPost]
         public JsonResult CompleteInvoicing([FromBody] CustomerInvoice customerInvoice)
         {
+            InvoiceSummary summary = new();
             try
             {
-                //do Transaction faff
+                
 
-
+                InvoicePDFModel newInvoice = new();
+                newInvoice.rows = summary.ProductBreakdown(customerInvoice);
+                newInvoice.transactions = summary.TurnsTransactionsToPdf(customerInvoice.CustomerTransactions);
+                newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
+                newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice,_db, HomeController.PFLXeroCustomersData.Where(e=>e.Name == customerInvoice.name).FirstOrDefault().ContactID.ToString());
+                if (customerInvoice.CustomerType == EnumHelper.CustomerType.Fix)
+                {
+                    newInvoice.fixedBox = summary.GetFixedDetails(customerInvoice);
+                }
+                invoices.Add(newInvoice);
                 return Json("");
             }
             catch (Exception e)

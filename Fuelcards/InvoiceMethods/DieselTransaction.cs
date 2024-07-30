@@ -10,25 +10,13 @@ namespace Fuelcards.InvoiceMethods
     {
         public static double? VolumeChargedAtFix = 0;
         public static double? VolumeChargedAtFloating = 0;
-        //public static double? PriceToInvoice = 0;
-        //public static List<double[]> AllocationIdsUsedForThisTransaction = new();
-        //public static List<double[]> AllocationIdsUsedForInvoice = new();
 
-        //public static int? CurrentAllocationId = null;
-
-        //public static double? TotalDieselUsedOnThisInvoice = 0;
-        //public static double? TotalVolumeRolled = 0;
-        //public static double TotalFixedVolumeUsedOnThisInvoice = 0;
-        //public static double? VolumeTakenFromTheCurrentAllocation = 0;
-
-
-
+        public static double? TotalDieselUsed {  get; set; }
         public static int? account = null;
         public static double? FixedVolumeUsedOnThisInvoice = null;
         public static double? RolledVolumeUsedOnThisInvoice = null;
         public static double? AvailableRolledVolume = null;
         public static double? FixedPrice = null;
-        public static double? Price2 = null;  // Assuming a secondary price level is defined.
         public static double? FixedVolumeRemainingForCurrent = null;
         public static double? FixRate { get; set; }
         public static double? FloatingRate { get; set; }
@@ -36,12 +24,14 @@ namespace Fuelcards.InvoiceMethods
         {
             if (account is null || currentAccount != account)
             {
+
                 account = currentAccount;
                 FixedVolumeUsedOnThisInvoice = 0;
                 RolledVolumeUsedOnThisInvoice = 0;
                 AvailableRolledVolume = StartingRoll;
                 FixedPrice = newFixPrice;
                 FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
+                TotalDieselUsed = 0;
             }
         }
         public static double? DieselMethodology(InvoicingController.TransactionDataFromView data, double? addon, Models.Site SiteInfo, EnumHelper.Network network, IQueriesRepository _db, EnumHelper.Products product)
@@ -60,8 +50,8 @@ namespace Fuelcards.InvoiceMethods
                     CheckIfStaticVariablesNeedUpdating((int)data.account, data.fixedInformation.RolledVolume, data.fixedInformation.AllFixes.Where(e => e.Id == data.fixedInformation.CurrentTradeId).FirstOrDefault().FixedPriceIncDuty, data.fixedInformation.AllFixes.Where(e => e.Id == data.fixedInformation.CurrentTradeId).FirstOrDefault().FixedVolume);
                     ProcessRolloverVolumes(data);
                 }
-              var e = CalculatePrice(data, network);
-                return e;
+              var unitPrice = CalculatePrice(data, network);
+                return unitPrice;
             }
             catch (Exception)
             {
@@ -107,7 +97,7 @@ namespace Fuelcards.InvoiceMethods
         {
             double? FixPrice = (VolumeChargedAtFix * FixRate) / 100;
             if (VolumeChargedAtFix == 0) FixPrice = 0;
-
+            FixedVolumeUsedOnThisInvoice += VolumeChargedAtFix;
             double? FloatingPrice = (VolumeChargedAtFloating * FloatingRate) / 100;
 
             if (network == EnumHelper.Network.Fuelgenie) FloatingPrice = data.transaction.Cost;
@@ -121,15 +111,18 @@ namespace Fuelcards.InvoiceMethods
 
         private static double? UpdateVolume(double? originalVolume, ref double QuantityRemainingToBeAllocated)
         {
+            double? QuantityBeforeAlteration = QuantityRemainingToBeAllocated;
             double? newVolume = originalVolume;
             newVolume = Convert.ToDouble(Math.Round(Convert.ToDecimal(originalVolume - QuantityRemainingToBeAllocated), 2));
 
             if (newVolume >= 0)
             {
+                FixedVolumeUsedOnThisInvoice += QuantityBeforeAlteration;
                 RolledVolumeUsedOnThisInvoice += QuantityRemainingToBeAllocated;
-                FixedVolumeUsedOnThisInvoice += QuantityRemainingToBeAllocated;
+                //FixedVolumeUsedOnThisInvoice += QuantityRemainingToBeAllocated;
                 QuantityRemainingToBeAllocated = 0;
                 AvailableRolledVolume = newVolume;
+                //TotalDieselUsed += QuantityBeforeAlteration;
             }
             else
             {
@@ -144,15 +137,17 @@ namespace Fuelcards.InvoiceMethods
             if (FixedVolumeRemainingForCurrent >= newVolume)
             {
                 FixedVolumeRemainingForCurrent = FixedVolumeRemainingForCurrent - newVolume;
-                FixedVolumeUsedOnThisInvoice += newVolume;
+                //FixedVolumeUsedOnThisInvoice += newVolume;
                 VolumeChargedAtFix = newVolume;
+                //TotalDieselUsed += newVolume;
                 newVolume = 0;
+                
                 return newVolume;
             }
             else
             {
                 VolumeChargedAtFix = FixedVolumeRemainingForCurrent;
-                FixedVolumeUsedOnThisInvoice += FixedVolumeRemainingForCurrent;
+                //FixedVolumeUsedOnThisInvoice += FixedVolumeRemainingForCurrent;
                 return newVolume - FixedVolumeRemainingForCurrent;
             }
         }
