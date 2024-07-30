@@ -127,7 +127,7 @@ namespace Fuelcards.Repositories
             foreach (var item in TransactionsByCustomerAndNetwork)
             {
                 CustomerInvoice model = new();
-                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == PortlandIdsToXeroIds.Where(e => e.PortlandId == item[0].PortlandId && e.XeroTennant == 0).FirstOrDefault()?.XeroId).FirstOrDefault()?.Name;
+                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == PortlandIdsToXeroIds.Where(e => e.PortlandId == item[0].portlandId && e.XeroTennant == 0).FirstOrDefault()?.XeroId).FirstOrDefault()?.Name;
                 if (model.name is null) throw new ArgumentException("could not get Name from portland ID. Possibly the customer is missing in the portland_id to xero_id table");
                 if (model.name.ToLower().Contains("aquaid"))
                 {

@@ -1,4 +1,5 @@
-﻿using Fuelcards.GenericClassFiles;
+﻿using Fuelcards.Controllers;
+using Fuelcards.GenericClassFiles;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.Graph;
@@ -54,6 +55,7 @@ namespace Fuelcards.InvoiceMethods
                     UnitPrice = item.unitPrice,
                     Volume = item.quantity,
                     Value = item.invoicePrice,
+                    Mileage = item.mileage.ToString(),
                 };
                 if (transactionsPDF.product == "TescoDieselNewDiesel") transactionsPDF.product = "Retail Diesel";
                 pdfList.Add(transactionsPDF);
@@ -61,15 +63,16 @@ namespace Fuelcards.InvoiceMethods
             return pdfList;
         }
 
-        internal CustomerDetails GetCustomerDetails(CustomerInvoice customerInvoice, IQueriesRepository _db, string xeroID)
+        internal CustomerDetails GetCustomerDetails(CustomerInvoice customerInvoice, IQueriesRepository _db, string xeroID, int network)
         {
             int? terms = _db.GetPaymentTerms(xeroID);
             CustomerDetails details = new();
             details.CompanyName = customerInvoice.name;
             details.account = customerInvoice.account;
             details.paymentDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now)).AddDays((int)terms);
-            details.Network = "Keyfuels";
-            details.AddressArr = new string[] { "Address1", "Address2", "Address3", "Address4", "Address5" };
+            details.Network = EnumHelper.NetworkEnumFromInt(network).ToString();
+            var address = HomeController.PFLXeroCustomersData.Where(e=>e.Name == details.CompanyName).FirstOrDefault();
+            details.AddressArr = new string[] { address.Addresses[0].AddressLine1, address.Addresses[0].AddressLine2, address.Addresses[0].City, address.Addresses[0].Country, address.Addresses[0].PostalCode };
             return details;
         }
         public FixedBox GetFixedDetails(CustomerInvoice customerInvoice)

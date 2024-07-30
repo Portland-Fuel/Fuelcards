@@ -104,7 +104,7 @@ namespace Fuelcards.Controllers
                 newInvoice.rows = summary.ProductBreakdown(customerInvoice);
                 newInvoice.transactions = summary.TurnsTransactionsToPdf(customerInvoice.CustomerTransactions);
                 newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
-                newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice,_db, HomeController.PFLXeroCustomersData.Where(e=>e.Name == customerInvoice.name).FirstOrDefault().ContactID.ToString());
+                newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice,_db, HomeController.PFLXeroCustomersData.Where(e=>e.Name == customerInvoice.name).FirstOrDefault().ContactID.ToString(),(int)customerInvoice.CustomerTransactions[0].network);
                 if (customerInvoice.CustomerType == EnumHelper.CustomerType.Fix)
                 {
                     newInvoice.fixedBox = summary.GetFixedDetails(customerInvoice);
