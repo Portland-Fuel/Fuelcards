@@ -11,16 +11,16 @@ namespace Fuelcards.InvoiceMethods
         {
             List<SummaryRow> Rows = new();
 
-            var ProductsUsed = invoice.CustomerTransactions?.GroupBy(t => t.ProductCode).Select(g => g.First());
+            var ProductsUsed = invoice.CustomerTransactions?.GroupBy(t => t.productCode).Select(g => g.First());
             foreach (var product in ProductsUsed)
             {
                 SummaryRow newRow = new()
                 {
-                    productCode = (int)product.ProductCode,
-                    productName = EnumHelper.GetProductFromProductCode(product.ProductCode, EnumHelper.NetworkEnumFromInt(product.network)).ToString(),
-                    Quantity = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoice.CustomerTransactions.Where(e => e.ProductCode == product.ProductCode).Sum(e => e.Quantity)), 2, MidpointRounding.AwayFromZero)),
-                    NetTotal = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoice.CustomerTransactions.Where(e => e.ProductCode == product.ProductCode).Sum(e => e.InvoicePrice)), 2, MidpointRounding.AwayFromZero)),
-                    VAT = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoice.CustomerTransactions.Where(e => e.ProductCode == product.ProductCode).Sum(e => e.InvoicePrice) * 0.2), 2, MidpointRounding.AwayFromZero))
+                    productCode = (int)product.productCode,
+                    productName = EnumHelper.GetProductFromProductCode(product.productCode, EnumHelper.NetworkEnumFromInt(product.network)).ToString(),
+                    Quantity = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoice.CustomerTransactions.Where(e => e.productCode == product.productCode).Sum(e => e.quantity)), 2, MidpointRounding.AwayFromZero)),
+                    NetTotal = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoice.CustomerTransactions.Where(e => e.productCode == product.productCode).Sum(e => e.invoicePrice)), 2, MidpointRounding.AwayFromZero)),
+                    VAT = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoice.CustomerTransactions.Where(e => e.productCode == product.productCode).Sum(e => e.invoicePrice) * 0.2), 2, MidpointRounding.AwayFromZero))
                 };
                 if (newRow.productName == EnumHelper.Products.TescoDieselNewDiesel.ToString()) newRow.productName = "Diesel Retail";
                 Rows.Add(newRow);
@@ -44,16 +44,16 @@ namespace Fuelcards.InvoiceMethods
             {
                 TransactionsPDF transactionsPDF = new()
                 {
-                    CardNumber = item.CardNumber,
-                    TransactionNumber = item.TransactionNumber.ToString(),
-                    RegNo = item.PrimaryRegistration,
-                    SiteName = item.SiteName,
-                    TranDate = item.TransactionDate,
-                    TranTime = item.TransactionTime,
-                    product = item.Product,
-                    UnitPrice = item.UnitPrice,
-                    Volume = item.Quantity,
-                    Value = item.InvoicePrice,
+                    CardNumber = item.cardNumber,
+                    TransactionNumber = item.transactionNumber.ToString(),
+                    RegNo = item.primaryRegistration,
+                    SiteName = item.siteName,
+                    TranDate = item.transactionDate,
+                    TranTime = item.transactionTime,
+                    product = item.product,
+                    UnitPrice = item.unitPrice,
+                    Volume = item.quantity,
+                    Value = item.invoicePrice,
                 };
                 if (transactionsPDF.product == "TescoDieselNewDiesel") transactionsPDF.product = "Retail Diesel";
                 pdfList.Add(transactionsPDF);
@@ -68,12 +68,14 @@ namespace Fuelcards.InvoiceMethods
             details.CompanyName = customerInvoice.name;
             details.account = customerInvoice.account;
             details.paymentDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now)).AddDays((int)terms);
+            details.Network = "Keyfuels";
+            details.AddressArr = new string[] { "Address1", "Address2", "Address3", "Address4", "Address5" };
             return details;
         }
         public FixedBox GetFixedDetails(CustomerInvoice customerInvoice)
         {
             FixedBox fixedBox = new();
-            fixedBox.TotalDieselVolumeLiftedOnThisInvoice = Convert.ToDouble(Math.Round(Convert.ToDecimal(customerInvoice.CustomerTransactions.Where(e=>e.Product == "Diesel").Sum(e=>e.Quantity)), 2));
+            fixedBox.TotalDieselVolumeLiftedOnThisInvoice = Convert.ToDouble(Math.Round(Convert.ToDecimal(customerInvoice.CustomerTransactions.Where(e=>e.product == "Diesel").Sum(e=>e.quantity)), 2));
             fixedBox.FixedPriceVolumeForThisPeriod = customerInvoice.fixedInformation.AllFixes.Where(e => e.Id == customerInvoice.fixedInformation.CurrentTradeId).FirstOrDefault()?.FixedVolume;
             fixedBox.FixedPriceVolumeFromPreviousPeriods = customerInvoice.fixedInformation.RolledVolume;
             fixedBox.FixedPriceVolumeUsedOnThisinvoice = Convert.ToDouble(Math.Round(Convert.ToDecimal(DieselTransaction.FixedVolumeUsedOnThisInvoice), 2));
@@ -98,6 +100,8 @@ namespace Fuelcards.InvoiceMethods
     }
     public class InvoicePDFModel
     {
+        public DateOnly InvoiceDate { get; set; }
+        public int InvoiceType { get; set;}
         public CustomerDetails CustomerDetails { get; set; }
         public List<SummaryRow> rows { get; set; }
         public InvoiceTotals totals { get; set; }
@@ -109,6 +113,7 @@ namespace Fuelcards.InvoiceMethods
         public string CardNumber { get; set; }
         public string TransactionNumber { get; set; }
         public string RegNo { get; set; }
+        public string Mileage { get; set; }
         public string SiteName { get; set; }
         public DateOnly? TranDate { get; set; }
         public TimeOnly? TranTime { get; set; }
@@ -122,6 +127,11 @@ namespace Fuelcards.InvoiceMethods
         public string CompanyName { get; set; }
         public int? account { get; set; }
         public DateOnly paymentDate { get; set; }
+        public string? InvoiceNumber { get; set; }
+
+        public string? Network { get; set; }
+
+        public string[] AddressArr { get; set; }
     }
     public class FixedBox
     {

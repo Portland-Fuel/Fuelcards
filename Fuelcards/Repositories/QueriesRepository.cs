@@ -127,24 +127,24 @@ namespace Fuelcards.Repositories
             foreach (var item in TransactionsByCustomerAndNetwork)
             {
                 CustomerInvoice model = new();
-                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == PortlandIdsToXeroIds.Where(e => e.PortlandId == item[0].PortlandId && e.XeroTennant == 0).FirstOrDefault()?.XeroId).FirstOrDefault()?.Name;
+                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == PortlandIdsToXeroIds.Where(e => e.PortlandId == item[0].portlandId && e.XeroTennant == 0).FirstOrDefault()?.XeroId).FirstOrDefault()?.Name;
                 if (model.name.ToLower().Contains("aquaid"))
                 {
-                    model.name = aquaid.FirstOrDefault(e => e.AccountNo == item[0].CustomerCode)?.CostCentre;
+                    model.name = aquaid.FirstOrDefault(e => e.AccountNo == item[0].customerCode)?.CostCentre;
 
                     int? portlandID = aquaid.FirstOrDefault(e => e.CostCentre == model.name)?.PortlandId;
-                    model.addon = (customerAddons.Where(e => e.PortlandId == portlandID && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                    model.addon = (customerAddons.Where(e => e.PortlandId == portlandID && e.Network == (int)network && e.EffectiveDate <= item[0].transactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 }
                 else
                 {
-                    model.addon = (customerAddons.Where(e => e.PortlandId == item[0].PortlandId && e.Network == (int)network && e.EffectiveDate <= item[0].TransactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                    model.addon = (customerAddons.Where(e => e.PortlandId == item[0].portlandId && e.Network == (int)network && e.EffectiveDate <= item[0].transactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                 }
                 if (model.name.ToLower().Contains("portland")) model.name = "The Fuel Trading Company";
                 model.addon = Convert.ToDouble(Math.Round(Convert.ToDecimal(BasePrice + model.addon),2));
-                model.account = item[0].CustomerCode;
+                model.account = item[0].customerCode;
                 model.CustomerTransactions = new();
                 model.CustomerType = customerType((int)model.account, invoiceDate);
-                model.CustomerTransactions = item.OrderBy(e => e.TransactionDate).ThenBy(e => e.TransactionTime).ToList();
+                model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
                 model.IfuelsCustomer = IfuelsCustomer((int)model.account);
                 if (model.CustomerType == EnumHelper.CustomerType.Fix)
                 {
@@ -483,11 +483,11 @@ namespace Fuelcards.Repositories
                     GetAllTexTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList(),
                     GetAllFGTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList());
 
-                foreach (var item in AllTransactions.Where(e => e.PortlandId is null))
+                foreach (var item in AllTransactions.Where(e => e.portlandId is null))
                 {
                     try
                     {
-                        var PortlandId = GetPortlandIdFromMaskedCards(Convert.ToDecimal(item.CardNumber));
+                        var PortlandId = GetPortlandIdFromMaskedCards(Convert.ToDecimal(item.cardNumber));
                         if (PortlandId is not null)
                         {
                             UpdatePortlandIdOnTransaction(item, PortlandId);
@@ -496,7 +496,7 @@ namespace Fuelcards.Repositories
                     }
                     catch (Exception)
                     {
-                        throw new ArgumentException($"error with a masked card. The card number {item.CardNumber} Failed.");
+                        throw new ArgumentException($"error with a masked card. The card number {item.cardNumber} Failed.");
                     }
                 }
             } while (updatesMade);
@@ -525,25 +525,25 @@ namespace Fuelcards.Repositories
             switch (item.network)
             {
                 case 0:
-                    var transaction1 = _db.KfE1E3Transactions.FirstOrDefault(e => e.TransactionId == item.TransactionId);
+                    var transaction1 = _db.KfE1E3Transactions.FirstOrDefault(e => e.TransactionId == item.transactionId);
                     transaction1.PortlandId = portlandId;
                     _db.KfE1E3Transactions.Update(transaction1);
                     _db.SaveChanges();
                     return;
                 case 1:
-                    var transaction2 = _db.UkfTransactions.FirstOrDefault(e => e.TransactionId == item.TransactionId);
+                    var transaction2 = _db.UkfTransactions.FirstOrDefault(e => e.TransactionId == item.transactionId);
                     transaction2.PortlandId = portlandId;
                     _db.UkfTransactions.Update(transaction2);
                     _db.SaveChanges();
                     return;
                 case 2:
-                    var transaction3 = _db.TexacoTransactions.FirstOrDefault(e => e.TransactionId == item.TransactionId);
+                    var transaction3 = _db.TexacoTransactions.FirstOrDefault(e => e.TransactionId == item.transactionId);
                     transaction3.PortlandId = portlandId;
                     _db.TexacoTransactions.Update(transaction3);
                     _db.SaveChanges();
                     return;
                 case 3:
-                    var transaction4 = _db.FgTransactions.FirstOrDefault(e => e.TransactionId == item.TransactionId);
+                    var transaction4 = _db.FgTransactions.FirstOrDefault(e => e.TransactionId == item.transactionId);
                     transaction4.PortlandId = portlandId;
                     _db.FgTransactions.Update(transaction4);
                     _db.SaveChanges();
@@ -554,21 +554,21 @@ namespace Fuelcards.Repositories
         {
 
             List<List<GenericTransactionFile>> TransactionsByCustomer = transactions
-       .GroupBy(t => t.CustomerCode)
+       .GroupBy(t => t.customerCode)
        .Select(group => group.ToList())
        .ToList();
             var AllAquaid = TransactionsByCustomer
                 .SelectMany(list => list)
-                .Where(e => e.PortlandId == 100028 || e.PortlandId == 100029 || e.PortlandId == 100030 || e.PortlandId == 100031 || e.PortlandId == 100032 || e.PortlandId == 100494)
+                .Where(e => e.portlandId == 100028 || e.portlandId == 100029 || e.portlandId == 100030 || e.portlandId == 100031 || e.portlandId == 100032 || e.portlandId == 100494)
                 .ToList();
             if (AllAquaid.Count > 0)
             {
                 var AllFcHiddenCardData = GetAccountFromCostCentre();
                 foreach (var CostCentre in AllAquaid)
                 {
-                    CostCentre.CustomerCode = AllFcHiddenCardData.Where(e => CostCentre.CardNumber.ToString().Contains(e.CardNo)).FirstOrDefault()?.AccountNo;
+                    CostCentre.customerCode = AllFcHiddenCardData.Where(e => CostCentre.cardNumber.ToString().Contains(e.CardNo)).FirstOrDefault()?.AccountNo;
                 }
-                var groupedAquaid = AllAquaid.GroupBy(e => e.CustomerCode).ToList();
+                var groupedAquaid = AllAquaid.GroupBy(e => e.customerCode).ToList();
                 foreach (var aquaidList in AllAquaid)
                 {
                     TransactionsByCustomer.RemoveAll(transactionsList => transactionsList.Contains(aquaidList));

@@ -33,22 +33,22 @@ namespace Fuelcards.InvoiceMethods
                 switch (network)
                 {
                     case EnumHelper.Network.Keyfuels:
-                        double? NewValue = 1.6 * (data.Cost / 1.1) / 100;
+                        double? NewValue = 1.6 * (data.cost / 1.1) / 100;
                         //return NewValue;
                         double? price =  NewValue * 100;
-                        return price / data.Quantity;
+                        return price / data.quantity;
                     case EnumHelper.Network.UkFuel:
 
-                        double? NewValue2 = 1.45 * (data.Cost / 100);
+                        double? NewValue2 = 1.45 * (data.cost / 100);
                         return NewValue2;
                     //return NewValue2 * 100;
                     case EnumHelper.Network.Texaco:
 
-                        double? NewValue3 = 1.6 * (data.Cost / 100);
+                        double? NewValue3 = 1.6 * (data.cost / 100);
                         //return NewValue3 * 100;
                         return NewValue3;
                     case EnumHelper.Network.Fuelgenie:
-                        return data.Cost;
+                        return data.cost;
                 }
                 return null;
             }
@@ -64,12 +64,12 @@ namespace Fuelcards.InvoiceMethods
             {
                 if (network == EnumHelper.Network.Keyfuels)
                 {
-                    double? KeyValue = 1.03 * (data.Cost / 1.01) / 100;
+                    double? KeyValue = 1.03 * (data.cost / 1.01) / 100;
                     var price = KeyValue * 100;
-                    double? unitPrice = price / data.Quantity;
+                    double? unitPrice = price / data.quantity;
                     return unitPrice;
                 }
-                double? NewValue = 1.02 * (data.Cost / 1.01) / 100;
+                double? NewValue = 1.02 * (data.cost / 1.01) / 100;
                 return NewValue * 100;
             }
             catch (Exception)
@@ -85,21 +85,21 @@ namespace Fuelcards.InvoiceMethods
                 switch (network)
                 {
                     case EnumHelper.Network.Keyfuels:
-                        double? SpecificValue = 1.15 * (data.Cost / 1.05) / 100;
+                        double? SpecificValue = 1.15 * (data.cost / 1.05) / 100;
                         var price = SpecificValue * 100;
-                        double? UnitPrice = price / data.Quantity;
+                        double? UnitPrice = price / data.quantity;
                         return UnitPrice;
 
                     case EnumHelper.Network.UkFuel:
-                        double? NewValueU = 1.14 * (data.Cost / 1.06) / 100;
+                        double? NewValueU = 1.14 * (data.cost / 1.06) / 100;
                         //var priceU = NewValueU * 100;
                         return NewValueU;
                     case EnumHelper.Network.Texaco:
-                        double? NewValue3 = (1.1 * data.Cost) / 100;
+                        double? NewValue3 = (1.1 * data.cost) / 100;
                         //var priceU3 = NewValue3 * 100;
                         return NewValue3;
                     case EnumHelper.Network.Fuelgenie:
-                        return data.Cost;
+                        return data.cost;
 
                 }
                 return null;
@@ -130,20 +130,20 @@ namespace Fuelcards.InvoiceMethods
                 switch (network)
                 {
                     case EnumHelper.Network.Keyfuels:
-                        double? NewValue = 1.35 * (data.Cost / 1.15) / 100;
+                        double? NewValue = 1.35 * (data.cost / 1.15) / 100;
                         double? price =  NewValue * 100;
-                        return price / data.Quantity;
+                        return price / data.quantity;
 
                     case EnumHelper.Network.UkFuel:
-                        //double? NewValue2 = 1.2 * (data.Cost / 1.1) / 100; OLD
-                        double? NewValue2 = 1.4 * (data.Cost / 1.1) / 100;
+                        //double? NewValue2 = 1.2 * (data.cost / 1.1) / 100; OLD
+                        double? NewValue2 = 1.4 * (data.cost / 1.1) / 100;
                         return NewValue2;
                     case EnumHelper.Network.Texaco:
-                        double? NewValue3 = 1.2 * (data.Cost) / 100;
+                        double? NewValue3 = 1.2 * (data.cost) / 100;
                         //return NewValue3 * 100;
                         return NewValue3;
                     case EnumHelper.Network.Fuelgenie:
-                        return data.Cost;
+                        return data.cost;
                     default: return null;
                 }
 
@@ -161,19 +161,19 @@ namespace Fuelcards.InvoiceMethods
                 switch (network)
                 {
                     case EnumHelper.Network.Keyfuels:
-                        double? NewValue = 1.35 * (data.Cost / 1.15) / 100;
+                        double? NewValue = 1.35 * (data.cost / 1.15) / 100;
                         var price = NewValue * 100;
-                        return price / data.Quantity;
+                        return price / data.quantity;
                     case EnumHelper.Network.UkFuel:
-                        double? NewValue2 = 1.2 * (data.Cost / 1.05) / 100;
+                        double? NewValue2 = 1.2 * (data.cost / 1.05) / 100;
                         //return NewValue2 * 100;
                         return NewValue2;
                     case EnumHelper.Network.Texaco:
-                        if (data.Cost > 500) data.Cost = data.Cost / 100;
-                        double? NewValue3 = 1.2 * (data.Cost) / 100;
+                        if (data.cost > 500) data.cost = data.cost / 100;
+                        double? NewValue3 = 1.2 * (data.cost) / 100;
                         return NewValue3 * 100;
                     case EnumHelper.Network.Fuelgenie:
-                        return data.Cost;
+                        return data.cost;
                     default: return null;
                 }
             }
@@ -185,17 +185,17 @@ namespace Fuelcards.InvoiceMethods
         }
         public double? Other(GenericTransactionFile data, EnumHelper.Network network)
         {
-            if (network == EnumHelper.Network.Fuelgenie) return data.Cost;
+            if (network == EnumHelper.Network.Fuelgenie) return data.cost;
             if (network == EnumHelper.Network.UkFuel)
             {
-                double? NewValue = 1.2 * (data.Cost / 1.15) / 100;
-                var a = (NewValue * 100) / data.Quantity;
+                double? NewValue = 1.2 * (data.cost / 1.15) / 100;
+                var a = (NewValue * 100) / data.quantity;
                 return NewValue * 100;
             }
             try
             {
-                double? NewValue = 1.2 * (data.Cost / 1.1) / 100;
-                var a = (NewValue * 100) / data.Quantity;
+                double? NewValue = 1.2 * (data.cost / 1.1) / 100;
+                var a = (NewValue * 100) / data.quantity;
                 return NewValue * 100;
             }
             catch (Exception)
@@ -209,20 +209,20 @@ namespace Fuelcards.InvoiceMethods
             switch (network)
             {
                 case EnumHelper.Network.UkFuel:
-                    double? NewValue = 1.2 * (data.Cost / 1.05) / 100;
+                    double? NewValue = 1.2 * (data.cost / 1.05) / 100;
                     //return NewValue * 100;
                     return NewValue;
                 case EnumHelper.Network.Keyfuels:
-                    double? NewValue2 = 1.35 * (data.Cost / 1.15) / 100;
+                    double? NewValue2 = 1.35 * (data.cost / 1.15) / 100;
                     double? price = NewValue2 * 100;
-                    return price / data.Quantity;
+                    return price / data.quantity;
 
                 case EnumHelper.Network.Texaco:
-                    double? NewValue3 = (1.2 * data.Cost) / 100;
+                    double? NewValue3 = (1.2 * data.cost) / 100;
                     //return NewValue3 * 100;
                     return NewValue3;
                 case EnumHelper.Network.Fuelgenie:
-                    return data.Cost;
+                    return data.cost;
                 default: return null;
             }
         }
@@ -233,18 +233,18 @@ namespace Fuelcards.InvoiceMethods
                 switch (network)
                 {
                     case EnumHelper.Network.Keyfuels:
-                        double? NewValue = 1.6 * (data.Cost / 1.1) / 100;
+                        double? NewValue = 1.6 * (data.cost / 1.1) / 100;
                         return NewValue * 100;
                     case EnumHelper.Network.UkFuel:
 
-                        double? NewValue2 = 1.6 * (data.Cost / 1.15 / 100);
+                        double? NewValue2 = 1.6 * (data.cost / 1.15 / 100);
                         return NewValue2;
                     case EnumHelper.Network.Texaco:
 
-                        double? NewValue3 = (1.6 * data.Cost) / 100;
+                        double? NewValue3 = (1.6 * data.cost) / 100;
                         return NewValue3;
                     case EnumHelper.Network.Fuelgenie:
-                        return data.Cost;
+                        return data.cost;
                     default: return null;
                 }
             }
@@ -258,10 +258,10 @@ namespace Fuelcards.InvoiceMethods
         {
             try
             {
-                double? NewValue = 1.2 * (data.Cost / 1.05) / 100;
+                double? NewValue = 1.2 * (data.cost / 1.05) / 100;
 
                 var price = NewValue * 100;
-                return price / data.Quantity;
+                return price / data.quantity;
             }
             catch (Exception)
             {
@@ -272,24 +272,24 @@ namespace Fuelcards.InvoiceMethods
         public double? Card(GenericTransactionFile data, EnumHelper.Network network)
         {
             if (network != EnumHelper.Network.Keyfuels) throw new ArgumentException("So far only keyfuels transactions should be able to enter the calculation for a new card! something has gone badly wrong");
-            double? NewValue = 1.25 * (data.Cost / 1.1) / 100;
+            double? NewValue = 1.25 * (data.cost / 1.1) / 100;
             var price =  NewValue * 100;
-            return price/data.Quantity;
+            return price/data.quantity;
         }
         public double? PackagedAdblue(GenericTransactionFile data, EnumHelper.Network network, IQueriesRepository _db)
         {
             try
             {
-                if (data.Cost == 0 && data.ProductCode == 18 && network == EnumHelper.Network.UkFuel)
+                if (data.cost == 0 && data.productCode == 18 && network == EnumHelper.Network.UkFuel)
                 {
 
-                    data.Cost = _db.GetMissingProduct(network, data.ProductCode);
-                    double? NewValue = 1.75 * (data.Cost / 1.2) / 100;
+                    data.cost = _db.GetMissingProduct(network, data.productCode);
+                    double? NewValue = 1.75 * (data.cost / 1.2) / 100;
                     return NewValue * 100;
                 }
-                if (data.Cost > 0 && data.ProductCode == 18)
+                if (data.cost > 0 && data.productCode == 18)
                 {
-                    double? NewValue = 1.75 * data.Cost / 100;
+                    double? NewValue = 1.75 * data.cost / 100;
                     return NewValue * 100;
                 }
                 return null;
@@ -305,7 +305,7 @@ namespace Fuelcards.InvoiceMethods
             try
             {
 
-                double? NewValue = 1.2 * data.Cost / 100;
+                double? NewValue = 1.2 * data.cost / 100;
 
                 return NewValue * 100;
             }
@@ -320,7 +320,7 @@ namespace Fuelcards.InvoiceMethods
             try
             {
 
-                double? NewValue = 1.2 * (data.Cost / 100) / 1.05;
+                double? NewValue = 1.2 * (data.cost / 100) / 1.05;
 
                 return NewValue * 100;
             }
@@ -335,7 +335,7 @@ namespace Fuelcards.InvoiceMethods
             try
             {
 
-                double? NewValue = 1.2 * (data.Cost / 100);
+                double? NewValue = 1.2 * (data.cost / 100);
 
                 return NewValue * 100;
             }
@@ -349,7 +349,7 @@ namespace Fuelcards.InvoiceMethods
         {
             if (product == EnumHelper.Products.Diesel)
             {
-                double? basePrice = _db.GetBasePrice((DateOnly)data.transaction.TransactionDate);
+                double? basePrice = _db.GetBasePrice((DateOnly)data.transaction.transactionDate);
                 double? transactionSite = site.transactionalSiteSurcharge;
                 double? UnitPrice = basePrice + Addon + transactionSite + site.Surcharge;
                 UnitPrice = UnitPrice / 100;

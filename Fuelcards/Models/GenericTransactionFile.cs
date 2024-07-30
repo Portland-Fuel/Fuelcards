@@ -2,54 +2,54 @@
 {
     public class GenericTransactionFile
     {
-        public int TransactionId { get; set; }
+        public int transactionId { get; set; }
 
-        public int ControlId { get; set; }
+        public int controlId { get; set; }
 
-        public int? PortlandId { get; set; }
+        public int? portlandId { get; set; }
 
-        public int? TransactionNumber { get; set; }
+        public int? transactionNumber { get; set; }
 
-        public DateOnly? TransactionDate { get; set; }
+        public DateOnly? transactionDate { get; set; }
 
-        public TimeOnly? TransactionTime { get; set; }
+        public TimeOnly? transactionTime { get; set; }
 
-        public int? SiteCode { get; set; }
-        public string? CardNumber { get; set; }
+        public int? siteCode { get; set; }
+        public string? cardNumber { get; set; }
 
-        public int? CustomerCode { get; set; }
+        public int? customerCode { get; set; }
 
-        public short? CustomerAc { get; set; }
+        public short? customerAc { get; set; }
 
-        public string PrimaryRegistration { get; set; }
+        public string? primaryRegistration { get; set; }
 
-        public int? Mileage { get; set; }
+        public int? mileage { get; set; }
 
-        public int? FleetNumber { get; set; }
+        public int? fleetNumber { get; set; }
 
-        public short? ProductCode { get; set; }
+        public short? productCode { get; set; }
 
-        public double? Quantity { get; set; }
+        public double? quantity { get; set; }
 
-        public string Sign { get; set; }
+        public string? sign { get; set; }
 
-        public double? Cost { get; set; }
+        public double? cost { get; set; }
 
-        public string CostSign { get; set; }
+        public string? costSign { get; set; }
 
-        public string AccurateMileage { get; set; }
+        public string? accurateMileage { get; set; }
 
-        public string CardRegistration { get; set; }
+        public string? cardRegistration { get; set; }
 
-        public string TransactonRegistration { get; set; }
+        public string? transactonRegistration { get; set; }
 
-        public bool? Invoiced { get; set; }
+        public bool? invoiced { get; set; }
         public int? network { get; set; }
 
-        public string? SiteName { get; set; }
-        public double? InvoicePrice { get; set; }
-        public double? UnitPrice { get; set; }
-        public string? Product { get; set; }
+        public string? siteName { get; set; }
+        public double? invoicePrice { get; set; }
+        public double? unitPrice { get; set; }
+        public string? product { get; set; }
 
     }
 }

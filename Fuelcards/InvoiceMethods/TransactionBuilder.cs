@@ -24,14 +24,14 @@ namespace Fuelcards.InvoiceMethods
 
         internal DataToPassBack processTransaction(InvoicingController.TransactionDataFromView transactionDataFromView, EnumHelper.Network network)
         {
-            EnumHelper.Products? product = EnumHelper.GetProductFromProductCode(Convert.ToInt32(transactionDataFromView.transaction.ProductCode), network);
-            Models.Site? siteInfo = getSite(transactionDataFromView.transaction.SiteCode, network, (int)transactionDataFromView.transaction.ProductCode, (EnumHelper.Products)product);
-            transactionDataFromView.transaction.Quantity = ConvertToLitresBasedOnNetwork(transactionDataFromView.transaction.Quantity, network);
-            double? Addon = _db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.PortlandId, transactionDataFromView.transaction.TransactionDate, network, transactionDataFromView.IfuelsCustomer, (int)transactionDataFromView.account);
+            EnumHelper.Products? product = EnumHelper.GetProductFromProductCode(Convert.ToInt32(transactionDataFromView.transaction.productCode), network);
+            Models.Site? siteInfo = getSite(transactionDataFromView.transaction.siteCode, network, (int)transactionDataFromView.transaction.productCode, (EnumHelper.Products)product);
+            transactionDataFromView.transaction.quantity = ConvertToLitresBasedOnNetwork(transactionDataFromView.transaction.quantity, network);
+            double? Addon = _db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.portlandId, transactionDataFromView.transaction.transactionDate, network, transactionDataFromView.IfuelsCustomer, (int)transactionDataFromView.account);
 
             double? UnitPrice = Math.Round(Convert.ToDouble(CalculateUnitPrice(_db, product, transactionDataFromView, network, Addon, siteInfo)), 4, MidpointRounding.AwayFromZero);
 
-            double? invoicePrice = transactionDataFromView.transaction.Quantity * UnitPrice;
+            double? invoicePrice = transactionDataFromView.transaction.quantity * UnitPrice;
             invoicePrice = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoicePrice), 2, MidpointRounding.AwayFromZero));
             DataToPassBack model = new()
             {
