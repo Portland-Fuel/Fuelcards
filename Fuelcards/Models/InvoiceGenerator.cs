@@ -208,7 +208,7 @@ namespace Fuelcards.Models
             headerRow.HeadingFormat = true;
             headerRow.Format.Font.Bold = true;
 
-            if (invoiceModelCustomerDetails.InvoiceType == 1)
+            if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 1)
             {
                 var edis = invoiceModelCustomerDetails.transactions;
                 string previousPanNumber = null;
@@ -294,7 +294,7 @@ namespace Fuelcards.Models
 
                 }
             }
-            if (invoiceModelCustomerDetails.InvoiceType == 0)
+            if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 0)
             {
                 var edis = invoiceModelCustomerDetails.transactions;
 
@@ -374,7 +374,7 @@ namespace Fuelcards.Models
             headerRow.HeadingFormat = true;
             headerRow.Format.Font.Bold = true;
 
-            if (invoiceModelCustomerDetails.InvoiceType == 1)
+            if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 1)
             {
                 var edis = invoiceModelCustomerDetails.transactions;
                 string previousPanNumber = null; // Initialize with null or empty string
@@ -456,7 +456,7 @@ namespace Fuelcards.Models
                     TotalValueForEachTransactionGroup = 0;
                 }
             }
-            if (invoiceModelCustomerDetails.InvoiceType == 0)
+            if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 0)
             {
                 var edis = invoiceModelCustomerDetails.transactions;
 

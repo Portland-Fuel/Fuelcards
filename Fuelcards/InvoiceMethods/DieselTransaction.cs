@@ -96,7 +96,7 @@ namespace Fuelcards.InvoiceMethods
         {
             double? FixPrice = (VolumeChargedAtFix * FixRate) / 100;
             if (VolumeChargedAtFix == 0) FixPrice = 0;
-            FixedVolumeUsedOnThisInvoice += VolumeChargedAtFix;
+            //FixedVolumeUsedOnThisInvoice += VolumeChargedAtFix;
             double? FloatingPrice = (VolumeChargedAtFloating * FloatingRate) / 100;
 
             if (network == EnumHelper.Network.Fuelgenie) FloatingPrice = data.transaction.cost;
@@ -125,6 +125,7 @@ namespace Fuelcards.InvoiceMethods
             }
             else
             {
+                FixedVolumeUsedOnThisInvoice += originalVolume;
                 AvailableRolledVolume = 0;
             }
             return newVolume;
@@ -136,7 +137,7 @@ namespace Fuelcards.InvoiceMethods
             if (FixedVolumeRemainingForCurrent >= newVolume)
             {
                 FixedVolumeRemainingForCurrent = FixedVolumeRemainingForCurrent - newVolume;
-                //FixedVolumeUsedOnThisInvoice += newVolume;
+                FixedVolumeUsedOnThisInvoice += newVolume;
                 VolumeChargedAtFix = newVolume;
                 //TotalDieselUsed += newVolume;
                 newVolume = 0;

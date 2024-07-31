@@ -810,5 +810,12 @@ namespace Fuelcards.Repositories
         {
             return _db.MissingProductValues.FirstOrDefault(e => e.Network == (int)network && e.Product == productCode)?.Value;
         }
+        public int GetInvoiceDisplayGroup(string companyName, string network)
+        {
+            var PortlandId = GetPortlandIdFromCustomerName(companyName);
+            int? DisplayGroup = _db.InvoicingOptions.FirstOrDefault(e => e.PortlandId == PortlandId && e.GroupedNetwork.Contains((int)EnumHelper.NetworkEnumFromString(network)))?.Displaygroup;
+            if (DisplayGroup == null) return 0;
+            else return (int)DisplayGroup;
+        }
     }
 }

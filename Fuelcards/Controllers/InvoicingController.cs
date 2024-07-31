@@ -31,7 +31,7 @@ namespace Fuelcards.Controllers
             try
             {
                 InvoicePreCheckModels checks = new();
-                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-5)));
+                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now));
                 checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);
                 checks.PlattsPrice = checks.BasePrice - 52.95;
                 checks.KeyfuelImports = _db.GetTotalEDIs(0);
@@ -98,23 +98,18 @@ namespace Fuelcards.Controllers
             InvoiceSummary summary = new();
             try
             {
-                
-
                 InvoicePDFModel newInvoice = new();
-                newInvoice.rows = summary.ProductBreakdown(customerInvoice);
-                newInvoice.transactions = summary.TurnsTransactionsToPdf(customerInvoice.CustomerTransactions);
-                newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
-                newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice,_db, HomeController.PFLXeroCustomersData.Where(e=>e.Name == customerInvoice.name).FirstOrDefault().ContactID.ToString(),(int)customerInvoice.CustomerTransactions[0].network);
                 if (customerInvoice.CustomerType == EnumHelper.CustomerType.Fix)
                 {
                     newInvoice.fixedBox = summary.GetFixedDetails(customerInvoice);
                 }
+                newInvoice.rows = summary.ProductBreakdown(customerInvoice);
+                newInvoice.transactions = summary.TurnsTransactionsToPdf(customerInvoice.CustomerTransactions);
+                newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
+                newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice,_db, HomeController.PFLXeroCustomersData.Where(e=>e.Name == customerInvoice.name).FirstOrDefault().ContactID.ToString(),(int)customerInvoice.CustomerTransactions[0].network);
+                
                 newInvoice.InvoiceDate = DateOnly.FromDateTime(DateTime.Now);
-                newInvoice.InvoiceType = 1;
                 invoices.Add(newInvoice);
-
-                #region PDF
-                //ProducingThePDFAndCSV
                 try
                 {
                     InvoiceGenerator invoiceGenerator = new(newInvoice);
@@ -124,13 +119,6 @@ namespace Fuelcards.Controllers
                 {
                     throw new Exception(e.Message);
                 }
-              
-
-
-                #endregion
-
-
-
                 return Json("");
             }
             catch (Exception e)
