@@ -42,5 +42,7 @@ namespace Fuelcards.Repositories
         double? TransactionalSiteSurcharge(EnumHelper.Network network, int site, int productCode);
         double? GetMissingProduct(EnumHelper.Network network, short? productCode);
         List<Models.Site> GetAllTransactions(List<int> ControlIDs);
+        bool CheckSite(Site item);
+        void AddSiteNumberToBand(Site site);
     }
 }

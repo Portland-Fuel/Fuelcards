@@ -7,7 +7,6 @@
 <link href="~/css/edi.css" rel="stylesheet" />
 <script src="~/js/edi.js"></script>
 <div id="EdiLoader" class="loader-container" hidden>
-    <h1>This may take a while!</h1>
     <div class="loader"></div>
 </div>
 @* <div class="form-container">
@@ -49,7 +48,12 @@
 
 <div class="table-container">
     <button onclick="CheckSites()" class="CheckSitesButton">Check Sites</button>
-
+        <table  id="FailedSitesTable">
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     <h3>Latest Edi Upload</h3>
     <table id="EdiTable" class="data-table">
         <thead>
