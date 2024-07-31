@@ -56,9 +56,9 @@ namespace Fuelcards.Controllers
         }
 
 
-        public JsonResult FindAnyFailedSites([FromBody] List<string> ControlIDs)
+        public JsonResult FindAnyFailedSites([FromBody] List<int> ControlIDs)
         {
-            List<Site> AllSites = _db.GetAllTransactions();
+            List<Site> AllSites = _db.GetAllTransactions(ControlIDs);
             return Json("");
         }
     }
