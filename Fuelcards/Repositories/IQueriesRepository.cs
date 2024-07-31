@@ -43,5 +43,7 @@ namespace Fuelcards.Repositories
         double? GetMissingProduct(EnumHelper.Network network, short? productCode);
         int GetInvoiceDisplayGroup(string companyName, string network);
         List<Models.Site> GetAllTransactions(List<int> ControlIDs);
+        bool CheckSite(Site item);
+        void AddSiteNumberToBand(Site site);
     }
 }

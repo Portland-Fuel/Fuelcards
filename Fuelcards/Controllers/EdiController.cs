@@ -4,8 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fuelcards.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    [Route("EdiController/[action]")]
     public class EdiController : Controller
     {
         private readonly IQueriesRepository _db;
@@ -15,7 +14,7 @@ namespace Fuelcards.Controllers
             _db = queriesRepository;
         }
 
-        [HttpPost("MoveFilesToCorrectFolder")]
+        [HttpPost]
         public async Task<IActionResult> MoveFilesToCorrectFolder(FileUploadViewModel model)
         {
             var EdiModel = HomeController.LoadEdiVmModel();
@@ -55,12 +54,44 @@ namespace Fuelcards.Controllers
 
         }
 
-
-        public JsonResult FindAnyFailedSites([FromBody] List<int> ControlIDs)
+        [HttpPost]
+        public JsonResult FindAnyFailedSites([FromBody]string[] ControlIDs)
         {
-            List<Site> AllSites = _db.GetAllTransactions(ControlIDs);
-            return Json("");
+            List<Site> FailedSites = new();
+
+            List<Site> AllSites = _db.GetAllTransactions(ControlIDs.Select(e=> Convert.ToInt32(e)).ToList());
+            foreach (var item in AllSites)
+            {
+                if (!_db.CheckSite(item))
+                {
+                    FailedSites.Add(item);
+
+                }
+                else
+                {
+                    var egg = 0;
+                }
+            }
+
+          
+            
+            return Json(FailedSites);
         }
+
+        [HttpPost]
+        public JsonResult UploadNewFixedSite([FromBody] Site site)
+        {
+            try
+            {
+                _db.AddSiteNumberToBand(site);
+                return Json("Success");
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return Json("Error:" + e.Message);
+            }
+        }   
     }
 
 

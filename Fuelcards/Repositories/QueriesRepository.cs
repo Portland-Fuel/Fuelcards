@@ -18,6 +18,7 @@ using Microsoft.Graph;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using DataAccess.Tickets;
+using Site = Fuelcards.Models.Site;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -30,6 +31,30 @@ namespace Fuelcards.Repositories
             _db = db;
             _Cdb = cDb;
             _Idb = Idb;
+        }
+
+
+        public void AddSiteNumberToBand(Site site)
+        {
+            SiteNumberToBand siteNumberToBand = new()
+            {
+                SiteNumber = site.code,
+                NetworkId = (int)EnumHelper.NetworkEnumFromString(site.Network),
+                Band = site.band,
+                Active = true,
+                Surcharge = site.Surcharge,
+                EffectiveDate = GetEffectiveDate(),
+            };
+            _db.SiteNumberToBands.Add(siteNumberToBand);
+            _db.SaveChanges();
+        }
+        private DateOnly GetEffectiveDate()
+        {
+            return DateOnly.FromDateTime(DateTime.Now).AddDays(-40);
+        }
+        public bool CheckSite(Site item)
+        {
+            return _db.SiteNumberToBands.Any(e=>e.SiteNumber == item.code && e.NetworkId == (int)EnumHelper.NetworkEnumFromString(item.Network) && e.Active != false);
         }
         public List<Models.Site> GetAllTransactions(List<int> ControlIDs)
         {
@@ -45,6 +70,28 @@ namespace Fuelcards.Repositories
                     Models.Site newSite = new Models.Site
                     {
                         code = item.SiteCode,
+                        Network = "KeyFuels"
+                    };
+
+                    AllSites.Add(newSite);
+                }
+
+                foreach (var item in UKfuelTransactions)
+                {
+                    Models.Site newSite = new Models.Site
+                    {
+                        code = Convert.ToInt32(item.Site),
+                        Network = "UkFuels",
+                    };
+
+                    AllSites.Add(newSite);
+                }
+                foreach (var item in TexacoTransactions)
+                {
+                    Models.Site newSite = new Models.Site
+                    {
+                        code = Convert.ToInt32(item.Site),
+                        Network = "Texaco",
                     };
 
                     AllSites.Add(newSite);
