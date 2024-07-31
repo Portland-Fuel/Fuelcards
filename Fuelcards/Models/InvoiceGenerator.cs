@@ -41,7 +41,7 @@ namespace Fuelcards.Models
         private MigraDoc.DocumentObjectModel.Section section;
         private Table table;
         readonly XPathNavigator navigator;
-        readonly XmlDocument invoice;
+        public readonly XmlDocument invoice;
         //Colors
         readonly static Color TableBorder = new(81, 125, 192);
         readonly static Color TableBlue = new(235, 240, 249);
@@ -57,6 +57,7 @@ namespace Fuelcards.Models
             FileName = InvoiceFileHelper.BuildingFileName(invoicePDFModel, invoicePDFModel.CustomerDetails.CompanyName);
             XmlUrlResolver resolver = new();
             resolver.Credentials = CredentialCache.DefaultCredentials;
+            InvoiceDate = invoicePDFModel.InvoiceDate;
 
             // Create invoice
             invoice = new XmlDocument();
@@ -68,35 +69,53 @@ namespace Fuelcards.Models
             navigator = invoice.CreateNavigator();
         }
 
-
+        #region PDF Generation
         public void generatePDF(InvoicePDFModel PDFModel)
         {
-            InvoiceFileHelper.CheckOrCorrectDirectorysBeforePDFCreation();
-
-            // Assuming InvoiceDate is a property or a variable in your context
-            DateOnly InvoiceDate = PDFModel.InvoiceDate; // Example, replace with actual date source
-            string SavePath = InvoiceFileHelper.BuildingFilePath(PDFModel, InvoiceDate);
-
-            // Set the custom font resolver for PDFsharp
-            GlobalFontSettings.FontResolver = new CustomFontResolver();
-
-            // Create the document
-            document = createDocument(PDFModel, InvoiceDate.ToString("dd/MM/yyyy"));
-
-            // Prepare and render the document
-            var docRenderer = new DocumentRenderer(document);
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-            docRenderer.PrepareDocument();
-
-            PdfDocumentRenderer renderer = new(true)
+            try
             {
-                Document = document
-            };
-            renderer.PrepareRenderPages();
-            renderer.RenderDocument();
-            renderer.PdfDocument.Save(SavePath);
-        }
+                InvoiceFileHelper.CheckOrCorrectDirectorysBeforePDFCreation();
 
+                DateOnly InvoiceDate = PDFModel.InvoiceDate;
+                string SavePath = InvoiceFileHelper.BuildingFilePath(PDFModel, InvoiceDate);
+
+                // Ensure the directory exists
+                string directoryPath = Path.GetDirectoryName(SavePath);
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                // Set the custom font resolver for PDFsharp, if needed
+
+                // Create the document
+                document = createDocument(PDFModel, InvoiceDate.ToString("dd/MM/yyyy"));
+
+                // Prepare and render the document
+                var docRenderer = new DocumentRenderer(document);
+                System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+                docRenderer.PrepareDocument();
+
+                PdfDocumentRenderer renderer = new(true)
+                {
+                    Document = document
+                };
+                renderer.PrepareRenderPages();
+                renderer.RenderDocument();
+                string FullSavePath = Path.Combine(SavePath, FileName);
+                renderer.PdfDocument.Save(FullSavePath);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine("Access denied: " + ex.Message);
+                // Handle the error or inform the user
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred: " + ex.Message);
+                // Handle other errors
+            }
+        }
         // Define the custom font resolver as shown previously
 
 
@@ -852,7 +871,7 @@ namespace Fuelcards.Models
 
             string[] AddressArr = CustomerInvoiceModel.CustomerDetails.AddressArr;
             string Customername = CustomerInvoiceModel.CustomerDetails.CompanyName;
-           
+
 
 
 
@@ -985,7 +1004,7 @@ namespace Fuelcards.Models
             row.Cells[5].AddParagraph("Net VAT");
             row.Cells[6].AddParagraph("VAT Rate");
 
-           
+
             string DisplayedNetwork = "";
             int count = 0;
             foreach (var sumrow in CustomerInvoiceModel.rows)
@@ -1013,7 +1032,7 @@ namespace Fuelcards.Models
                 NewSumRow.Cells[6].AddParagraph(sumrow.VAT.ToString() + "%");
 
 
-               
+
 
                 count++;
             }
@@ -1137,57 +1156,37 @@ namespace Fuelcards.Models
             style.ParagraphFormat.SpaceAfter = "5mm";
             style.ParagraphFormat.TabStops.AddTabStop("16cm", TabAlignment.Right);
         }
-    }
-    public class CustomFontResolver : IFontResolver
-    {
-        // Map your font names to internal face names
-        private readonly Dictionary<string, string> fontMapping = new()
-    {
-        { "Arial", "Arial#Regular" },
-        { "ArialBold", "Arial#Bold" },
-        { "Calibri", "Calibri#Regular" },
-        { "CalibriBold", "Calibri#Bold" },
-        { "CalibriItalic", "Calibri#Italic" },
-        { "CalibriBoldItalic", "Calibri#BoldItalic" }
-        // Add other fonts as needed
-    };
 
-        // Implement ResolveTypeface to map requested font to internal representation
-        public FontResolverInfo? ResolveTypeface(string familyName, bool bold, bool italic)
+        #endregion
+
+        public void GenerateCSV(InvoicePDFModel invoicePDFModel)
         {
-            string faceName = familyName + (bold ? "Bold" : "") + (italic ? "Italic" : "");
-            if (fontMapping.TryGetValue(faceName, out var internalName))
+            try
             {
-                return new FontResolverInfo(internalName);
+                string Filename = InvoiceFileHelper.BuildingFileName(invoicePDFModel, invoicePDFModel.CustomerDetails.CompanyName);
+                string FilePath = InvoiceFileHelper.BuildingFilePath(invoicePDFModel, invoicePDFModel.InvoiceDate);
+                string CSVPath = Path.Combine(FilePath, "CSV", Filename.Replace(".pdf", ".csv"));
+                using (StreamWriter sw = new StreamWriter(CSVPath))
+                {
+                    sw.WriteLine(",,,,,,,,,Portland");
+                    sw.WriteLine($",{invoicePDFModel.CustomerDetails.CompanyName}");
+                    for (int i = 0; i < invoicePDFModel.CustomerDetails.AddressArr.Length; i++)
+                    {
+                        sw.WriteLine($",{invoicePDFModel.CustomerDetails.AddressArr[i]}");
+                    }
+                    sw.WriteLine(",SALES INVOICE,,,,,,,,Account No,,,Document Date,,,Sales Invoice No");
+                    sw.WriteLine($",,,,,,,,,122542,,,29-Jul-2024,,,TX32734");
+
+                }
             }
-
-            return null; // Fallback if font is not found
-        }
-
-        // Implement GetFont to return the font data
-        public byte[]? GetFont(string faceName)
-        {
-            switch (faceName)
+            catch (Exception)
             {
-                case "Arial#Regular":
-                    return File.ReadAllBytes(@"C:\Windows\Fonts\arial.ttf");
-                case "Arial#Bold":
-                    return File.ReadAllBytes(@"C:\Windows\Fonts\arialbd.ttf");
-                case "Calibri#Regular":
-                    return File.ReadAllBytes(@"C:\Windows\Fonts\calibri.ttf");
-                case "Calibri#Bold":
-                    return File.ReadAllBytes(@"C:\Windows\Fonts\calibrib.ttf");
-                case "Calibri#Italic":
-                    return File.ReadAllBytes(@"C:\Windows\Fonts\calibrii.ttf");
-                case "Calibri#BoldItalic":
-                    return File.ReadAllBytes(@"C:\Windows\Fonts\calibriz.ttf");
-                // Add other fonts as needed
-                default:
-                    return null; // Handle missing fonts
+
+                throw;
             }
         }
-    }
 
+    }
 
 
     public static class InvoiceFileHelper
@@ -1287,9 +1286,10 @@ namespace Fuelcards.Models
             {
                 network = network.ToLower();
             }
+            string strdate = InvoiceDate.ToString("yyyy-MM-dd");
+            strdate = strdate.Replace("/", "-");
+            string baseDirectory = Path.Combine(_startingDirectory, _year.ToString(), strdate);
 
-
-            string baseDirectory = Path.Combine(_startingDirectory, _year.ToString(), InvoiceDate.ToString());
 
             switch (network)
             {

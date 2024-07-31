@@ -72,7 +72,44 @@ function HighlightRow(RowElement){
     }
 }
 
+async function CheckSites(){
+    ShowEdiLoader();
+    var ListOfRecentControlIDs = GetListOfRecentControlIDs();
+    $.ajax({
+        url: "/EDIImports/FindAnyFailedSites",
+        type: "POST",
+        dataType: 'json',
+        data: JSON.stringify({ListOfRecentControlIDs}),
+        contentType: "application/json;charset=utf-8",
+        success: async function (SiteResponse) {
+           
+        },
+        error: function (error) {
+   
+        }
+    });
 
+}
+
+async function GetListOfRecentControlIDs{
+    var Table = document.getElementById('EdiTable');
+    var tbody = Table.getElementsByTagName('tbody')[0];
+    var TableRows = tbody.getElementsByTagName('tr');
+    var ListOfRecentControlIDs = [];
+    for (var i = 0; i < TableRows.length; i++) {
+        var Row = TableRows[i];
+        var RowID = Row.id;
+        ListOfRecentControlIDs.push(RowID);
+    }
+}
+
+
+async function ShowEdiLoader(){
+    document.getElementById('EdiLoader').hidden = false;
+}
+async function HideEdiLoader(){
+    document.getElementById('EdiLoader').hidden = true;
+}
 
 const Toast = Swal.mixin({
     toast: true,

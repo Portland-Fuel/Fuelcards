@@ -450,6 +450,7 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
         account: customer.account,
         customerType: customer.customerType,
         IfuelsCustomer: customer.ifuelsCustomer,
+        fixedInformation: customer.fixedInformation,
         transaction: Transaction,
     }
 

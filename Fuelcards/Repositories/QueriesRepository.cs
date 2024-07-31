@@ -31,6 +31,34 @@ namespace Fuelcards.Repositories
             _Cdb = cDb;
             _Idb = Idb;
         }
+        public List<Models.Site> GetAllTransactions(List<int> ControlIDs)
+        {
+            try
+            {
+                List<Models.Site> AllSites = new();
+                var KeyfuelTransactions = _db.KfE1E3Transactions.Where(e => ControlIDs.Contains(e.ControlId));
+                var UKfuelTransactions = _db.UkfTransactions.Where(e => ControlIDs.Contains(e.ControlId));
+                var TexacoTransactions = _db.TexacoTransactions.Where(e => ControlIDs.Contains((int)e.ControlId));
+
+                foreach (var item in KeyfuelTransactions)
+                {
+                    Models.Site newSite = new Models.Site
+                    {
+                        code = item.SiteCode,
+                    };
+
+                    AllSites.Add(newSite);
+                }
+
+                return AllSites;
+
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error Getting All Transactions:" +  e.Message);   
+            }
+        }
         public List<CustomerPricingAddon>? GetListOfAddonsForCustomer(int PortlandId, EnumHelper.Network network)
         {
             List<CustomerPricingAddon>? AllCustomerAddons = GetAll().Where(e => e.PortlandId == PortlandId && e.Network == (int)network).ToList();

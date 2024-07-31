@@ -114,9 +114,7 @@ namespace Fuelcards.Controllers
                 invoices.Add(newInvoice);
 
                 #region PDF
-                //ProducingThePDF
-
-
+                //ProducingThePDFAndCSV
                 try
                 {
                     InvoiceGenerator invoiceGenerator = new(newInvoice);

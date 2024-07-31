@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Fuelcards.Models;
+using Fuelcards.Repositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fuelcards.Controllers
 {
@@ -6,6 +8,13 @@ namespace Fuelcards.Controllers
     [ApiController]
     public class EdiController : Controller
     {
+        private readonly IQueriesRepository _db;
+
+        public EdiController(IQueriesRepository queriesRepository)
+        {
+            _db = queriesRepository;
+        }
+
         [HttpPost("MoveFilesToCorrectFolder")]
         public async Task<IActionResult> MoveFilesToCorrectFolder(FileUploadViewModel model)
         {
@@ -45,7 +54,16 @@ namespace Fuelcards.Controllers
             return View("/Views/Edi/Edi.cshtml", EdiModel);
 
         }
+
+
+        public JsonResult FindAnyFailedSites([FromBody] List<string> ControlIDs)
+        {
+            List<Site> AllSites = _db.GetAllTransactions();
+            return Json("");
+        }
     }
+
+
     public class FileUploadViewModel
     {
         public List<IFormFile> Files { get; set; }

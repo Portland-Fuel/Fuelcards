@@ -41,5 +41,6 @@ namespace Fuelcards.Repositories
         double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network, bool isIfuels, int account);
         double? TransactionalSiteSurcharge(EnumHelper.Network network, int site, int productCode);
         double? GetMissingProduct(EnumHelper.Network network, short? productCode);
+        List<Models.Site> GetAllTransactions(List<int> ControlIDs)
     }
 }
