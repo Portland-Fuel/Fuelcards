@@ -40,6 +40,7 @@ namespace Fuelcards.InvoiceMethods
                 UnitPrice = UnitPrice.HasValue ? UnitPrice.Value.ToString("F4") : null,
                 InvoicePrice = invoicePrice.HasValue ? invoicePrice.Value.ToString("F2") : null
             };
+            
             return model;
 
         }
@@ -87,33 +88,18 @@ namespace Fuelcards.InvoiceMethods
         }
         private Models.Site? getSite(int? siteCode, EnumHelper.Network network, int product, EnumHelper.Products productName)
         {
-            if (siteCode == null && productName == EnumHelper.Products.EmailPinCharge) 
+            if (siteCode == null)
             {
-                Models.Site _site = new()
-                {
-                    name = "EMAIL PIN CHARGE",
-                    band = null,
-                    Surcharge = null,
-                    transactionalSiteSurcharge = null,
-                    code = null
-                };
-                return _site;
-            }
-            if (siteCode == null && productName == EnumHelper.Products.Card)
-            {
-                Models.Site _site = new()
-                {
-                    name = "Card",
-                    band = null,
-                    Surcharge = null,
-                    transactionalSiteSurcharge = null,
-                    code = null
-                };
-                return _site;
+                return CreateSiteForNullCode(productName);
             }
 
-            if (siteCode == null) throw new ArgumentNullException("The site code should not be null. now that it is - This needs to be coded...");
             SiteNumberToBand? site = _sites.Where(e => e.SiteNumber == siteCode && e.NetworkId == (int)network && e.Active != false).FirstOrDefault();
+
+            if (site == null)
+            {
+                throw new ArgumentNullException($"No active site found for site code: {siteCode} and network: {network}");
+            }
+
             Models.Site foundSite = new()
             {
                 name = site.Name,
@@ -124,6 +110,61 @@ namespace Fuelcards.InvoiceMethods
             foundSite.Surcharge = _db.GetSurchargeFromBand(foundSite.band, network);
             return foundSite;
         }
+
+        private Models.Site CreateSiteForNullCode(EnumHelper.Products productName)
+        {
+            switch (productName)
+            {
+                case EnumHelper.Products.EmailPinCharge:
+                    return new Models.Site
+                    {
+                        name = "EMAIL PIN CHARGE",
+                        band = null,
+                        Surcharge = null,
+                        transactionalSiteSurcharge = null,
+                        code = null
+                    };
+                case EnumHelper.Products.Card:
+                    return new Models.Site
+                    {
+                        name = "Card",
+                        band = null,
+                        Surcharge = null,
+                        transactionalSiteSurcharge = null,
+                        code = null
+                    };
+                case EnumHelper.Products.CardStopManagementFee:
+                    return new Models.Site
+                    {
+                        name = "CARD STOP MANAGEMENT FEE",
+                        band = null,
+                        Surcharge = null,
+                        transactionalSiteSurcharge = null,
+                        code = null
+                    };
+                case EnumHelper.Products.StockNotification:
+                    return new Models.Site
+                    {
+                        name = "STOCK NOTIFICATION",
+                        band = null,
+                        Surcharge = null,
+                        transactionalSiteSurcharge = null,
+                        code = null
+                    };
+                case EnumHelper.Products.EDISTDSignle:
+                    return new Models.Site
+                    {
+                        name = "EDI STF SINGLE (NEW A/C's ONLY)",
+                        band = null,
+                        Surcharge = null,
+                        transactionalSiteSurcharge = null,
+                        code = null
+                    };
+                default:
+                    throw new ArgumentNullException("The site code should not be null.");
+            }
+        }
+
         public static double? ConvertToLitresBasedOnNetwork(double? quantity, EnumHelper.Network network)
         {
             switch (network)

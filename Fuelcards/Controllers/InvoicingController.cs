@@ -12,7 +12,9 @@ namespace Fuelcards.Controllers
     {
         private readonly IQueriesRepository _db;
         private readonly List<SiteNumberToBand> _sites;
-        List<InvoicePDFModel> invoices = new();
+        public static List<InvoicePDFModel> invoices = new();
+        public static InvoiceReporter _report = new();
+        public static List<InvoiceReport> reportList = new();
         public InvoicingController(IQueriesRepository db)
         {
             _db = db;
@@ -81,6 +83,44 @@ namespace Fuelcards.Controllers
         [HttpPost]
         public JsonResult GetInvoicePng([FromBody] CustomerInvoice customerInvoice)
         {
+            InvoiceReport summaryReport = new InvoiceReport();
+            summaryReport.DieselVol = reportList.Sum(e => e.DieselVol);
+            summaryReport.PetrolVol = reportList.Sum(e => e.PetrolVol);
+            summaryReport.LubesVol = reportList.Sum(e => e.LubesVol);
+            summaryReport.GasoilVol = reportList.Sum(e => e.GasoilVol);
+            summaryReport.AdblueVol = reportList.Sum(e => e.AdblueVol);
+            summaryReport.PremDieselVol = reportList.Sum(e => e.PremDieselVol);
+            summaryReport.SuperUnleadedVol = reportList.Sum(e => e.SuperUnleadedVol);
+            summaryReport.BrushTollVol = reportList.Sum(e => e.BrushTollVol);
+            summaryReport.TescoVol = reportList.Sum(e => e.TescoVol);
+            summaryReport.OtherVol = reportList.Sum(e => e.OtherVol);
+
+            summaryReport.DieselPrice = reportList.Sum(e => e.DieselPrice);
+            summaryReport.PetrolPrice = reportList.Sum(e => e.PetrolPrice);
+            summaryReport.LubesPrice = reportList.Sum(e => e.LubesPrice);
+            summaryReport.GasoilPrice = reportList.Sum(e => e.GasoilPrice);
+            summaryReport.AdbluePrice = reportList.Sum(e => e.AdbluePrice);
+            summaryReport.PremDieselPrice = reportList.Sum(e => e.PremDieselPrice);
+            summaryReport.SuperUnleadedPrice = reportList.Sum(e => e.SuperUnleadedPrice);
+            summaryReport.BrushTollPrice = reportList.Sum(e => e.BrushTollPrice);
+            summaryReport.TescoPrice = reportList.Sum(e => e.TescoPrice);
+            summaryReport.OthersPrice = reportList.Sum(e => e.OthersPrice);
+
+            summaryReport.Rolled = reportList.Sum(e => e.Rolled);
+            summaryReport.Current = reportList.Sum(e => e.Current);
+            summaryReport.RollAvailable = reportList.Sum(e => e.RollAvailable);
+            summaryReport.DieselLifted = reportList.Sum(e => e.DieselLifted);
+            summaryReport.Fixed = reportList.Sum(e => e.Fixed);
+            summaryReport.Floating = reportList.Sum(e => e.Floating);
+            summaryReport.TescoVol = reportList.Sum(e => e.TescoVol);
+            summaryReport.NetTotal = reportList.Sum(e => e.NetTotal);
+            summaryReport.Vat = reportList.Sum(e => e.Vat);
+            summaryReport.Total = reportList.Sum(e => e.Total);
+
+
+
+
+
             try
             {
                 throw new Exception("Error getting Png");
@@ -99,6 +139,7 @@ namespace Fuelcards.Controllers
             try
             {
                 InvoicePDFModel newInvoice = new();
+                
                 if (customerInvoice.CustomerType == EnumHelper.CustomerType.Fix)
                 {
                     newInvoice.fixedBox = summary.GetFixedDetails(customerInvoice);
@@ -106,10 +147,20 @@ namespace Fuelcards.Controllers
                 newInvoice.rows = summary.ProductBreakdown(customerInvoice);
                 newInvoice.transactions = summary.TurnsTransactionsToPdf(customerInvoice.CustomerTransactions);
                 newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
-                newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice,_db, HomeController.PFLXeroCustomersData.Where(e=>e.Name == customerInvoice.name).FirstOrDefault().ContactID.ToString(),(int)customerInvoice.CustomerTransactions[0].network);
+                if(customerInvoice.name != "The Fuel Trading Company")
+                {
+                    newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice, _db, HomeController.PFLXeroCustomersData.Where(e => e.Name == customerInvoice.name).FirstOrDefault().ContactID.ToString(), (int)customerInvoice.CustomerTransactions[0].network);
+                }
+                else
+                {
+                    newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice, _db, "FTC", (int)customerInvoice.CustomerTransactions[0].network);
+                }
+                
                 
                 newInvoice.InvoiceDate = DateOnly.FromDateTime(DateTime.Now);
                 invoices.Add(newInvoice);
+
+                reportList.Add(_report.CreateNewInvoiceReport(newInvoice));
                 try
                 {
                     InvoiceGenerator invoiceGenerator = new(newInvoice);

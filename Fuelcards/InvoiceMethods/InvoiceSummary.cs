@@ -78,6 +78,9 @@ namespace Fuelcards.InvoiceMethods
                     Volume = item.quantity,
                     Value = item.invoicePrice,
                     Mileage = item.mileage.ToString(),
+                    Band = item.band,
+                    productCode = item.productCode,
+                    
                 };
                 if (transactionsPDF.product == "TescoDieselNewDiesel") transactionsPDF.product = "Retail Diesel";
                 pdfList.Add(transactionsPDF);
@@ -88,21 +91,27 @@ namespace Fuelcards.InvoiceMethods
         internal CustomerDetails GetCustomerDetails(CustomerInvoice customerInvoice, IQueriesRepository _db, string xeroID, int network)
         {
             int? terms = _db.GetPaymentTerms(xeroID);
+            if (!terms.HasValue) throw new ArgumentException($"There are no payment terms for this customer - {customerInvoice.name}");
             CustomerDetails details = new();
             details.CompanyName = customerInvoice.name;
             details.account = customerInvoice.account;
             details.paymentDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now)).AddDays((int)terms);
             details.Network = EnumHelper.NetworkEnumFromInt(network).ToString();
             var address = HomeController.PFLXeroCustomersData.Where(e=>e.Name == details.CompanyName).FirstOrDefault();
-            details.AddressArr = GetAddress(address);
+            details.AddressArr = GetAddress(address, xeroID);
             details.InvoiceNumber = "123";
             details.InvoiceType = _db.GetInvoiceDisplayGroup(details.CompanyName, details.Network);
             return details;
         }
 
-        private string[] GetAddress(Xero.NetStandard.OAuth2.Model.Accounting.Contact? address)
+        private string[] GetAddress(Xero.NetStandard.OAuth2.Model.Accounting.Contact? address, string XeroId)
         {
-            if(address.Addresses[0].AddressLine1 is not null)
+            if(XeroId == "FTC")
+            {
+                return new string[] {"1 Toft Green", null, "York", null, "YO1 6JT" };
+
+            }
+            else if(address.Addresses[0].AddressLine1 is not null)
             {
                 return new string[] { address.Addresses[0].AddressLine1, address.Addresses[0].AddressLine2, address.Addresses[0].City, address.Addresses[0].Country, address.Addresses[0].PostalCode };
             }
@@ -165,6 +174,8 @@ namespace Fuelcards.InvoiceMethods
         public double? UnitPrice { get; set; }
         public double? Volume { get; set; }
         public double? Value { get; set; }
+        public string? Band { get; set; }
+        public int? productCode { get; set; }
     }
     public class CustomerDetails
     {

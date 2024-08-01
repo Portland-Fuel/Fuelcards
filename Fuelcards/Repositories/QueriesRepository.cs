@@ -122,6 +122,7 @@ namespace Fuelcards.Repositories
         }
         public int? GetPaymentTerms(string xeroId)
         {
+            if (xeroId == "FTC") return 7;
             int? paymentTerms = _db.PaymentTerms.FirstOrDefault(e => e.XeroId == xeroId)?.PaymentTerms;
             return paymentTerms;
         }
@@ -175,21 +176,22 @@ namespace Fuelcards.Repositories
         public async Task<List<CustomerInvoice>?> GetCustomersToInvoice(int network, DateOnly invoiceDate, double? BasePrice)
         {
             List<GenericTransactionFile> PortlandTransaction = new();
+            var sites = GetAllSiteInformation();
             List<List<GenericTransactionFile>> TransactionsByCustomerAndNetwork = new();
             List<CustomerInvoice> Customers = new();
             switch (network)
             {
                 case 0:
-                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(GetAllKeyfuelTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null, null);
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(GetAllKeyfuelTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null, null,sites);
                     break;
                 case 1:
-                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, GetAllUKTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null);
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, GetAllUKTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null,sites);
                     break;
                 case 2:
-                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, GetAllTexTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null);
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, GetAllTexTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null,sites);
                     break;
                 case 3:
-                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, null, GetAllFGTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList());
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, null, GetAllFGTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), sites);
                     break;
             }
             List<FcHiddenCard> aquaid = await GetAquaidInfo();
@@ -229,7 +231,7 @@ namespace Fuelcards.Repositories
                 }
                 Customers.Add(model);
             }
-            return Customers;
+            return Customers.OrderBy(e=>e.name).ToList();
         }
         private CustomerInvoice? FixedProperties(CustomerInvoice model, DateOnly invoiceDate)
         {
@@ -348,6 +350,7 @@ namespace Fuelcards.Repositories
 
         public int? GetPortlandIdFromCustomerName(string customerName)
         {
+            if (customerName == "The Fuel Trading Company") return 100177;
             string xeroID = HomeController.PFLXeroCustomersData.Where(e => e.Name == customerName).FirstOrDefault().ContactID.ToString();
             int? portlandId = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.XeroId == xeroID && e.XeroTennant == 0).PortlandId;
             if (portlandId is null) throw new ArgumentException($"Portland ID could not be established from the xero id {xeroID}");
@@ -549,6 +552,7 @@ namespace Fuelcards.Repositories
         {
             List<GenericTransactionFile> AllTransactions;
             bool updatesMade;
+            var sites = GetAllSiteInformation();
             do
             {
                 updatesMade = false;
@@ -557,11 +561,12 @@ namespace Fuelcards.Repositories
                     GetAllKeyfuelTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList(),
                     GetAllUKTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList(),
                     GetAllTexTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList(),
-                    GetAllFGTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList());
+                    GetAllFGTransactionsThatNeedToBeInvoiced(InvoiceDate).Result.ToList(), sites);
 
                 foreach (var item in AllTransactions.Where(e => e.portlandId is null))
                 {
                     try
+
                     {
                         var PortlandId = GetPortlandIdFromMaskedCards(Convert.ToDecimal(item.cardNumber));
                         if (PortlandId is not null)

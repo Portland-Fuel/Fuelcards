@@ -50,6 +50,7 @@
         public double? invoicePrice { get; set; }
         public double? unitPrice { get; set; }
         public string? product { get; set; }
+        public string band { get; set; }
 
     }
 }

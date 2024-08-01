@@ -234,7 +234,8 @@ namespace Fuelcards.InvoiceMethods
                 {
                     case EnumHelper.Network.Keyfuels:
                         double? NewValue = 1.6 * (data.cost / 1.1) / 100;
-                        return NewValue * 100;
+                        var price = NewValue * 100;
+                        return price / data.quantity;
                     case EnumHelper.Network.UkFuel:
 
                         double? NewValue2 = 1.6 * (data.cost / 1.15 / 100);

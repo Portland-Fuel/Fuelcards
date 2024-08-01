@@ -1,6 +1,8 @@
 ﻿using DataAccess.Fuelcards;
+using Fuelcards.GenericClassFiles;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
+using System.Transactions;
 using Xero.NetStandard.OAuth2.Client;
 
 namespace Fuelcards.InvoiceMethods
@@ -16,9 +18,9 @@ namespace Fuelcards.InvoiceMethods
             DateOnly mostRecentMonday = currentDate.AddDays(-daysUntilMonday);
             return mostRecentMonday;
         }
-        public static List<GenericTransactionFile> TurnTransactionIntoGeneric(List<KfE1E3Transaction>? kf, List<UkfTransaction>? uk, List<TexacoTransaction>? tx, List<FgTransaction>? fg)
+        public static List<GenericTransactionFile> TurnTransactionIntoGeneric(List<KfE1E3Transaction>? kf, List<UkfTransaction>? uk, List<TexacoTransaction>? tx, List<FgTransaction>? fg, List<SiteNumberToBand> sites)
         {
-
+            
             List<GenericTransactionFile> TotalTransactions = [];
             if (kf is not null)
             {
@@ -48,6 +50,7 @@ namespace Fuelcards.InvoiceMethods
                     transactions.transactonRegistration = item.TransactonRegistration;
                     transactions.invoiced = item.Invoiced;
                     transactions.network = 0;
+                    transactions.band = sites.FirstOrDefault(e => e.SiteNumber == transactions.siteCode && e.NetworkId == (int)EnumHelper.Network.Keyfuels)?.Band;
                     TotalTransactions.Add(transactions);
                 }
             }
@@ -75,6 +78,8 @@ namespace Fuelcards.InvoiceMethods
                     transactions.cardRegistration = item.Registration;
                     transactions.invoiced = null;
                     transactions.network = 1;
+                    transactions.band = sites.FirstOrDefault(e => e.SiteNumber == transactions.siteCode && e.NetworkId == (int)EnumHelper.Network.UkFuel).Band;
+
                     TotalTransactions.Add(transactions);
                 }
             }
@@ -102,6 +107,8 @@ namespace Fuelcards.InvoiceMethods
                     transactions.transactonRegistration = item.Registration;
                     transactions.invoiced = null;
                     transactions.network = 2;
+                    transactions.band = sites.FirstOrDefault(e => e.SiteNumber == transactions.siteCode && e.NetworkId == (int)EnumHelper.Network.Texaco).Band; ;
+
                     TotalTransactions.Add(transactions);
                 }
             }
@@ -130,6 +137,8 @@ namespace Fuelcards.InvoiceMethods
                     transactions.transactonRegistration = item.RegNo;
                     transactions.invoiced = null;
                     transactions.network = 3;
+                    transactions.band = sites.FirstOrDefault(e => e.SiteNumber == transactions.siteCode && e.NetworkId == (int)EnumHelper.Network.Fuelgenie).Band;
+
                     TotalTransactions.Add(transactions);
                 }
             }
