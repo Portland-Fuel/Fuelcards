@@ -98,6 +98,7 @@ namespace Fuelcards.Controllers
         [HttpPost]
         public JsonResult GetInvoicePng([FromBody] CustomerInvoice customerInvoice)
         {
+            // THIS IS TEMP
             InvoiceReport summaryReport = new InvoiceReport();
             summaryReport.DieselVol = reportList.Sum(e => e.DieselVol);
             summaryReport.PetrolVol = reportList.Sum(e => e.PetrolVol);
@@ -131,7 +132,7 @@ namespace Fuelcards.Controllers
             summaryReport.NetTotal = reportList.Sum(e => e.NetTotal);
             summaryReport.Vat = reportList.Sum(e => e.Vat);
             summaryReport.Total = reportList.Sum(e => e.Total);
-
+            // END
 
 
 
@@ -186,8 +187,6 @@ namespace Fuelcards.Controllers
                 {
                     throw new Exception(e.Message);
                 }
-                throw new Exception("Error");
-
                 return Json("");
             }
             catch (Exception e)
