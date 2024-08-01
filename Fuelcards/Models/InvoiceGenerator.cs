@@ -31,6 +31,8 @@ using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
 using System.IO;
 using File = System.IO.File;
+using Fuelcards.Repositories;
+using Fuelcards.CustomExceptions;
 namespace Fuelcards.Models
 {
     public class InvoiceGenerator
@@ -50,11 +52,15 @@ namespace Fuelcards.Models
         readonly static Color TableGreen = new(99, 171, 113);
         readonly static Color Black = new(0, 0, 0, 0);
         readonly static Color Blue = new(30, 144, 255);
+        public static  IQueriesRepository _db;
 
 
-        public InvoiceGenerator(InvoicePDFModel invoicePDFModel)
+
+        public InvoiceGenerator(InvoicePDFModel invoicePDFModel, IQueriesRepository queriesRepository)
         {
-            FileName = InvoiceFileHelper.BuildingFileName(invoicePDFModel, invoicePDFModel.CustomerDetails.CompanyName);
+            _db = queriesRepository;
+
+            FileName = FileHelperForInvoicing.BuildingFileNameForInvoicing(invoicePDFModel, invoicePDFModel.CustomerDetails.CompanyName);
             XmlUrlResolver resolver = new();
             resolver.Credentials = CredentialCache.DefaultCredentials;
             InvoiceDate = invoicePDFModel.InvoiceDate;
@@ -74,10 +80,9 @@ namespace Fuelcards.Models
         {
             try
             {
-                InvoiceFileHelper.CheckOrCorrectDirectorysBeforePDFCreation();
 
                 DateOnly InvoiceDate = PDFModel.InvoiceDate;
-                string SavePath = InvoiceFileHelper.BuildingFilePath(PDFModel, InvoiceDate);
+                string SavePath = FileHelperForInvoicing.BuildingFilePath(PDFModel, InvoiceDate);
 
                 // Ensure the directory exists
                 string directoryPath = Path.GetDirectoryName(SavePath);
@@ -1159,25 +1164,140 @@ namespace Fuelcards.Models
 
         #endregion
 
-        public void GenerateCSV(InvoicePDFModel invoicePDFModel)
+        public static void GenerateXeroCSV(List<InvoicePDFModel> ListinvoicePDFModel)
         {
             try
             {
-                string Filename = InvoiceFileHelper.BuildingFileName(invoicePDFModel, invoicePDFModel.CustomerDetails.CompanyName);
-                string FilePath = InvoiceFileHelper.BuildingFilePath(invoicePDFModel, invoicePDFModel.InvoiceDate);
-                string CSVPath = Path.Combine(FilePath, "CSV", Filename.Replace(".pdf", ".csv"));
-                using (StreamWriter sw = new StreamWriter(CSVPath))
-                {
-                    sw.WriteLine(",,,,,,,,,Portland");
-                    sw.WriteLine($",{invoicePDFModel.CustomerDetails.CompanyName}");
-                    for (int i = 0; i < invoicePDFModel.CustomerDetails.AddressArr.Length; i++)
-                    {
-                        sw.WriteLine($",{invoicePDFModel.CustomerDetails.AddressArr[i]}");
-                    }
-                    sw.WriteLine(",SALES INVOICE,,,,,,,,Account No,,,Document Date,,,Sales Invoice No");
-                    sw.WriteLine($",,,,,,,,,122542,,,29-Jul-2024,,,TX32734");
+                List<XeroCsv> ListOfDataToGoOnTheCSV = new List<XeroCsv>();
+                string XeroFileName = FileHelperForInvoicing.BuildingFileNameForXeroCSV(ListinvoicePDFModel[0]);
+                string FilePathForXeroCSV = Path.Combine(FileHelperForInvoicing.BuildingFilePathForXeroCSV(ListinvoicePDFModel[0]), XeroFileName);
 
+
+                foreach (var invoicePDFModel in ListinvoicePDFModel)
+                {
+                    List<XeroCsv> ListToAdd = new List<XeroCsv>();
+
+                    ListToAdd = GetListOfCSVData(invoicePDFModel);
+                    ListOfDataToGoOnTheCSV.AddRange(ListToAdd);
                 }
+                WriteOutTheCsv(ListOfDataToGoOnTheCSV, FilePathForXeroCSV);
+
+
+
+            }
+            catch (Exception e)
+            {
+                
+                throw;
+            }
+        }
+
+        private static void WriteOutTheCsv(List<XeroCsv> listOfDataToGoOnTheCSV, string filePathForXeroCSV)
+        {
+            try
+            {
+                string directoryPath = Path.GetDirectoryName(filePathForXeroCSV);
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                using (var writer = new StreamWriter(filePathForXeroCSV))
+                {
+                    // Write the CSV header
+                    writer.WriteLine("ContactName,EmailAddress,POAddressLine1,POAddressLine2,POAddressLine3,POAddressLine4,POCity,PORegion,POPostalCode,POCountry,InvoiceNumber,Reference,InvoiceDate,DueDate,Total,InventoryItemCode,Description,Quantity,UnitAmount,Discount,AccountCode,TaxType,TaxAmount,TrackingName1,TrackingOption1,TrackingName2,TrackingOption2,Currency,BrandingTheme");
+
+                    // Write each record
+                    foreach (var data in listOfDataToGoOnTheCSV)
+                    {
+                        string line = $"{EscapeCsvField(data.ContactName)},{EscapeCsvField(data.EmailAddress)},{EscapeCsvField(data.POAddressLine1)},{EscapeCsvField(data.POAddressLine2)},{EscapeCsvField(data.POAddressLine3)},{EscapeCsvField(data.POAddressLine4)},{EscapeCsvField(data.POCity)},{EscapeCsvField(data.PORegion)},{EscapeCsvField(data.POPostalCode)},{EscapeCsvField(data.POCountry)},{EscapeCsvField(data.InvoiceNumber)},{EscapeCsvField(data.Reference)},{EscapeCsvField(data.InvoiceDate)},{EscapeCsvField(data.DueDate)},{EscapeCsvField(data.Total.ToString())},{EscapeCsvField(data.InventoryItemCode)},{EscapeCsvField(data.Description)},{EscapeCsvField(data.Quantity.ToString())},{EscapeCsvField(data.UnitAmount.ToString())},{EscapeCsvField(data.Discount.ToString())},{EscapeCsvField(data.AccountCode)},{EscapeCsvField(data.TaxType)},{EscapeCsvField(data.TaxAmount.ToString())},{EscapeCsvField(data.TrackingName1)},{EscapeCsvField(data.TrackingOption1)},{EscapeCsvField(data.TrackingName2)},{EscapeCsvField(data.TrackingOption2)},{EscapeCsvField(data.Currency)},{EscapeCsvField(data.BrandingTheme)}";
+                        writer.WriteLine(line);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while writing the CSV file.", ex);
+            }
+        }
+
+        private static string EscapeCsvField(string field)
+        {
+            if (string.IsNullOrEmpty(field))
+            {
+                return "";
+            }
+
+            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
+            {
+                field = "\"" + field.Replace("\"", "\"\"") + "\"";
+            }
+
+            return field;
+        }
+
+        private static List<XeroCsv> GetListOfCSVData(InvoicePDFModel invoicePDFModel)
+        {
+            try
+            {
+
+                List<XeroCsv> ListOfDataToGoOnTheCSV = new List<XeroCsv>();
+
+                foreach (var item in invoicePDFModel.rows)
+                {
+                    XeroCsv xeroCsv = new XeroCsv();
+                    xeroCsv.ContactName = invoicePDFModel.CustomerDetails.CompanyName;
+                    xeroCsv.EmailAddress = "Not given yet";
+                    xeroCsv.POAddressLine1 = invoicePDFModel.CustomerDetails.AddressArr[0];
+                    xeroCsv.POAddressLine2 = invoicePDFModel.CustomerDetails.AddressArr[1];
+                    xeroCsv.POAddressLine3 = invoicePDFModel.CustomerDetails.AddressArr[2];
+                    xeroCsv.POAddressLine4 = invoicePDFModel.CustomerDetails.AddressArr[3];
+                    xeroCsv.POCity = "PoCity";
+                    xeroCsv.PORegion = "PoRegion";
+                    xeroCsv.POPostalCode = "ff";
+                    xeroCsv.POCountry = "United Kingdom";
+                    xeroCsv.InvoiceNumber = invoicePDFModel.CustomerDetails.InvoiceNumber;
+                    xeroCsv.Reference = "";
+                    xeroCsv.InvoiceDate = invoicePDFModel.InvoiceDate.ToString();
+                    xeroCsv.DueDate = invoicePDFModel.CustomerDetails.paymentDate.ToString();
+                    xeroCsv.Total = item.NetTotal.ToString();
+                    xeroCsv.InventoryItemCode = GetInventoryItemCode(item.productName);
+                    xeroCsv.Description = item.productName;
+                    xeroCsv.Quantity = item.Quantity.ToString();
+                    xeroCsv.UnitAmount = (item.NetTotal / item.Quantity).ToString();
+                    xeroCsv.Discount = "";
+                    xeroCsv.AccountCode = "201";
+                    xeroCsv.TaxType = "20%" + "(VAT on Income)";
+                    xeroCsv.TaxAmount = "";
+                    xeroCsv.TrackingName1 = "";
+                    xeroCsv.TrackingOption1 = "";
+                    xeroCsv.TrackingName2 = "";
+                    xeroCsv.TrackingOption2 = "";
+                    xeroCsv.Currency = "GBP";
+                    xeroCsv.BrandingTheme = "PFL-DD";
+                    ListOfDataToGoOnTheCSV.Add(xeroCsv);
+                }
+
+                return ListOfDataToGoOnTheCSV;
+            }
+            catch
+            {
+                throw;
+            }
+
+        }
+
+        private static string? GetInventoryItemCode(string productName)
+        {
+            try
+            {
+                string? ItemCode = _db.GetinventoryItemCode(productName);
+                if(ItemCode == null)
+                {
+                    throw new InventoryItemCodeNotInDb("There is no item code in the database for the prodcut: " + productName);
+                }
+                return ItemCode;
+
             }
             catch (Exception)
             {
@@ -1185,15 +1305,14 @@ namespace Fuelcards.Models
                 throw;
             }
         }
-
     }
 
 
-    public static class InvoiceFileHelper
+    public static class FileHelperForInvoicing
     {
         public static string _startingDirectory = @"C:\Portland\Fuel Trading Company\Fuelcards - Fuelcards\Invoices\FuelcardApp";
         public static decimal _year = DateTime.Now.Year;
-        public static string BuildingFileName(InvoicePDFModel newInvoice, string CustomerName)
+        public static string BuildingFileNameForInvoicing(InvoicePDFModel newInvoice, string CustomerName)
         {
             string prefix = string.Empty;
             switch (newInvoice.CustomerDetails.Network.ToString())
@@ -1213,6 +1332,16 @@ namespace Fuelcards.Models
             newInvoice.CustomerDetails.InvoiceNumber = prefix + newInvoice.CustomerDetails.InvoiceNumber;
             return CustomerName + " Inv" + " " + newInvoice.CustomerDetails.InvoiceNumber + ".pdf";
         }
+        public static string BuildingFileNameForXeroCSV(InvoicePDFModel invoicePDFModel)
+        {
+            string date = invoicePDFModel.InvoiceDate.ToString("ddMMyy");
+            return "Xero FC Upload " + date + ".csv";
+        }
+
+        public static string BuildingFilePathForXeroCSV(InvoicePDFModel invoicePDFModel)
+        {
+            return Path.Combine(_startingDirectory, "Xero", _year.ToString(), invoicePDFModel.InvoiceDate.ToString("MMM dd"));
+        }
 
         public static void CheckOrCorrectDirectorysBeforePDFCreation()
         {
@@ -1225,43 +1354,58 @@ namespace Fuelcards.Models
                 ListOfNetworks.Add("Fuel Genie");
                 ListOfNetworks.Add("FastFuel");
                 //TopLevelCheck
+
+                string InvoiceDate = InvoiceGenerator.InvoiceDate.ToString("yyMMdd");
                 if (!Directory.Exists(_startingDirectory))
                 {
                     Directory.CreateDirectory(_startingDirectory);
                 }
 
-
+                if (!Directory.Exists(_startingDirectory + "\\" + "Xero"))
+                {
+                    Directory.CreateDirectory(_startingDirectory + "\\" + "Xero");
+                }
                 //YearCheck
                 if (!Directory.Exists(_startingDirectory + "\\" + _year))
                 {
                     Directory.CreateDirectory(_startingDirectory + "\\" + _year);
                 }
 
-                //DateCheck
-                if (!Directory.Exists(_startingDirectory + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("yyyy-MM-dd")))
+                if (!Directory.Exists(_startingDirectory + "\\" + "Xero" + "\\" + _year))
                 {
-                    Directory.CreateDirectory(_startingDirectory + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("yyyy-MM-dd"));
+                    Directory.CreateDirectory(_startingDirectory + "\\" + "Xero" + "\\" + _year);
+                }
+
+
+                //DateCheck
+                if (!Directory.Exists(_startingDirectory + "\\" + "Xero" + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("MMM dd")))
+                {
+                    Directory.CreateDirectory(_startingDirectory + "\\" + "Xero" + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("MMM dd"));
+                }
+                if (!Directory.Exists(_startingDirectory + "\\" + _year + "\\" + InvoiceDate))
+                {
+                    Directory.CreateDirectory(_startingDirectory + "\\" + _year + "\\" + InvoiceDate);
                 }
 
                 //NetworkCheck
                 foreach (var Network in ListOfNetworks)
                 {
-                    if (!Directory.Exists(_startingDirectory + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("yyyy-MM-dd") + "\\" + Network))
+                    if (!Directory.Exists(_startingDirectory + "\\" + _year + "\\" + InvoiceDate + "\\" + Network))
                     {
-                        Directory.CreateDirectory(_startingDirectory + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("yyyy-MM-dd") + "\\" + Network);
+                        Directory.CreateDirectory(_startingDirectory + "\\" + _year + "\\" + InvoiceDate + "\\" + Network);
                     }
                 }
 
                 //CsvAndPDFImagesCheck
                 foreach (var Network in ListOfNetworks)
                 {
-                    if (!Directory.Exists(_startingDirectory + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("yyyy-MM-dd") + "\\" + Network + "\\" + "CSV"))
+                    if (!Directory.Exists(_startingDirectory + "\\" + _year + "\\" + InvoiceDate + "\\" + Network + "\\" + "CSV"))
                     {
-                        Directory.CreateDirectory(_startingDirectory + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("yyyy-MM-dd") + "\\" + Network + "\\" + "CSV");
+                        Directory.CreateDirectory(_startingDirectory + "\\" + _year + "\\" + InvoiceDate + "\\" + Network + "\\" + "CSV");
                     }
-                    if (!Directory.Exists(_startingDirectory + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("yyyy-MM-dd") + "\\" + Network + "\\" + "PDFImages"))
+                    if (!Directory.Exists(_startingDirectory + "\\" + _year + "\\" + InvoiceDate + "\\" + Network + "\\" + "PDFImages"))
                     {
-                        Directory.CreateDirectory(_startingDirectory + "\\" + _year + "\\" + InvoiceGenerator.InvoiceDate.ToString("yyyy-MM-dd") + "\\" + Network + "\\" + "PDFImages");
+                        Directory.CreateDirectory(_startingDirectory + "\\" + _year + "\\" + InvoiceDate + "\\" + Network + "\\" + "PDFImages");
                     }
                 }
 
@@ -1286,7 +1430,7 @@ namespace Fuelcards.Models
             {
                 network = network.ToLower();
             }
-            string strdate = InvoiceDate.ToString("yyyy-MM-dd");
+            string strdate = InvoiceDate.ToString("yyMMdd");
             strdate = strdate.Replace("/", "-");
             string baseDirectory = Path.Combine(_startingDirectory, _year.ToString(), strdate);
 
@@ -1308,6 +1452,40 @@ namespace Fuelcards.Models
                     throw new InvalidOperationException($"Unknown network: {network}");
             }
         }
+    }
+
+
+    public class XeroCsv
+    {
+        public string? ContactName { get; set; }
+        public string? EmailAddress { get; set; }
+        public string? POAddressLine1 { get; set; }
+        public string? POAddressLine2 { get; set; }
+        public string? POAddressLine3 { get; set; }
+        public string? POAddressLine4 { get; set; }
+        public string? POCity { get; set; }
+        public string? PORegion { get; set; }
+        public string? POPostalCode { get; set; }
+        public string? POCountry { get; set; }
+        public string? InvoiceNumber { get; set; }
+        public string? Reference { get; set; }
+        public string? InvoiceDate { get; set; }
+        public string? DueDate { get; set; }
+        public string? Total { get; set; }
+        public string? InventoryItemCode { get; set; }
+        public string? Description { get; set; }
+        public string? Quantity { get; set; }
+        public string? UnitAmount { get; set; }
+        public string? Discount { get; set; }
+        public string? AccountCode { get; set; }
+        public string? TaxType { get; set; }
+        public string? TaxAmount { get; set; }
+        public string? TrackingName1 { get; set; }
+        public string? TrackingOption1 { get; set; }
+        public string? TrackingName2 { get; set; }
+        public string? TrackingOption2 { get; set; }
+        public string? Currency { get; set; }
+        public string? BrandingTheme { get; set; }
     }
 
 }

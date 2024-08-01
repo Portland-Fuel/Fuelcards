@@ -12,7 +12,8 @@ namespace Fuelcards.Controllers
     {
         private readonly IQueriesRepository _db;
         private readonly List<SiteNumberToBand> _sites;
-        List<InvoicePDFModel> invoices = new();
+
+        public static List<InvoicePDFModel> invoices = new();
         public InvoicingController(IQueriesRepository db)
         {
             _db = db;
@@ -76,7 +77,22 @@ namespace Fuelcards.Controllers
             }
         }
 
+        [HttpPost]
+        public JsonResult ConfirmInvoicing([FromBody] string Network)
+        {
+            try
+            {
+                InvoiceGenerator.GenerateXeroCSV(invoices);
 
+
+                return Json("Success");
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return Json("Error:" + e.Message);
+            }
+        }
 
         [HttpPost]
         public JsonResult GetInvoicePng([FromBody] CustomerInvoice customerInvoice)
@@ -112,13 +128,16 @@ namespace Fuelcards.Controllers
                 invoices.Add(newInvoice);
                 try
                 {
-                    InvoiceGenerator invoiceGenerator = new(newInvoice);
+                    InvoiceGenerator invoiceGenerator = new(newInvoice, _db);
+                    FileHelperForInvoicing.CheckOrCorrectDirectorysBeforePDFCreation();
                     invoiceGenerator.generatePDF(newInvoice);
                 }
                 catch (Exception e)
                 {
                     throw new Exception(e.Message);
                 }
+                throw new Exception("Error");
+
                 return Json("");
             }
             catch (Exception e)

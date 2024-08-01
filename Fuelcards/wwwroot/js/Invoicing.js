@@ -324,15 +324,15 @@ async function StartInvoicing(btn) {
         await MinusCustCountToBeinvoiced();
 
         await InvoiceCustomer(customer);
-        Toast.fire({
-            icon: 'success',
-            title: customer.name + ":" + "Invoiced Successfully"
-        })
+      
        /* await new Promise(resolve => setTimeout(resolve, 1200)); */
 
 
     }
-    InvoicingCompletion();
+
+    await ConfirmInvoicing();
+
+    await InvoicingCompletion();
     document.getElementById("PauseInvoicingBTN").hidden = true;
     document.getElementById("StartInvoicingAgainBTN").hidden = true;
     document.getElementById("StartInvoicingBTN").hidden = false;
@@ -345,12 +345,57 @@ async function InvoiceCustomer(Customer) {
             data: JSON.stringify(Customer),
             contentType: 'application/json',
             success: function(data) {
-         
+                Toast.fire({
+                    icon: 'success',
+                    title: Customer.name + ":" + "Invoiced Successfully"
+                })
             },
+            error: function(xhr) {
+                document.getElementById("StartInvoicingAgainBTN").hidden = false;
+                document.getElementById("PauseInvoicingBTN").hidden = true;
+                Invoicing = false;
+                stopInvoicingLoader();
+                HandleInvoicingError(xhr)
+
+            }
+                
         })
     }
     catch{
         console.error("Error Invoicing Customer");
+    }
+}
+async function ConfirmInvoicing(network) {
+    try{
+        const result = await Swal.fire({
+            title: 'Confirm Invoicing',
+            text: 'Do you want to confirm invoicing for this network?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        });
+
+        if (result.isConfirmed) {
+            let response = await $.ajax({
+                url: '/Invoicing/ConfirmInvoicing',
+                data: JSON.stringify(selectedNetwork),
+                contentType: 'application/json',
+                type: 'POST',
+                success: function(data) {
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Invoicing Complete'
+                    })
+                },
+                error: function(xhr) {
+                    HandleInvoicingError(xhr)
+                }
+            });
+        }
+    }
+    catch{
+        console.error("Error Confirming Invoicing");
     }
 }
 async function StartLoopThroughTransactions(Customer) {
@@ -419,6 +464,10 @@ async function DisplayTransactionOnPage(Transaction) {
 
     const TransactionTable = document.getElementById("InvoiceSectionTransactionTable");
     const tbody = TransactionTable.querySelector("tbody");
+
+    // Create a document fragment to hold the new row
+    const fragment = document.createDocumentFragment();
+
     const row = document.createElement("tr");
 
     const createCell = (content) => {
@@ -440,9 +489,12 @@ async function DisplayTransactionOnPage(Transaction) {
     row.appendChild(createCell(unitPrice));
     row.appendChild(createCell(product));
 
-    tbody.appendChild(row);
+    fragment.appendChild(row);
+    tbody.appendChild(fragment);
     TransactionTable.hidden = false;
 }
+
+
 async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
     var TransactionDataFromView = {
         name: customer.name,

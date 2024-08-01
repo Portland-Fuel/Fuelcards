@@ -33,7 +33,11 @@ namespace Fuelcards.Repositories
             _Idb = Idb;
         }
 
-
+        public string? GetinventoryItemCode(string productName)
+        {
+            string? ItemInventoryCode = _db.ProductDescriptionToInventoryItemCodes.FirstOrDefault(e => e.Description.ToLower() == productName.ToLower())?.InventoryItemcode;
+            if (ItemInventoryCode is null) return null; else { return ItemInventoryCode; }
+        }
         public void AddSiteNumberToBand(Site site)
         {
             SiteNumberToBand siteNumberToBand = new()
@@ -42,6 +46,7 @@ namespace Fuelcards.Repositories
                 NetworkId = (int)EnumHelper.NetworkEnumFromString(site.Network),
                 Band = site.band,
                 Active = true,
+                Name = site.name,
                 Surcharge = site.Surcharge,
                 EffectiveDate = GetEffectiveDate(),
             };
