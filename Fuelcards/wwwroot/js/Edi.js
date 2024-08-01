@@ -84,7 +84,23 @@ async function CheckSites() {
         success: function (SiteResponse) {
             HideEdiLoader();
             console.log("Success:", SiteResponse);
-            ShowFailedSites(SiteResponse)
+            if(SiteResponse.length == 0){
+                Toast.fire({
+                    icon: "success",
+                    title: "No failed sites!",
+                    text: "All sites are working correctly."
+                });
+            }
+            else{
+                Toast.fire({
+                    icon: "error",
+                    title: "Failed sites found!",
+                    text: "Failed sites have been found. Please check the table below."
+                });
+               ShowFailedSites(SiteResponse)
+
+            }
+
             // Handle success response
         },
         error: function (error) {
@@ -158,8 +174,6 @@ async function ShowFailedSites(SiteResponse){
                             <label for="bandInput" style="display: block; margin-bottom: 5px;">Band:</label>
                             <input type="text" id="bandInput" name="bandInput" required style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
 
-                            <label for="surchargeInput" style="display: block; margin-bottom: 5px;">Site Surcharge:</label>
-                            <input type="text" id="surchargeInput" name="surchargeInput" required style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
                         </div>
                     `,
                     showCancelButton: true,
@@ -170,7 +184,6 @@ async function ShowFailedSites(SiteResponse){
                         const siteCodeInput = document.getElementById('siteCodeInput').value;
                         const bandInput = document.getElementById('bandInput').value;
                         const siteNameInput = document.getElementById('SiteNameInput').value;
-                        const surchargeInput = document.getElementById('surchargeInput').value;
     
                         if (!networkInput || !siteCodeInput || !bandInput || !siteNameInput) {
                             Swal.showValidationMessage('Please fill in all fields.');
@@ -229,7 +242,7 @@ async function RunThroughFailedSites(sitecode){
         var Row = TableRows[i];
         var Site = Row.cells[0].innerText;
         if(Site == sitecode){
-            Row.style.backgroundColor = '#9e3434';
+            Row.style.backgroundColor = 'darkgreen';
             Row.cells[Row.cells.length - 1].innerText = "Fixed";
         }
     }

@@ -45,5 +45,6 @@ namespace Fuelcards.Repositories
         List<Models.Site> GetAllTransactions(List<int> ControlIDs);
         bool CheckSite(Site item);
         void AddSiteNumberToBand(Site site);
+        string? GetinventoryItemCode(string productName);
     }
 }
