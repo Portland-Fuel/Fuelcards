@@ -104,11 +104,12 @@ namespace Fuelcards.GenericClassFiles
             return contracts.ToList();
         }
 
-        private int ValidatePaymentTerms(string xeroID, string name)
+        private int? ValidatePaymentTerms(string xeroID, string name)
         {
             int? paymentTerms = _db.GetPaymentTerms(xeroID);
-            if (paymentTerms != null) return (int)paymentTerms;
-            throw new ArgumentException($"No Payment Terms have been found for the following customer {name}");
+            return paymentTerms;
+            //if (paymentTerms != null) return (int)paymentTerms;
+            //throw new ArgumentException($"No Payment Terms have been found for the following customer {name}");
         }
         private List<HistoricAddon> GetAddon(int portlandId, EnumHelper.Network network)
         {

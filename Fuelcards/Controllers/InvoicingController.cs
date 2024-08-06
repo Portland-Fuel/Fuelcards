@@ -33,7 +33,7 @@ namespace Fuelcards.Controllers
             try
             {
                 InvoicePreCheckModels checks = new();
-                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now));
+                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-7)));
                 checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);
                 checks.PlattsPrice = checks.BasePrice - 52.95;
                 checks.KeyfuelImports = _db.GetTotalEDIs(0);
@@ -99,6 +99,12 @@ namespace Fuelcards.Controllers
         public JsonResult GetInvoicePng([FromBody] CustomerInvoice customerInvoice)
         {
             // THIS IS TEMP
+
+            foreach (var item in reportList)
+            {
+                Console.WriteLine(item.Total);
+            }
+
             InvoiceReport summaryReport = new InvoiceReport();
             summaryReport.DieselVol = reportList.Sum(e => e.DieselVol);
             summaryReport.PetrolVol = reportList.Sum(e => e.PetrolVol);
@@ -154,13 +160,14 @@ namespace Fuelcards.Controllers
             InvoiceSummary summary = new();
             try
             {
+                EnumHelper.Network network = _db.getNetworkFromAccount((int)customerInvoice.account);
                 InvoicePDFModel newInvoice = new();
                 
-                if (customerInvoice.CustomerType == EnumHelper.CustomerType.Fix)
+                if (customerInvoice.CustomerType != EnumHelper.CustomerType.Floating)
                 {
-                    newInvoice.fixedBox = summary.GetFixedDetails(customerInvoice);
+                    newInvoice.fixedBox = summary.GetFixDetails(customerInvoice, network, customerInvoice.CustomerType);
                 }
-                newInvoice.rows = summary.ProductBreakdown(customerInvoice);
+                newInvoice.rows = summary.ProductBreakdown(customerInvoice, network);
                 newInvoice.transactions = summary.TurnsTransactionsToPdf(customerInvoice.CustomerTransactions);
                 newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
                 if(customerInvoice.name != "The Fuel Trading Company")
@@ -232,8 +239,7 @@ namespace Fuelcards.Controllers
             public string? InvoicePrice { get; set; }
             public string? UnitPrice { get; set; }
             public string? Product { get; set; }
-        }
-        
+        }      
         public struct TransactionDataFromView
         {
             public string? name { get; set; }
@@ -244,14 +250,11 @@ namespace Fuelcards.Controllers
             public FixedInformation? fixedInformation { get; set; }
             public GenericTransactionFile? transaction { get; set; }
         }
-        
-
         public struct SendEmailInformation
         {
             public EmailDetails EmailDetails { get; set; }
             public CustomerInvoice CustomerInvoice { get; set; }
         }
-
         public struct EmailDetails
         {
             public string? htmlbody { get; set; }

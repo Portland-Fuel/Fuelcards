@@ -187,13 +187,13 @@ namespace Fuelcards.Repositories
             switch (network)
             {
                 case 0:
-                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(GetAllKeyfuelTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null, null,sites);
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(GetAllKeyfuelTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null, null, sites);
                     break;
                 case 1:
-                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, GetAllUKTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null,sites);
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, GetAllUKTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, null, sites);
                     break;
                 case 2:
-                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, GetAllTexTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null,sites);
+                    PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, GetAllTexTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), null, sites);
                     break;
                 case 3:
                     PortlandTransaction = Transactions.TurnTransactionIntoGeneric(null, null, null, GetAllFGTransactionsThatNeedToBeInvoiced(invoiceDate).Result.ToList(), sites);
@@ -205,54 +205,83 @@ namespace Fuelcards.Repositories
 
             if (PortlandTransaction is null) return null;
             TransactionsByCustomerAndNetwork = GroupTransactionsByCustomer(PortlandTransaction);
-
-            foreach (var item in TransactionsByCustomerAndNetwork)
+            try
             {
-                CustomerInvoice model = new();
-                model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == PortlandIdsToXeroIds.Where(e => e.PortlandId == item[0].portlandId && e.XeroTennant == 0).FirstOrDefault()?.XeroId).FirstOrDefault()?.Name;
-                if (model.name is null) throw new ArgumentException("could not get Name from portland ID. Possibly the customer is missing in the portland_id to xero_id table");
-                if (model.name.ToLower().Contains("aquaid"))
-                {
-                    model.name = aquaid.FirstOrDefault(e => e.AccountNo == item[0].customerCode)?.CostCentre;
 
-                    int? portlandID = aquaid.FirstOrDefault(e => e.CostCentre == model.name)?.PortlandId;
-                    model.addon = (customerAddons.Where(e => e.PortlandId == portlandID && e.Network == (int)network && e.EffectiveDate <= item[0].transactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
-                }
-                else
+
+                foreach (var item in TransactionsByCustomerAndNetwork)
                 {
-                    model.addon = (customerAddons.Where(e => e.PortlandId == item[0].portlandId && e.Network == (int)network && e.EffectiveDate <= item[0].transactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                    CustomerInvoice model = new();
+                    model.name = HomeController.PFLXeroCustomersData.Where(e => e.ContactID.ToString() == PortlandIdsToXeroIds.Where(e => e.PortlandId == item[0].portlandId && e.XeroTennant == 0).FirstOrDefault()?.XeroId).FirstOrDefault()?.Name;
+                    if (model.name is null) throw new ArgumentException("could not get Name from portland ID. Possibly the customer is missing in the portland_id to xero_id table");
+                    if (model.name.ToLower().Contains("aquaid"))
+                    {
+                        model.name = aquaid.FirstOrDefault(e => e.AccountNo == item[0].customerCode)?.CostCentre;
+
+                        int? portlandID = aquaid.FirstOrDefault(e => e.CostCentre == model.name)?.PortlandId;
+                        model.addon = (customerAddons.Where(e => e.PortlandId == portlandID && e.Network == (int)network && e.EffectiveDate <= item[0].transactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                    }
+                    else
+                    {
+                        model.addon = (customerAddons.Where(e => e.PortlandId == item[0].portlandId && e.Network == (int)network && e.EffectiveDate <= item[0].transactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
+                    }
+                    if (model.name.ToLower().Contains("portland")) model.name = "The Fuel Trading Company";
+                    model.addon = Convert.ToDouble(Math.Round(Convert.ToDecimal(BasePrice + model.addon), 2));
+                    model.account = item[0].customerCode;
+                    model.CustomerTransactions = new();
+                    model.CustomerType = await customerType((int)model.account, invoiceDate);
+                    model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
+                    model.IfuelsCustomer = IfuelsCustomer((int)model.account);
+                    if (model.CustomerType != EnumHelper.CustomerType.Floating)
+                    {
+                        model.fixedInformation = new FixedInformation();
+                        model = FixedProperties(model, invoiceDate, model.CustomerType);
+                    }
+                    Customers.Add(model);
                 }
-                if (model.name.ToLower().Contains("portland")) model.name = "The Fuel Trading Company";
-                model.addon = Convert.ToDouble(Math.Round(Convert.ToDecimal(BasePrice + model.addon),2));
-                model.account = item[0].customerCode;
-                model.CustomerTransactions = new();
-                model.CustomerType = customerType((int)model.account, invoiceDate);
-                model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
-                model.IfuelsCustomer = IfuelsCustomer((int)model.account);
-                if (model.CustomerType == EnumHelper.CustomerType.Fix)
-                {
-                    model.fixedInformation = new FixedInformation();
-                    model = FixedProperties(model, invoiceDate);
-                }
-                Customers.Add(model);
             }
+            catch (Exception e)
+            {
+                throw new ArgumentException(e.Message);
+            }
+        
             return Customers.OrderBy(e=>e.name).ToList();
         }
-        private CustomerInvoice? FixedProperties(CustomerInvoice model, DateOnly invoiceDate)
+        private CustomerInvoice? FixedProperties(CustomerInvoice model, DateOnly invoiceDate, EnumHelper.CustomerType custType)
         {
             try
             {
                 List<FixedPriceContract> fixedContracts = _db.FixedPriceContracts.Where(e => e.FcAccount == model.account).ToList();
-                model.fixedInformation.AllFixes = ConvertFixedPriceToVM(fixedContracts);
-                var tradeIds = model.fixedInformation.AllFixes
-                    .Select(f => f.Id)
-                    .ToList();
-                model.fixedInformation.CurrentAllocation = GetCurrentAllocation(invoiceDate, tradeIds);
-                model.fixedInformation.CurrentTradeId = GetTradeIdFromAllocationId(model.fixedInformation.CurrentAllocation);
-                model.fixedInformation.RolledVolume = _db.AllocatedVolumes
-                    .Where(e => tradeIds.Contains((int)e.TradeId) && e.Volume > 0 && e.AllocationId < model.fixedInformation.CurrentAllocation)
-                    .Sum(e => (double?)e.Volume) ?? 0;
-                return model;
+                if (custType == EnumHelper.CustomerType.Fix)
+                {
+                    model.fixedInformation.AllFixes = ConvertFixedPriceToVM(fixedContracts);
+                    var tradeIds = model.fixedInformation.AllFixes
+                        .Select(f => f.Id)
+                        .ToList();
+                    model.fixedInformation.CurrentAllocation = GetCurrentAllocation(invoiceDate, tradeIds);
+                    model.fixedInformation.CurrentTradeId = GetTradeIdFromAllocationId(model.fixedInformation.CurrentAllocation);
+                    model.fixedInformation.RolledVolume = _db.AllocatedVolumes
+                        .Where(e => tradeIds.Contains((int)e.TradeId) && e.Volume > 0 && e.AllocationId < model.fixedInformation.CurrentAllocation)
+                        .Sum(e => (double?)e.Volume) ?? 0;
+                    return model;
+                }
+                else
+                {
+                    List<int> fixedContractIds = fixedContracts.Select(fc => fc.Id).ToList();
+                    var alreadyAllocated = _db.FixAllocationDates
+                        .Where(e => fixedContractIds.Contains((int)e.TradeId) && e.NewAllocationDate < invoiceDate)
+                        .Select(f => f.Id)
+                        .ToList();
+                    var allocatedVolumeSum = _db.AllocatedVolumes
+                        .Where(av => av.Volume > 0 && alreadyAllocated.Contains((int)av.AllocationId))
+                        .Sum(x => x.Volume);
+
+                    // Step 5: Assign the sum to model.fixedInformation.RolledVolume
+                    model.fixedInformation.RolledVolume =  InvoiceSummary.Round2(allocatedVolumeSum);
+
+                    model.fixedInformation.CurrentTradeId = null; 
+                    return model;
+                }
             }
             catch (Exception)
             {
@@ -716,6 +745,24 @@ namespace Fuelcards.Repositories
             ExistingEmail.Bcc = updatedAccount.BccEmail;
             await FcEmailUpdateAsync(ExistingEmail);
             _db.SaveChanges();
+            var portlandId = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e=>e.FcAccountNo == Convert.ToInt32(updatedAccount.account)).PortlandId;
+            var XeroIds = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.PortlandId == portlandId && e.XeroTennant == 0).XeroId;
+           DataAccess.Fuelcards.PaymentTerm? ExistingTerms = _db.PaymentTerms.FirstOrDefault(e => e.XeroId == XeroIds && e.Network == (int)network);
+            if(ExistingTerms is null)
+            {
+                DataAccess.Fuelcards.PaymentTerm newTerms = new();
+                newTerms.Network = (int)network;
+                newTerms.XeroId = XeroIds;
+                newTerms.PaymentTerms = Convert.ToInt32(updatedAccount.paymentTerm);
+                _db.PaymentTerms.Add(newTerms);
+                _db.SaveChanges();
+            }
+            else
+            {
+                ExistingTerms.PaymentTerms = Convert.ToInt32(updatedAccount.paymentTerm);
+                _db.PaymentTerms.Update(ExistingTerms);
+                _db.SaveChanges();
+            }
         }
         public async Task FcEmailUpdateAsync(FcEmail source)
         {
@@ -795,15 +842,17 @@ namespace Fuelcards.Repositories
             return _db.SiteNumberToBands.Where(e => e.Active != false).ToList();
         }
 
-        public EnumHelper.CustomerType customerType(int account, DateOnly invoiceDate)
+        public async Task<EnumHelper.CustomerType> customerType(int account, DateOnly invoiceDate)
         {
-            IEnumerable<FixedPriceContract>? contracts = _db.FixedPriceContracts.Where(e => e.FcAccount == Convert.ToInt32(account) && e.EffectiveFrom < invoiceDate);
+            bool HasUnusedVolume = false;
+            IEnumerable<FixedPriceContract>? contracts = await _db.FixedPriceContracts.Where(e => e.FcAccount == Convert.ToInt32(account) && e.EffectiveFrom < invoiceDate).ToListAsync();
             if (contracts == null || !contracts.Any())
             {
                 return EnumHelper.CustomerType.Floating;
             }
             foreach (var contract in contracts)
             {
+                HasUnusedVolume = await CheckForUnusedVolumeOnThisContract(contract);
                 if (contract.FrequencyId == 3)
                 {
                     contract.EndDate = contract.EndDate.Value.AddMonths(1);
@@ -816,16 +865,50 @@ namespace Fuelcards.Repositories
                 {
                     return EnumHelper.CustomerType.Fix;
                 }
-                //IEnumerable<AllocatedVolume>? volumes = _fuelcardRepo.AllocatedVolume.GetAll(v => v.TradeId == contract.Id);
+                else if (HasUnusedVolume)
+                {
+                    return EnumHelper.CustomerType.ExpiredFixWithVolume;
+                }
             }
             return EnumHelper.CustomerType.Floating;
         }
+
+
+        private async Task<bool> CheckForUnusedVolumeOnThisContract(FixedPriceContract contract)
+        {
+            var volume = _db.AllocatedVolumes.FirstOrDefaultAsync(e => e.Volume > 0 && e.TradeId == contract.Id).Result;
+            if (volume == null) return false;
+            return true;
+        }
+
         public double? GetSurchargeFromBand(string? band, EnumHelper.Network network)
         {
+            // Convert the band if it is a letter
+            band = ConvertBandToNumber(band);
+
             double? surcharge = _db.SiteBandInfos.FirstOrDefault(e => e.NetworkId == (int)network && e.Band == band)?.CommercialPrice;
             if (surcharge == null) throw new ArgumentException("Surcharge should not be null, even if it is 0");
             return surcharge;
         }
+        private string ConvertBandToNumber(string? band)
+        {
+            if (string.IsNullOrEmpty(band))
+            {
+                throw new ArgumentException("Band should not be null or empty");
+            }
+
+            // Check if the band is an alphabetical letter
+            if (char.IsLetter(band[0]))
+            {
+                char upperBand = char.ToUpper(band[0]);
+                int bandNumber = upperBand - 'A' + 1;
+                return bandNumber.ToString();
+            }
+
+            // If band is already numeric, return it unchanged
+            return band;
+        }
+
         public double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network, bool isIfuels, int account)
         {
             if (!isIfuels)

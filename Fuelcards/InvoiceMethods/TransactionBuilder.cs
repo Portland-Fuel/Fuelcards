@@ -28,8 +28,8 @@ namespace Fuelcards.InvoiceMethods
             Models.Site? siteInfo = getSite(transactionDataFromView.transaction.siteCode, network, (int)transactionDataFromView.transaction.productCode, (EnumHelper.Products)product);
             transactionDataFromView.transaction.quantity = ConvertToLitresBasedOnNetwork(transactionDataFromView.transaction.quantity, network);
             double? Addon = _db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.portlandId, transactionDataFromView.transaction.transactionDate, network, transactionDataFromView.IfuelsCustomer, (int)transactionDataFromView.account);
-
-            double? UnitPrice = Math.Round(Convert.ToDouble(CalculateUnitPrice(_db, product, transactionDataFromView, network, Addon, siteInfo)), 4, MidpointRounding.AwayFromZero);
+            if (Addon is null) throw new ArgumentException($"Addon should not be null - {transactionDataFromView.name} with account = {transactionDataFromView.account}")
+;            double? UnitPrice = Math.Round(Convert.ToDouble(CalculateUnitPrice(_db, product, transactionDataFromView, network, Addon, siteInfo)), 4, MidpointRounding.AwayFromZero);
 
             double? invoicePrice = transactionDataFromView.transaction.quantity * UnitPrice;
             invoicePrice = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoicePrice), 2, MidpointRounding.AwayFromZero));

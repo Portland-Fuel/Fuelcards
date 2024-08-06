@@ -44,6 +44,7 @@ namespace Fuelcards.Models
         public double? RolledVolume { get; set; }
         public int? CurrentTradeId { get;set; }
         public int CurrentAllocation { get; set; }
+        public bool IsCurrentTrade { get; set; }
        
 
     }

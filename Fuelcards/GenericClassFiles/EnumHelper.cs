@@ -48,7 +48,8 @@ namespace Fuelcards.GenericClassFiles
         public enum CustomerType
         {
             Fix,
-            Floating
+            Floating,
+            ExpiredFixWithVolume
         };
         public static Network NetworkEnumFromString(string network)
         {
@@ -349,5 +350,6 @@ namespace Fuelcards.GenericClassFiles
             Default,
             Pan,
         }
+        
     }
 }

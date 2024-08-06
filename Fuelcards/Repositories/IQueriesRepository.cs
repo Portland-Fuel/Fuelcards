@@ -36,7 +36,7 @@ namespace Fuelcards.Repositories
         Task FcEmailUpdateAsync(FcEmail source);
         Task NewFix(NewCustomerDetailsModel.Fix newFixesForCustomer, string customerName, EnumHelper.Network network);
         List<SiteNumberToBand> GetAllSiteInformation();
-        EnumHelper.CustomerType customerType(int account, DateOnly invoiceDate);
+        Task<EnumHelper.CustomerType> customerType(int account, DateOnly invoiceDate);
         double? GetSurchargeFromBand(string? band, EnumHelper.Network network);
         double? GetAddonForSpecificTransaction(int? portlandId, DateOnly? transactionDate, EnumHelper.Network network, bool isIfuels, int account);
         double? TransactionalSiteSurcharge(EnumHelper.Network network, int site, int productCode);
