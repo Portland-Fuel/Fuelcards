@@ -145,15 +145,25 @@ function getCustomerListFromNetwork(network) {
     }
 
 }
-function createCheckListRows(model, network) {
-    let verticalRowsHeaders = [];
-    if(network.toLowerCase() === "ukfuels" || network.toLowerCase() === "ukfuel"){
-        verticalRowsHeaders = ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Product 18","Customer List"];
+async function getHeaderList(network) {
+    switch (network.toLowerCase()) {
+        case "keyfuels":
+            return ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Customer List"];
+        case "ukfuels":
+            return ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Product 18", "Customer List"];
+        case "texaco":
+            return ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates","Texaco Volumes", "Customer List"];
+        case "fuelgenie":
+            return ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Customer List"];
+        default:
+            return "Error";
     }
-    else{
-        verticalRowsHeaders = ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Customer List"];
+}
 
-    }
+async function createCheckListRows(model, network) {
+    let verticalRowsHeaders = [];
+
+    verticalRowsHeaders = await getHeaderList(network);
     const table = document.getElementById("CheckListTable");
     const tbody = table.querySelector("tbody");
     tbody.innerHTML = ""; // Clear existing rows
@@ -179,39 +189,42 @@ function createCheckListRows(model, network) {
     rows[2].appendChild(createCell(getImportsList(network) || "Error"));
 
     const failedSiteList = getFailedSiteList(network);
-    if (failedSiteList.length > 0 || failedSiteList ===  undefined) {
-        const TDButton = createButton("FailedSitesButton","View Failed Sites");
+    if (failedSiteList.length > 0 || failedSiteList === undefined) {
+        const TDButton = createButton("FailedSitesButton", "View Failed Sites");
         TDButton.onclick = function() {
             ShowSiteErrorForm(failedSiteList);
         };
         rows[3].appendChild(TDButton);
     } else {
-
         rows[3].appendChild(createCell("No failed sites"), "green");
-        
     }
-
 
     const DuplicateSiteList = getDuplicatesSiteList(network);
     if (DuplicateSiteList.length > 0) {
-        const TDButton = createButton("FailedSitesButton","View Failed Duplicates");
+        const TDButton = createButton("FailedSitesButton", "View Failed Duplicates");
         rows[4].appendChild(TDButton);
     } else {
-
         rows[4].appendChild(createCell("No duplicates"), "green");
-        
     }
-
-    if(network.toLowerCase() === "ukfuels" || network.toLowerCase() === "ukfuel"){
+    if(network.toLowerCase() === "texaco"){
+        rows[5].appendChild(createVolumesList(network));
+        rows[6].appendChild(createSelectCustomerList(network));
+    }
+    else if (network.toLowerCase() === "ukfuels" || network.toLowerCase() === "ukfuel") {
         rows[5].appendChild(createCell("NEed to do this!"));
         rows[6].appendChild(createSelectCustomerList(network));
-
     }
-    else{
+    else if(network.toLowerCase() === "fuelgenie"){
         rows[5].appendChild(createSelectCustomerList(network));
 
     }
+    else if(network.toLowerCase() === "keyfuels"){
+        rows[5].appendChild(createSelectCustomerList(network));
 
+    }
+    else{
+        rows[5].appendChild(createCell("Error"));
+    }
 
 
     rows.forEach((row, index) => {
@@ -220,6 +233,7 @@ function createCheckListRows(model, network) {
         row.appendChild(checkboxTd);
     });
 }
+
 
 
 
@@ -238,7 +252,36 @@ function createButton(className,textContent) {
     td.appendChild(button);
     return td;
 }
+function createVolumesList(network) {
+    // Assume model.texacoVolume is an object with properties as volume names and their values as the actual volume
+    const Volumes = model.texacoVolume || {};
 
+    const select = document.createElement("select");
+    select.id = "TexacoVolumes";
+    select.name = "TexacoVolumes";
+    select.classList.add("CustomerListSelect");
+
+    // Check if Volumes is empty (i.e., no properties) or is "Error"
+    if (Object.keys(Volumes).length === 0 || Volumes === "Error") {
+        const option = document.createElement("option");
+        option.value = "No Volumes";
+        option.text = "No Volumes";
+        select.appendChild(option);
+    } else {
+        // Iterate over the object's properties
+        for (const [volumeName, volumeValue] of Object.entries(Volumes)) {
+            const option = document.createElement("option");
+            option.value = volumeValue;
+            option.text = `${volumeName} - ${volumeValue}`;
+            select.appendChild(option);
+        }
+    }
+
+    const td = document.createElement("td");
+    td.appendChild(select);
+
+    return td;
+}
 function createSelectCustomerList(network) {
     const CustList = getCustomerListFromNetwork(network);
     const select = document.createElement("select");
@@ -305,68 +348,89 @@ async function StartInvoicing(btn) {
     startInvoicingLoader();
     document.getElementById("PauseInvoicingBTN").hidden = false;
     document.getElementById("StartInvoicingBTN").hidden = true;
-    document.getElementById("StartInvoicingAgainBTN").hidden = true;
+    document.getElementById("ResumeInvoicingBTN").hidden = true;
     Invoicing = true;
-    var CustList = getCustomerListFromNetwork(selectedNetwork);
-    for (const customer of CustList) {
-        while (!Invoicing) {
-            console.log("Invoicing Stopped");
-            await new Promise(resolve => setTimeout(resolve, 500)); // Check every 500ms if Invoicing is true
-        }
+    var CustList = await getCustomerListFromNetwork(selectedNetwork);
+
+    await InvoiceCustomers(CustList);
+}
+let currentCustomerIndex = 0;
+async function InvoiceCustomers(CustList, startIndex = 0) {
+    for (; currentCustomerIndex < CustList.length; ) {
+        const customer = CustList[currentCustomerIndex];
+        console.log("Current Customer Index: ", currentCustomerIndex);
+        console.log("Customer: ", customer);
         clearTransactionTable();
-
-        console.log("Invoicing Resumed");
         await DisplayIntialPageText(customer);
-        
+        console.log("UpdatedContent on page for customer: ", customer);
         var updatedTransactionsWithData = await StartLoopThroughTransactions(customer);
-        
+        console.log("Updated Transactions with data: ", updatedTransactionsWithData);
         customer.customerTransactions = updatedTransactionsWithData;
-        await MinusCustCountToBeinvoiced();
+        currentCustomerIndex++;
+        console.log("Invoicing Customer...")
+        var result = await InvoiceCustomer(customer);
 
-        await InvoiceCustomer(customer);
-      
-       /* await new Promise(resolve => setTimeout(resolve, 1200)); */
 
+        if(!result){
+            currentCustomerIndex  = currentCustomerIndex - 1;
+            return;
+        }
+        else{
+            await MinusCustCountToBeinvoiced();
+
+            continue
+        }
 
     }
 
     await ConfirmInvoicing();
-
     await InvoicingCompletion();
+
     document.getElementById("PauseInvoicingBTN").hidden = true;
-    document.getElementById("StartInvoicingAgainBTN").hidden = true;
+    document.getElementById("ResumeInvoicingBTN").hidden = true;
     document.getElementById("StartInvoicingBTN").hidden = false;
 }
-async function InvoiceCustomer(Customer) {
-    try{
-        let response = await $.ajax({
-            url: '/Invoicing/CompleteInvoicing',
-            type: 'POST',
-            data: JSON.stringify(Customer),
-            contentType: 'application/json',
-            success: function(data) {
-                Toast.fire({
-                    icon: 'success',
-                    title: Customer.name + ":" + "Invoiced Successfully"
-                })
-            },
-            error: function(xhr) {
-                document.getElementById("StartInvoicingAgainBTN").hidden = false;
-                document.getElementById("PauseInvoicingBTN").hidden = true;
-                Invoicing = false;
-                stopInvoicingLoader();
-                HandleInvoicingError(xhr)
+async function ResumeInvoicing(btn) {
+    Invoicing = true;
+    startInvoicingLoader();
+    document.getElementById("PauseInvoicingBTN").hidden = false;
+    document.getElementById("ResumeInvoicingBTN").hidden = true;
 
-            }
-                
-        })
-    }
-    catch{
-        console.error("Error Invoicing Customer");
+    var CustList = await getCustomerListFromNetwork(selectedNetwork);
+
+    await InvoiceCustomers(CustList, currentCustomerIndex - 1);
+}
+async function InvoiceCustomer(Customer) {
+    try {
+        let response = await new Promise((resolve, reject) => {
+            $.ajax({
+                url: '/Invoicing/CompleteInvoicing',
+                type: 'POST',
+                data: JSON.stringify(Customer),
+                contentType: 'application/json',
+                success: function(data) {
+                    Toast.fire({
+                        icon: 'success',
+                        title: Customer.name + ": Invoiced Successfully"
+                    });
+                    resolve(data);
+                },
+                error: function(xhr) {
+                    HandleInvoicingError(xhr);
+                    reject(new Error('Error invoicing customer.'));
+                }
+            });
+        });
+
+        return true;
+    } catch (error) {
+        console.error("Error Invoicing Customer:", error);
+        return false;
     }
 }
+
 async function ConfirmInvoicing(network) {
-    try{
+    try {
         const result = await Swal.fire({
             title: 'Confirm Invoicing',
             text: 'Do you want to confirm invoicing for this network?',
@@ -379,7 +443,7 @@ async function ConfirmInvoicing(network) {
         if (result.isConfirmed) {
             let response = await $.ajax({
                 url: '/Invoicing/ConfirmInvoicing',
-                data: JSON.stringify(selectedNetwork),
+                data: JSON.stringify(network),
                 contentType: 'application/json',
                 type: 'POST',
                 success: function(data) {
@@ -389,12 +453,12 @@ async function ConfirmInvoicing(network) {
                     })
                 },
                 error: function(xhr) {
-                    HandleInvoicingError(xhr)
+                    HandleConfirmInvoicingError(xhr.responseText);
                 }
             });
         }
     }
-    catch{
+    catch {
         console.error("Error Confirming Invoicing");
     }
 }
@@ -508,7 +572,6 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
 
    
 
-    console.log(TransactionDataFromView);
     try {
         let response = await $.ajax({
             url: '/Invoicing/ProcessTransactionFromPage',
@@ -560,12 +623,6 @@ async function SetCustCountToBeInvoiced(CustList) {
     console.log(CustCount);
     
 }
-async function StartInvoicingAgain(btn) {
-    Invoicing = true;
-    startInvoicingLoader();
-    document.getElementById("PauseInvoicingBTN").hidden = false;
-    document.getElementById("StartInvoicingAgainBTN").hidden = true;
-}
 
 async function DisplayIntialPageText(customer) {
     var CustText = customer.name;
@@ -579,7 +636,7 @@ async function DisplayIntialPageText(customer) {
 async function StopInvoicingbtn() {
     Invoicing = false;
     stopInvoicingLoader();
-    document.getElementById("StartInvoicingAgainBTN").hidden = false;
+    document.getElementById("ResumeInvoicingBTN").hidden = false;
     document.getElementById("PauseInvoicingBTN").hidden = true;
 }
 
