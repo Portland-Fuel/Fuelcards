@@ -4,7 +4,10 @@ using Fuelcards.InvoiceMethods;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.IdentityModel.Tokens;
+using System.Data.Common;
+using System.Reflection.Metadata;
 
 namespace Fuelcards.Controllers
 {
@@ -77,21 +80,43 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
+        [HttpPost]
+        public JsonResult UploadNewItemInventoryCode([FromBody] ItemCodeAndPorductData itemCodeAndPorductData)
+        {
+            _db.UploadNewItemInventoryCode(itemCodeAndPorductData.description, itemCodeAndPorductData.itemCode);
+            return Json("True");
+        }
+        public struct ItemCodeAndPorductData
+        {
+            public string description { get; set; }
+            public string itemCode { get; set; }
+        }
 
         [HttpPost]
         public JsonResult ConfirmInvoicing([FromBody] string Network)
         {
             try
             {
-                InvoiceGenerator.GenerateXeroCSV(invoices);
+                var ListOfProducts = _db.GetListOfProducts();
+                InvoiceGenerator.GenerateXeroCSV(invoices, ListOfProducts);
 
-
-                return Json("Success");
+                return Json(new { Status = "Success" });
             }
             catch (Exception e)
             {
                 Response.StatusCode = 500;
-                return Json("Error:" + e.Message);
+
+                // Create an error response object
+                var errorResponse = new
+                {
+                    Status = "Error",
+                    ExceptionType = e.GetType().Name,
+                    Message = e.Message,
+                    Description = e.Message.Split(":")[1],
+                    StackTrace = e.StackTrace // Optional: include stack trace for debugging
+                };
+
+                return Json(errorResponse);
             }
         }
 
@@ -117,42 +142,35 @@ namespace Fuelcards.Controllers
             summaryReport.TescoVol = reportList.Sum(e => e.TescoVol);
             summaryReport.OtherVol = reportList.Sum(e => e.OtherVol);
 
-            summaryReport.DieselPrice = reportList.Sum(e => e.DieselPrice);
-            summaryReport.PetrolPrice = reportList.Sum(e => e.PetrolPrice);
-            summaryReport.LubesPrice = reportList.Sum(e => e.LubesPrice);
-            summaryReport.GasoilPrice = reportList.Sum(e => e.GasoilPrice);
-            summaryReport.AdbluePrice = reportList.Sum(e => e.AdbluePrice);
-            summaryReport.PremDieselPrice = reportList.Sum(e => e.PremDieselPrice);
-            summaryReport.SuperUnleadedPrice = reportList.Sum(e => e.SuperUnleadedPrice);
-            summaryReport.BrushTollPrice = reportList.Sum(e => e.BrushTollPrice);
-            summaryReport.TescoPrice = reportList.Sum(e => e.TescoPrice);
-            summaryReport.OthersPrice = reportList.Sum(e => e.OthersPrice);
+                string fileName = FileHelperForInvoicing.BuildingFileNameForInvoicing(invoice, invoice.CustomerDetails.CompanyName);
+                string path = Path.Combine(
+                    FileHelperForInvoicing._startingDirectory,
+                    FileHelperForInvoicing._year.ToString(),
+                    invoice.InvoiceDate.ToString("yyMMdd"),
+                    GetNetworkName(invoice.CustomerDetails.Network),
+                    "PDFImages",
+                    fileName + ".png"
+                );
 
-            summaryReport.Rolled = reportList.Sum(e => e.Rolled);
-            summaryReport.Current = reportList.Sum(e => e.Current);
-            summaryReport.RollAvailable = reportList.Sum(e => e.RollAvailable);
-            summaryReport.DieselLifted = reportList.Sum(e => e.DieselLifted);
-            summaryReport.Fixed = reportList.Sum(e => e.Fixed);
-            summaryReport.Floating = reportList.Sum(e => e.Floating);
-            summaryReport.TescoVol = reportList.Sum(e => e.TescoVol);
-            summaryReport.NetTotal = reportList.Sum(e => e.NetTotal);
-            summaryReport.Vat = reportList.Sum(e => e.Vat);
-            summaryReport.Total = reportList.Sum(e => e.Total);
-            // END
-
-
-
-
-            try
-            {
-                throw new Exception("Error getting Png");
-                return Json("");
+                return Json(path);
             }
             catch (Exception e)
             {
                 Response.StatusCode = 500;
-                return Json("Error:" + e.Message);
+                return Json("Error: Could not get PNG " + e.Message);
             }
+        }
+
+        public string GetNetworkName(string Network)
+        {
+            switch (Network)
+            {
+                case "Texaco":
+                    return "FastFuel";
+                default:
+                    return Network;
+            }
+
         }
         [HttpPost]
         public JsonResult CompleteInvoicing([FromBody] CustomerInvoice customerInvoice)
@@ -180,20 +198,22 @@ namespace Fuelcards.Controllers
                 }
                 
                 
-                newInvoice.InvoiceDate = DateOnly.FromDateTime(DateTime.Now);
                 invoices.Add(newInvoice);
 
                 reportList.Add(_report.CreateNewInvoiceReport(newInvoice));
                 try
                 {
-                    InvoiceGenerator invoiceGenerator = new(newInvoice, _db);
+                    newInvoice = CheckFileName(newInvoice);
+                    InvoiceGenerator invoiceGenerator = new(newInvoice);
                     FileHelperForInvoicing.CheckOrCorrectDirectorysBeforePDFCreation();
                     invoiceGenerator.generatePDF(newInvoice);
+                    //invoiceGenerator.generatePDFImage(newInvoice);
                 }
                 catch (Exception e)
                 {
                     throw new Exception(e.Message);
                 }
+
                 return Json("");
             }
             catch (Exception e)
@@ -202,6 +222,22 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
+
+        private InvoicePDFModel CheckFileName(InvoicePDFModel newInvoice)
+        {
+            string[] errorChars = { "\\", "/", ":", "*", "?", "\"", "<", ">", "|" };
+
+            foreach (var errorChar in errorChars)
+            {
+                if (newInvoice.CustomerDetails.CompanyName.Contains(errorChar))
+                {
+                    newInvoice.CustomerDetails.CompanyName = newInvoice.CustomerDetails.CompanyName.Replace(errorChar, string.Empty);
+                }
+            }
+
+            return newInvoice;
+        }
+
         [HttpPost]
         public JsonResult SendEmail([FromBody] SendEmailInformation sendEmailInformation)
         {

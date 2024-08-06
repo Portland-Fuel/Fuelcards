@@ -63,7 +63,7 @@
     <div id="ButtonGroupInvoicing" class="ChoiceButtonGrouping">
         <button class="Invoicingbtn" onclick="StartInvoicing(this)" id="StartInvoicingBTN">Start Invoicing</button>
         <button class="StopInvoicingbtn" onclick="StopInvoicingbtn(this)" id="PauseInvoicingBTN" hidden>Pause Invoicing</button>
-        <button class="Invoicingbtn" onclick="StartInvoicingAgain(this)" id="StartInvoicingAgainBTN" hidden>Start Invoicing Again</button>
+        <button class="Invoicingbtn" onclick="ResumeInvoicing(this)" id="ResumeInvoicingBTN" hidden>Resume Invoicing</button>
     </div>
     <div id="CustomerDetails" class="CustomerDetails">
         <div class="CustomerDetails-item">
@@ -144,6 +144,8 @@
                 </div>
             </div>
             <div class="EmailDetails" hidden id="EmailDetails">
+                <label>Subject</label>
+                <input type="text" id="EmailSubject" />
                 <label>To</label>
                 <input type="text" id="EmailTo" />
                 <label>CC</label>

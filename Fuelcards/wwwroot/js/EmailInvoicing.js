@@ -14,7 +14,6 @@ async function StartSendingEmails(){
             await showErrorBox("Error loading PDF or HTML");
         };
 
-        await SendEmailToCustomer(Customer);
 
     
         document.getElementById('DisplayEmailItemsContainer').hidden = false;
@@ -30,8 +29,8 @@ async function SendEmailToCustomer(Customer){
         EmailDetails: {
             htmlbody: document.getElementById('EmailHtml').innerHTML,
             emailTo: document.getElementById("EmailTo").textContent,
-            emailCc: document.getElementById("EmailCc").textContent,
-            emailBcc: document.getElementById("EmailBcc").textContent,
+            emailCc: document.getElementById("EmailCC").textContent,
+            emailBcc: document.getElementById("EmailBCC").textContent,
             emailSubject: document.getElementById("EmailSubject").value,
         },
         CustomerInvoice: Customer,
@@ -65,37 +64,6 @@ async function fillInputs(Customer){
     document.getElementById('EmailAccountNumber').value = Customer.account;
 }
 
-async function getEmailBody(Customer) {
-    let Errored = false;
-
-    try {
-        let response = await $.ajax({
-            url: '/Invoicing/GetEmailBody',
-            type: 'POST',
-            data: JSON.stringify(Customer),
-            contentType: 'application/json'
-        });
-
-        // Ensure response.html exists and is valid before assigning it
-        if (response && response.html) {
-            document.getElementById('EmailHtml').innerHTML = response.html;
-            document.getElementById('EmailDetails').hidden = false;
-        } else {
-            throw new Error('Invalid response format');
-        }
-
-    } catch (error) {
-        Errored = true;
-        console.error('Error in getEmailBody:', error);
-        var ff = document.getElementById('HtmlCon');
-        if (ff) {
-            var ErrorLabel = await CreateErrorLabelForPDFOrHtml();
-            ff.appendChild(ErrorLabel);
-        }
-    }
-
-    return Errored;
-}
 
 async function CreateErrorLabelForPDFOrHtml(){
     var ErrorLabel = document.createElement('label');
@@ -147,4 +115,36 @@ async function getCustomerInvoicePng(Customer){
     }
     return Errored;
 
+}
+
+async function getEmailBody(Customer) {
+    let Errored = false;
+
+    try {
+        let response = await $.ajax({
+            url: '/Invoicing/GetEmailBody',
+            type: 'POST',
+            data: JSON.stringify(Customer),
+            contentType: 'application/json'
+        });
+
+        // Ensure response.html exists and is valid before assigning it
+        if (response && response.html) {
+            document.getElementById('EmailHtml').innerHTML = response.html;
+            document.getElementById('EmailDetails').hidden = false;
+        } else {
+            throw new Error('Invalid response format');
+        }
+
+    } catch (error) {
+        Errored = true;
+        console.error('Error in getEmailBody:', error);
+        var ff = document.getElementById('HtmlCon');
+        if (ff) {
+            var ErrorLabel = await CreateErrorLabelForPDFOrHtml();
+            ff.appendChild(ErrorLabel);
+        }
+    }
+
+    return Errored;
 }
