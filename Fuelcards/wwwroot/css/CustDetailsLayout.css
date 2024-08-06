@@ -1,488 +1,102 @@
 ﻿body{
     background-image: none;
-    background-color: #004080;
+    background: linear-gradient(to bottom, #528cc7, #4a6169);
 }
-
-
 .sidenav {
     height: 100%;
-    width: 280px;
+    width: 250px;
     position: fixed;
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: #302929;
+    background-color: #4a6169;
     overflow-x: hidden;
-    padding-top: 20px;
+    transition: 0.5s;
 }
 
-.sidenav .back-arrow {
-    display: inline-block;
-    font-size: 22px;
-    color: white;
-    cursor: pointer;
-    position: absolute;
+.sidenav .BackButtonContainer {
+    padding: 10px;
 }
 
-.sidenav h1 {
-    color: #85d1d1;
-    font-size: 30px;
-}
-
-.sidenav a {
+.sidenav h1, .sidenav a {
     padding: 10px 15px;
     text-decoration: none;
-    font-size: 22px;
-    color: white !important; 
+    font-size: 25px;
+    color: white !important;
     display: block;
-    cursor: pointer;
+    transition: 0.3s;
+}
+
+.sidenav input{
+    padding: 10px 15px;
+    text-decoration: none;
 }
 
 .sidenav a:hover {
     color: #f1f1f1;
-    background-color: #464949;
+    cursor: pointer;
+    transform: scale(1.05);
 }
 
+.Pagebody {
+    transition: margin-left 0.5s;
+    padding: 16px;
+    margin-left: 270px;
+}
 
-.Section{
+.openclosebtn {
+    font-size: 12px; 
+    cursor: pointer;
+    background-color: #942e2e; 
+    color: white;
+    border: none;
+    border-radius: 4px; 
+    padding: 8px 12px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s; 
+    top: 10px;
+    z-index: 1000; 
+}
+.openclosebtn-close {
     display: none;
-    width: 100%;
 }
-.Section .ChoiceButtonGrouping {
-    flex-basis: 100%;
+
+.openclosebtn-back{
+    background-color: #305539; 
+    color: white;
+    border: none;
+    border-radius: 4px; 
+    padding: 8px 12px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s; 
+    top: 10px;
+    z-index: 1000; 
+
+}
+
+.openclosebtn-back:hover{
+    background-color: #203626; 
+    transform: scale(1.05);
+
+}
+.openclosebtn:hover {
+    background-color: #694848; 
+    transform: scale(1.05);
+}
+
+.sidenav-closed .sidenav {
+    width: 0;
+}
+
+.sidenav-closed .Pagebody {
+    margin-left: 0;
+}
+
+.sidenav-closed .openclosebtn {
+    display: block;
+}
+.BackButtonContainer{
     justify-content: space-between;
     display: flex;
-    margin-top: 20px;
-}
-.form-container {
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-.form-row {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-}
-.form-row-centered {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-}
-.network-form-row{
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 15px;
-    justify-content: space-between;
-}
-.network-form-row span{
-    margin-left: 150px;
-    color : white;
-    gap: 10px;
-}
-.form-group {
-    flex: 1;
-    min-width: 200px;
-    margin-right: 10px;
-}
-.form-group:last-child {
-    margin-right: 0;
-}
-.form-container label {
-    color: white;
-    
-    display: block;
-    margin-bottom: 5px;
-}
-.form-container input:not([type="checkbox"]), select {
-    width: 100%;
-    padding: 10px;
-    height: 40px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
 
-.form-container .FormButton[type="button"] {
-    padding: 10px 15px;
-    background-color: rgb(72, 194, 235);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    width: 15%;
-}
-
-.form-container .FormButton:hover {
-    background-color: rgb(42, 166, 207);
-
-}
-
-
-.dropdown {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-}
-
-.dropdown-content {
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    padding: 12px 16px;
-    z-index: 1;
-    width: 100%;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-.NetworkList {
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.network-item {
-    display: block;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    cursor: pointer;
-    height: 50px;;
-}
-
-.network-item:hover {
-    background-color: #3b3737;
-}
-
-.dropdown input[type="checkbox"] {
-    margin-right: 10px;
-    cursor: pointer;
-}
-
-.dropdown label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
-
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(44, 40, 41, 0.8); 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.overlay .form-container {
-    background: #004080;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.overlay .form-container h2 {
-  color: white;
-}
-.overlay .form-container h2 {
-    margin-top: 0;
-    text-align: center;
-}
-.overlay .form-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-}
-.overlay .form-group label {
-    flex: 1;
-    color: white; /* White text for labels */
-    margin-bottom: 0;
-    padding-right: 10px;
-}
-.overlay .form-group input,select {
-    flex: 2;
-    padding: 8px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-.overlay .form-group button[type="submit"] {
-    width: 100%;
-    padding: 10px;
-    background-color: #28a745;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-.overlay .form-group button[type="submit"]:hover {
-    background-color: #218838;
-}
-.overlay .form-group button[type="button"] {
-    width: 100%;
-    padding: 10px;
-    background-color: indianred;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-.overlay .form-group button[type="button"]:hover {
-    background-color: rgb(199, 61, 61);
-}
-.Small-Button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: background-color 0.3s ease;
-}
-
-.Small-Button:hover {
-    background-color: #0056b3;
-}
-
-.Small-Button:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
-}
-
-.Small-Button:active {
-    background-color: #004080;
-}
-
-
-.AnimateNetworkOptions{
-    animation-duration: 1.5s;
-    animation-name: slidein;    
-}
-
-@keyframes slidein {
-        from {
-            margin-left: 100%;
-            width: 300%;
-        }
-        to {
-            margin-left: 0%;
-            width: 100%;
-        }
-}
-
-  *{ box-sizing: border-box;}
-  h1{
-    font-size: 1.5em;
-  }
-  
-  small{
-    color: #888;
-  }
-  
-  .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #fff;
-    border-radius: 15px;
-    background-color: #007bff;
-    border: none;
-    height: 50px;
-    width: 20%;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    position: relative;
-}
-
-.button.animate {
-    pointer-events: none;
-}
-.button.success{
-    cursor:default!important;
-    background-color: #28a745;
-
-}
-.button .loader, 
-.button .success-icon, 
-.button .error-icon {
-    display: none;
-}
-
-.button.animate .loader {
-    display: inline-block;
-}
-
-.button.success .loader,
-.button.error .loader {
-    display: none;
-}
-
-.button.success .success-icon,
-.button.error .error-icon {
-    display: inline-block;
-}
-
-.loader,
-.success-icon,
-.error-icon {
-    margin-left: 10px;
-}
-
-.loader {
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #3498db;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    animation: spin 1s linear infinite;
-}
-
-.success-icon::before,
-.error-icon::before {
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-}
-
-
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.button.error {
-    background-color: red;
-    cursor:default!important;
-}
-
-
-.LoadHistoricButton{
-    text-align: center;
-    padding: 10px 20px;
-    font-size: 15px;
-    color: #fff;
-    background-color: #168b26;
-    border: none;
-    height: 40px;
-    width: 100%;
-    cursor: pointer;
-    position: relative;
-
-}
-
-.LoadHistoricButton:hover{
-  background-color: #094611;
-
-}
-
-.form-group-flex{
-  justify-content: center;
-}
-
-element{
-    display: none;
-}
-.UniqueNetworkOverlay {
-    position: fixed;
-    display: flex;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.OverlayContent {
-    background: #004080;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 1500px;
-    max-height: 80%;
-    overflow-y: auto;
-    text-align: center;
-}
-
-.OverlayContent .Menu-Options {
-    margin-bottom: 20px;
-}
-
-.OverlayContent .Menu-Options label {
-    display: block;
-    margin-bottom: 10px;
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.OverlayContent .Menu-Options button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.OverlayContent .Menu-Options button.CloseOverlay {
-    background: #dc3545 !important;
-}
-
-.OverlayContent .Menu-Options button.CloseOverlay:hover{
-    background: #9a1f2b !important;
-}
-
-.OverlayContent .Menu-Options button:hover {
-    background: #0056b3;
-}
-
-.OverlayContent table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    table-layout: fixed;
-    overflow-x: auto;
-}
-
-.OverlayContent table th,
-.OverlayContent table td {
-    border: 3px solid #ddd;
-    color: white !important;
-    padding: 10px;
-    text-align:center;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.OverlayContent table th {
-    background-color: #004080;
-    font-weight: bold;
-}
-
-.OverlayContent table tr:hover {
-    background-color: #0c233b;
-}
-
-.OverlayContent table th,
-.OverlayContent table td {
-    padding: 12px 15px;
 }

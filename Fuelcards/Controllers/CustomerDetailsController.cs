@@ -4,6 +4,7 @@ using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Graph;
 using Fuelcards.Models;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 //using static Fuelcards.Models.CustomerDetailsModels;
 
 namespace Fuelcards.Controllers
@@ -35,8 +36,6 @@ namespace Fuelcards.Controllers
                     portlandId = Return.portlandId,
                     XeroId = Return.xeroID,
                     adress = Return.address,
-
-
                 };
 
                 return Json(JsonResult);
@@ -51,17 +50,21 @@ namespace Fuelcards.Controllers
 
 
         [HttpPost]
-        public JsonResult SubmitAddOrEdit([FromBody] CustomerDetailsModels.AddEditCustomerFormData AddEditCustomerFormData)
+        public JsonResult SubmitAddOrEdit([FromBody] NewCustomerDetailsModel.AddEditCustomerFormData AddEditCustomerFormData)
         {
             try
             {
-                var JsonResult = new
+                if(AddEditCustomerFormData.isUpdateCustomer == true)
                 {
-                    ffff = "f" +
-                    "ff"
-                };
-
-                return Json(JsonResult);
+                    SortChanges(AddEditCustomerFormData.keyFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Keyfuels);
+                    SortChanges(AddEditCustomerFormData.uKFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.UkFuel);
+                    SortChanges(AddEditCustomerFormData.texacoInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Texaco);
+                }
+                else
+                {
+                    var help = "THIS STILL NEEDS CODING";
+                }
+                return Json("JsonResult");
             }
             catch (Exception e)
             {
@@ -70,38 +73,20 @@ namespace Fuelcards.Controllers
             }
         }
 
-        [HttpPost]
-
-        public JsonResult UpdateAddon([FromBody] AddonFromJs customerPricingAddon)
+        private void SortChanges(NewCustomerDetailsModel.NetworkInfo? networkInfo, string CustomerName, EnumHelper.Network network)
         {
-            try
+            foreach (var NewAddon in networkInfo.newAddons)
             {
-                var JsonResult = new
-                {
-                    ffff = "f" +
-                    "ff"
-                };
-
-                return Json(JsonResult);
+                _db.UpdateAddon(NewAddon, CustomerName, network);
             }
-            catch (Exception e)
+            foreach (var UpdatedAccount in networkInfo.newAccountInfo)
             {
-                Response.StatusCode = 443;
-                return Json(new { error = e.Message });
+                _db.UpdateAccount(UpdatedAccount,CustomerName, network);
+            }
+            foreach (var newFix in networkInfo.newFixesForCustomer)
+            {
+                _db.NewFix(newFix, CustomerName, network);
             }
         }
-
-    }
-
-    public struct AddonFromJs
-    {
-        public string? account { get; set; }
-        public string addon { get; set; }
-        public string? effectiveFrom { get; set; }
-        public string toEmail { get; set; }
-        public string ccEmail
-        { get; set; }
-        public string bccEmail { get; set; }
-
     }
 }

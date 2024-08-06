@@ -1,4 +1,5 @@
 ﻿using DataAccess.Fuelcards;
+using Fuelcards.GenericClassFiles;
 
 namespace Fuelcards.Models
 {
@@ -20,12 +21,14 @@ namespace Fuelcards.Models
         public List<FixedPriceContract>? Fixed { get; set; }
         public int? paymentTerms { get; set; }
         public Email email { get; set; }
+        public EnumHelper.InvoiceFormatType? invoiceFormatType { get; set; } 
 
     }
     public struct CustomerList
     {
         public string? Name { get; set; }
         public string? xeroId { get; set; }
+        
     }
 
     public struct HistoricAddon

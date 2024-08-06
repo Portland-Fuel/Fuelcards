@@ -53,7 +53,7 @@ public partial class InvoiceReport
 
     public double? Current { get; set; }
 
-    public double? PrevRolled { get; set; }
+    public double? RollAvailable { get; set; }
 
     public double? DieselLifted { get; set; }
 

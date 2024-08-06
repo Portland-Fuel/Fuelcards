@@ -1,0 +1,739 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Calibri';
+    font-size: 14px;
+    color: #333;
+    background: linear-gradient(to bottom, #c83d3d, #b77275);
+}
+
+
+.NetworkToInvoice {
+    background-color: transparent;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 0 auto; 
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh;
+    flex-direction: column;
+}
+
+.NetworkToInvoice h1 {
+    font-size: 2em;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.NetworkToInvoice select{
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #f8f9fa;
+
+}
+
+
+.CheckListContainer {
+    margin: auto;
+    text-align: center;
+}
+.button{
+    background-color: #4b7baa;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+
+}
+.button:hover{
+    background-color: #194979;
+    color: #f8f9fa;
+}
+.button.active {
+    animation: flash 1s infinite;
+}
+.CheckListContainer .FailedSitesButton {
+    background-color: #c83d3d;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+
+}
+.CheckListContainer .FailedSitesButton:hover {
+    background-color: #a31e1e;
+    color: white;
+}
+.CheckListContainer .CustomerListSelect{
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: transparent;
+    text-align: left;
+    border: 0px;
+    color: white;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+.CheckListContainer .CustomerListSelect option{
+    cursor: pointer !important;
+    background-color: #511212;
+    color: white;
+
+}
+
+
+.CheckListTable {
+    border-collapse: collapse;
+    background-color: transparent;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    margin-bottom: 20px; 
+}
+
+.CheckListTable thead {
+    background-color: transparent;
+}
+
+.CheckListTable th {
+    color: white;
+}
+
+.CheckListTable th,
+.CheckListTable td {
+    padding: 10px;
+    text-align: left;
+    color: white;
+    border: 3px solid #f8f9fa;
+}
+
+.CheckListTable tbody tr:hover {
+    cursor: pointer;
+    background-color: #511212;
+}
+
+.CheckListCheckBox {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    align-items: center;
+}
+
+.ButtonContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ButtonContainer button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    width: 200px;
+    border: none; 
+    background-color: #4b7baa;
+    color: white;
+    cursor: pointer;
+    margin: 10px;
+}
+.ButtonContainer button:hover {
+    background-color: #194979;
+    color: #f8f9fa;
+}
+
+
+
+.InvoiceSection{
+    background-color: transparent;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 0 auto; 
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh;
+    flex-direction: column;
+    width: 100%;
+}
+.CustomerDetails{
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 300px;
+    margin-bottom: 50px;
+
+}
+.InvoiceSection .CustomerDetails label{
+    color: white;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+#InvoiceSectionTransactionTable{
+    border-collapse: collapse;
+    background-color: transparent;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(209, 202, 202, 0.1);
+    width: 100%;
+    margin-bottom: 20px; 
+    overflow:  auto;
+    max-height: 500px;
+
+}
+#InvoiceSectionTransactionTable thead {
+    background-color: transparent;
+}
+#InvoiceSectionTransactionTable th {
+    color: white;
+    font-size: 20px;
+    border: 2px solid #f8f9fa;
+    padding: 10px;
+    font: bold;
+}
+
+#InvoiceSectionTransactionTable td {
+    font-size: 18px;
+    color: white;
+    overflow: auto;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid #f8f9fa;
+    text-overflow:ellipsis;
+}
+
+.CustomerDetails .CustomerDetails-item{
+    background-color: transparent;  
+    width: 100%;  
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #f8f9fa;
+    color: white;
+    margin-bottom: 10px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.CustomerDetails .CustomerDetails-item label{
+    color: white;
+    font-size: 25px;
+
+}
+
+.Invoicingbtn{
+    background-color: #318f36;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+}
+.Invoicingbtn:hover{
+    background-color: #24842a;
+    color: #f8f9fa;
+}
+
+@keyframes flash {
+    0% {
+        filter: brightness(100%);
+    }
+    50% {
+        filter: brightness(50%);
+    }
+    100% {
+        filter: brightness(100%);
+    }
+}
+
+.Invoicingbtn.active {
+    animation: flash 1s infinite;
+}
+.StopInvoicingbtn {
+    background-color: #521010;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+}
+
+.StopInvoicingbtn:hover {
+    background-color: #a31e1e;
+    color: white;
+}
+
+.EmailOutSection {
+    background-color: transparent;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+.EmailOutSection .CustDetailsContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 300px;
+    width: 100%;
+
+}
+
+.EmailOutSection .CustDetailsContainer label{
+    color: white;
+    margin-bottom: 10px;
+    font-size: 18px;
+    text-align: center;
+    width: 100%;
+
+
+}
+.EmailOutSection .CustDetailsContainer input{
+    width: 100%;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    text-align: center;
+    margin-bottom: 10px;
+    background-color: transparent;
+
+}
+
+
+
+.EmailOutSection .section {
+    margin-bottom: 20px;
+}
+
+.EmailOutSection .DisplayItemsContainer {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 1200px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.EmailOutSection .HtmlOrPdf {
+    width: 48%;
+    box-sizing: border-box;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.EmailOutSection .HtmlOrPdf label{
+    color: white;
+    font-size: 18px;
+    margin-bottom: 10px;
+    text-align: center;
+
+}
+
+
+.EmailOutSection .HtmlOrPdf .PDFImageContainer:hover {
+    transform: scale(1.10);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.EmailOutSection .HtmlOrPdf .PDFImageContainer,
+.EmailOutSection .HtmlOrPdf .EmailContainer {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.EmailOutSection .HtmlOrPdf img {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+}
+
+.EmailOutSection .HtmlOrPdf #EmailHtml {
+    background-color: white;
+    color: black;
+    width: 100%;
+    max-height: 500px; 
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+.EmailOutSection .HtmlOrPdf .PDFImageContainer label,
+.EmailOutSection .HtmlOrPdf #EmailHtml  label{
+    background-color: white;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.EmailOutSection .EmailDetails {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;
+    height: 100%;
+    gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.EmailOutSection .EmailDetails label {
+    font-weight: bold;
+    color: white;
+    width: 100%; 
+    text-align: left; 
+}
+
+.EmailOutSection .EmailDetails input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+
+* {
+    box-sizing: border-box;
+  }
+  
+  
+  .s2 {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    background-color: transparent;
+    top: 50vh;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .s1 {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    top: 50vh;
+    left: 50%;
+    transform-origin: center;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background-color: transparent;
+  }
+  
+  .bigcon {
+    position: absolute;
+    height: 95px;
+    width: 95px;
+    top: 50vh;
+    left: 50%;
+    transform-origin: center;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    background-color: transparent;
+    animation: bigcon 2s infinite linear;
+    animation-delay: 0.25s;
+  }
+  
+  .b {
+    border-radius: 50%;
+    position: absolute;
+  }
+  
+  .s {
+    width: 25px;
+    height: 25px;
+    animation: small 2s infinite ease;
+    box-shadow: 0px 2px rgba(0,0,0,0.3);
+  }
+  
+  .s:nth-child(1) {
+    top: 0%;
+    left: 0%;
+  }
+  
+  .s:nth-child(2) {
+    top: 0%;
+    right: 0%;
+  }
+  
+  .s:nth-child(3) {
+    right: 0%;
+    bottom: 0%;
+  }
+  
+  .s:nth-child(4) {
+    bottom: 0%;
+    left: 0%;
+  }
+  
+  .big {
+    width: 20px;
+    height: 20px;
+    border-radius: 15px;
+    box-shadow:0px 0px 10px #f85454, 0px 0px 20px #f85454, 0px 0px 30px #f85454, 0px 0px 50px #f85454, 0px 0px 60px #f85454 ;
+    z-index: 1;
+    background-color: #912222;
+    animation: bigball 1s infinite linear;
+  }
+  
+  .sb1{
+    animation-delay: -1.75s;
+  }
+  .sb6{
+    animation-delay: -1.5s;
+  }
+  .sb2{
+    animation-delay: -1.25s;
+  }
+  .sb7{
+    animation-delay: -1s;
+  }
+  .sb3{
+    animation-delay: -0.75s;
+  }
+  .sb8{
+    animation-delay: -0.5s;
+  }
+  .sb4{
+    animation-delay: -0.25s;
+  }
+  .sb5{
+    animation-delay: -0s;
+  }
+  
+  @keyframes bigcon {
+    0% {
+      transform-origin: center;
+      transform: translate(-50%, -50%) rotate(45deg);
+    }
+    100% {
+      transform-origin: center;
+      transform: translate(-50%, -50%) rotate(405deg);
+    }
+  }
+  
+  @keyframes small {
+    0% {
+      transform: scale(1);
+       background-color: #f85454;
+    }
+    10% {
+      transform: scale(1.3);
+      background-color: #912222;
+    }
+    15% {
+      transform: scale(1);
+    }
+    25%{
+  transform: scale(1);
+       background-color: #f85454;
+    }
+    100%{
+      transform: scale(1);
+       background-color: #f85454;
+    }
+  }
+
+:root {
+    --loader-width: 250px;
+    --loader-dot-size: 20px;
+}
+
+.container {
+    height: 100vh;
+    width: 100vw;
+}
+
+.loader {
+    height: var(--loader-dot-size);
+    width: var(--loader-width);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+.loader--dot {
+    animation: loader 3s ease-in-out infinite;
+    height: var(--loader-dot-size);
+    width: var(--loader-dot-size);
+    border-radius: 100%;
+    background-color: black;
+    position: absolute;
+    border: 2px solid white;
+}
+
+.loader--dot:nth-child(1) {
+    background-color: #8cc759;
+    animation-delay: 0.5s;
+}
+
+.loader--dot:nth-child(2) {
+    background-color: #8c6daf;
+    animation-delay: 0.4s;
+}
+
+.loader--dot:nth-child(3) {
+    background-color: #ef5d74;
+    animation-delay: 0.3s;
+}
+
+.loader--dot:nth-child(4) {
+    background-color: #f9a74b;
+    animation-delay: 0.2s;
+}
+
+.loader--dot:nth-child(5) {
+    background-color: #60beeb;
+    animation-delay: 0.1s;
+}
+
+.loader--dot:nth-child(6) {
+    background-color: #fbef5a;
+    animation-delay: 0s;
+}
+
+.loader--text1 {
+    position: absolute;
+    top: 300%;
+    left: 0;
+    right: 0;
+    width: 20rem;
+    margin: auto;
+    color: white;
+    text-align: center;
+}
+
+.loader--text1:after {
+    content: "This may take a while";
+    font-weight: bold;
+    animation: loading-text1 3s infinite;
+}
+
+
+.loader--text {
+    position: absolute;
+    top: 200%;
+    left: 0;
+    right: 0;
+    width: 20rem;
+    margin: auto;
+    color:white;
+    text-align: center;
+}
+
+.loader--text:after {
+    content: "Getting data from the database";
+    font-weight: bold;
+    animation: loading-text 3s infinite;
+}
+
+@keyframes loader {
+    15% {
+        transform: translateX(0);
+    }
+
+    45% {
+        transform: translateX(calc(var(--loader-width) - var(--loader-dot-size)));
+    }
+
+    65% {
+        transform: translateX(calc(var(--loader-width) - var(--loader-dot-size)));
+    }
+
+    95% {
+        transform: translateX(0);
+    }
+}
+
+
+@keyframes loading-text1 {
+    0% {
+        content: "This may take a while";
+    }
+
+    25% {
+        content: "This may take a while.";
+    }
+
+    50% {
+        content: "This may take a while..";
+    }
+
+    75% {
+        content: "This may take a while...";
+    }
+}
+
+@keyframes loading-text {
+    0% {
+        content: "Getting data from the database";
+    }
+
+    25% {
+        content: "Getting data from the database.";
+    }
+
+    50% {
+        content: "Getting data from the database..";
+    }
+
+    75% {
+        content: "Getting data from the database...";
+    }
+}
+
+
+
+
+.ModelLoadError{
+    background-color: #c83d3d;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    margin: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.ErrorOptions{
+    background-color: #318f36;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+  
+}
+
+.ErrorOptions.ErrorOptions-Report{
+    background-color: indianred;
+}
+
+.ErrorOptions.ErrorOptions-Report:hover{
+    background-color: #a31e1e;
+    color: white;
+}
+
+.ErrorOptions:hover{
+    background-color: #24842a;
+    color: #f8f9fa;
+}

@@ -1,5 +1,6 @@
 ﻿using DataAccess.Cdata;
 using DataAccess.Fuelcards;
+using DataAccess.Tickets;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -29,6 +30,8 @@ namespace Fuelcards
                    Configuration.GetConnectionString("Cdata")));
             services.AddDbContext<FuelcardsContext>(options => options.UseNpgsql(
                    Configuration.GetConnectionString("FuelcardDb")));
+            services.AddDbContext<IfuelsContext>(options => options.UseNpgsql(
+                   Configuration.GetConnectionString("Ifuels")));
             services.AddControllersWithViews(options =>
             {
                 var policy = new AuthorizationPolicyBuilder()

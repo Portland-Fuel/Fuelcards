@@ -135,6 +135,8 @@ public partial class FuelcardsContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<ProductDescriptionToInventoryItemCode> ProductDescriptionToInventoryItemCodes { get; set; }
+
     public virtual DbSet<RolledVolume> RolledVolumes { get; set; }
 
     public virtual DbSet<SandwichOrder> SandwichOrders { get; set; }
@@ -919,7 +921,7 @@ public partial class FuelcardsContext : DbContext
             entity.Property(e => e.PetrolVol).HasColumnName("petrol_vol");
             entity.Property(e => e.PremDieselPrice).HasColumnName("prem_diesel_price");
             entity.Property(e => e.PremDieselVol).HasColumnName("prem_diesel_vol");
-            entity.Property(e => e.PrevRolled).HasColumnName("prev_rolled");
+            entity.Property(e => e.RollAvailable).HasColumnName("roll_available");
             entity.Property(e => e.Rolled).HasColumnName("rolled");
             entity.Property(e => e.SainsburysPrice).HasColumnName("sainsburys_price");
             entity.Property(e => e.SainsburysVol).HasColumnName("sainsburys_vol");
@@ -1498,6 +1500,21 @@ public partial class FuelcardsContext : DbContext
             entity.Property(e => e.Product1)
                 .HasMaxLength(255)
                 .HasColumnName("Product");
+        });
+
+        modelBuilder.Entity<ProductDescriptionToInventoryItemCode>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("product_description_to_inventory_item_code_pkey");
+
+            entity.ToTable("product_description_to_inventory_item_code");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Description)
+                .HasColumnType("character varying")
+                .HasColumnName("description");
+            entity.Property(e => e.InventoryItemcode)
+                .HasColumnType("character varying")
+                .HasColumnName("inventoryItemcode");
         });
 
         modelBuilder.Entity<RolledVolume>(entity =>

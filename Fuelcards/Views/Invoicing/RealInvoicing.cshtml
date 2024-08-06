@@ -1,0 +1,164 @@
+﻿@model InvoicePreCheckModels;
+<script src="~/js/invoicing.js"></script>
+<script src="~/js/invoicingerrorhandling.js"></script>
+<script src="~/js/emailinvoicing.js"></script>
+<link href="~/css/invoicing.css" rel="stylesheet" />
+<script>
+
+</script>
+
+<div id="InitialPageLoad">
+    <div class="container">
+        <div class="loader">
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--dot"></div>
+            <div class="loader--text1"></div>
+            <div class="loader--text"></div>
+
+        </div>
+    </div>
+</div>
+
+<div id="ModelError" class="ModelLoadError" hidden>
+    <h1>There was an error loading the page data</h1>
+    <button class="ErrorOptions" onclick="history.back()">Home Page</button>
+    <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
+    <button class="ErrorOptions ErrorOptions-Report" onclick="window.location.href = 'https://192.168.0.17:666/Home/ReportIssue'">Report It to IT</button>
+
+
+</div>
+<div hidden class="NetworkToInvoice" id="NetworkToInvoice">
+    <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
+    <h1>Please Select a network to check</h1>
+    <select>
+        <option disabled selected value="">Please Select an option to start</option>
+        <option onclick="showSelectedNetworkCheckList(this)" value="Keyfuels">Keyfuels</option>
+        <option onclick="showSelectedNetworkCheckList(this)" value="Texaco">Texaco</option>
+        <option onclick="showSelectedNetworkCheckList(this)" value="UkFuels">UkFuels</option>
+        <option onclick="showSelectedNetworkCheckList(this)" value="FuelGenie">FuelGenie</option>
+    </select>
+</div>
+
+<div id="CheckListContainer" class="CheckListContainer" hidden>
+    <button class="button" onclick="goBackFromNetworkCheck(this)">Back</button>
+    <button class="button" onclick="selectAllCheckBoxes(this)">Select All</button>
+
+    <table id="CheckListTable" class="CheckListTable">
+        <thead>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div class="ButtonContainer">
+        <button onclick="ApproveButtonClick()" id="ApproveButton" hidden>Approve</button>
+    </div>
+</div>
+
+
+<div hidden id="InvoiceSection" class="InvoiceSection">
+    <div id="ButtonGroupInvoicing" class="ChoiceButtonGrouping">
+        <button class="Invoicingbtn" onclick="StartInvoicing(this)" id="StartInvoicingBTN">Start Invoicing</button>
+        <button class="StopInvoicingbtn" onclick="StopInvoicingbtn(this)" id="PauseInvoicingBTN" hidden>Pause Invoicing</button>
+        <button class="Invoicingbtn" onclick="ResumeInvoicing(this)" id="ResumeInvoicingBTN" hidden>Resume Invoicing</button>
+    </div>
+    <div id="CustomerDetails" class="CustomerDetails">
+        <div class="CustomerDetails-item">
+            <label id="CustNameInvoicing">Customer Name:</label>
+        </div>
+        <div class="CustomerDetails-item">
+            <label id="CountOfCustomersToBeInvoiced">Number of Customers to be Invoiced: 0</label>
+
+        </div>
+    </div>
+    <div id="TransactionsTableContainer">
+        <table id="InvoiceSectionTransactionTable">
+            <thead>
+                <tr>
+                    <th>TransactionNumber</th>
+                    <th>TransactionDate</th>
+                    <th>TransactionTime</th>
+                    <th>SiteCode</th>
+                    <th>CardNumber</th>
+                    <th>ProductCode</th>
+                    <th>Quantity</th>
+                    <th>Cost</th>
+                    <th>Site Name</th>
+                    <th>Invoice Price</th>
+                    <th>Unit Price</th>
+                    <th>Product</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div hidden class="InvoicingLoaderContainer" id="InvoiceingLoader">
+    <div class="s1">
+        <div class="s b sb1"></div>
+        <div class="s b sb2"></div>
+        <div class="s b sb3"></div>
+        <div class="s b sb4"></div>
+    </div>
+
+
+    <div class="s2">
+        <div class="s b sb5"></div>
+        <div class="s b sb6"></div>
+        <div class="s b sb7"></div>
+        <div class="s b sb8"></div>
+    </div>
+
+    <div class="bigcon">
+        <div class="big b"></div>
+    </div>
+
+</div>
+
+<div hidden id="EmailOutSection" class="EmailOutSection">
+    <button onclick="StartSendingEmails()" class="button">Start Sending Emails</button>
+
+    <div class="section">
+        <div class="CustDetailsContainer">
+            <div>
+                <label>Customer Name:</label>
+                <input id="EmailCustomerName"readonly type="text" name="name" value="" />
+            </div>
+            <div>
+                <label >Account Number:</label>
+                <input id="EmailAccountNumber" readonly type="text" name="name" value="" />
+            </div>
+        </div>
+    </div>
+    <div class="DisplayItemsContainer" hidden id="DisplayEmailItemsContainer">
+        <div id="HtmlCon" class="HtmlOrPdf">
+            <div class="EmailContainer">
+                <div id="EmailHtml" class="EmailHtml">
+                </div>
+            </div>
+            <div class="EmailDetails" hidden id="EmailDetails">
+                <label>Subject</label>
+                <input type="text" id="EmailSubject" />
+                <label>To</label>
+                <input type="text" id="EmailTo" />
+                <label>CC</label>
+                <input  type="text" id="EmailCC" />
+                <label>BCC</label>
+                <input type="text" id="EmailBCC" />
+            </div>
+
+        </div>
+        <div id="PFfCon" class="HtmlOrPdf">
+            <div id="PDFImgContainer" class="PDFImageContainer">
+            </div>
+        </div>
+    </div>
+
+</div>

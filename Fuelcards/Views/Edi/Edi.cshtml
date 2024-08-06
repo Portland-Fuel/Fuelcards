@@ -6,7 +6,10 @@
 
 <link href="~/css/edi.css" rel="stylesheet" />
 <script src="~/js/edi.js"></script>
-<div class="form-container">
+<div id="EdiLoader" class="loader-container" hidden>
+    <div class="loader"></div>
+</div>
+@* <div class="form-container">
     <h1>Import EDI Files</h1>
     <form asp-action="MoveFilesToCorrectFolder" asp-controller="Edi" method="post" enctype="multipart/form-data">
         <div>
@@ -41,10 +44,18 @@
         }
     </form>
 </div>
+ *@
 
 <div class="table-container">
+    <button onclick="CheckSites()" class="CheckSitesButton">Check Sites</button>
+        <table  id="FailedSitesTable">
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     <h3>Latest Edi Upload</h3>
-    <table class="data-table">
+    <table id="EdiTable" class="data-table">
         <thead>
             <tr>
                 <th>Control ID</th>

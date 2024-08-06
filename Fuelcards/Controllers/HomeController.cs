@@ -4,6 +4,7 @@ using Fuelcards.GenericClassFiles;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using PortlandXeroLib;
 using System.Diagnostics;
 
@@ -30,7 +31,7 @@ namespace Fuelcards.Controllers
             pageModel.CustomerLists = customerClass.CustomerDetailsLoadData();
 
             ViewData["Title"] = "Customer Details";
-            return View("/Views/CustomerDetails/CustomerDetails.cshtml", pageModel);
+            return View("/Views/CustomerDetails/NewCustomerDetails.cshtml", pageModel);
         }
 
         public ActionResult Edi()
@@ -59,7 +60,8 @@ namespace Fuelcards.Controllers
         public ActionResult Invoicing()
         {
             ViewData["Title"] = "Invoicing";
-            return View();
+
+            return RedirectToAction("Invoicing", "Invoicing");
         }
         public async Task<IActionResult> Homepage()
         {

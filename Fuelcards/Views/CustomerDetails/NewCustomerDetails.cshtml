@@ -1,0 +1,158 @@
+﻿@model CustomerDetailsModels
+@{
+    Layout = "~/Views/Shared/_CustDetailsLayout.cshtml";
+    var jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(Model);
+}
+
+<script>
+    var model = JSON.parse('@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(jsonModel))');
+    console.log(model);
+</script>
+<script src="~/js/newcustomerdetails.js"></script>
+<link href="~/css/newcustomerdetails.css" rel="stylesheet" />
+
+
+<div id="UniqueNetworkOverlay" class="UniqueNetworkOverlay" hidden>
+    <div class="OverlayContent">
+        <div class="Menu-Options">
+            <div style="display:flex; justify-content:space-between">
+                <label id="CustNameLabelUniqueNetwork">Customer Name:</label>
+                <label id="NewFixCount">0 New Fixs</label>
+                <label id="NetworkNameLabelUniqueNetwork">Network: </label>
+            </div>
+
+
+            <label id="UniqueNetworkOverlayNetworkNameLabel"></label>
+            <button hidden onclick="LoadHistoricAddons(this)" id="LoadHistoricAddonsButton">Load Addons</button>
+            <button onclick="AddNewAddon(this)" id="AddNewAddonButton">Add new addon</button>
+            <button onclick="AddNewAccount(this)" id="AddNewAccountButton">Add or Update Account</button>
+            <button onclick="ShowNewFix(this)" id="AddNewFix">Add new Fix</button>
+
+
+            <button id="CloseOverlayButton" class="CloseOverlay" onclick="closeUniqueNetworkOverlay()">Close</button>
+        </div>
+        <table id="UniqueNetworkTable">
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <table id="HistoricAddons">
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div hidden id="overlay" class="">
+    <form id="NewFixForm">
+        <div class="form-container">
+            <h2>Add New Fix</h2>
+            <div id="NewFixSelectParent" class="form-group">
+                <label>Select Account:</label>
+            </div>
+            <div class="form-group">
+                <label for="effectiveFrom">Effective From:</label>
+                <input type="date" id="effectiveFrom" name="effectiveFrom" placeholder="YYYY-MM-DD">
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" name="endDate" placeholder="YYYY-MM-DD">
+            </div>
+            <div class="form-group">
+                <label for="period">Period:</label>
+                <select id="period" name="periods">
+                    <option value="Weekly">Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Fortnightly">Fortnightly</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="grade">Grade:</label>
+                <select id="grade" name="grade">
+                    <option value="Diesel">Diesel</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="fixedPrice">Fixed Price:</label>
+                <input type="text" id="fixedPrice" name="fixedPrice" oninput="CalculateFixedPriceIncDuty(this)" placeholder="Enter fixed price">
+            </div>
+            <div class="form-group">
+                <label for="fixedPriceIncDuty">Fixed Price Inc Duty:</label>
+                <input type="text" id="fixedPriceIncDuty" name="fixedPriceIncDuty" placeholder="Enter fixed price including duty">
+            </div>
+            <div class="form-group">
+                <label for="fixedVolume">Fixed Volume:</label>
+                <input type="text" id="fixedVolume" name="fixedVolume" placeholder="Enter fixed volume">
+            </div>
+            <div class="form-group">
+                <label for="periods">Periods:</label>
+                <input type="text" id="periods" name="periods" placeholder="Enter number of periods">
+            </div>
+            <div class="form-group">
+                <label for="tradeReference">Trade Reference:</label>
+                <input type="text" id="tradeReference" name="tradeReference" placeholder="Enter trade reference">
+            </div>
+            <div class="form-group">
+                <button onclick="AddNewFix(event)" type="submit">Add Fix</button>
+                <button onclick="CloseNewFixOverlay()" type="button">Close</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="Section" id="AddOrEditSection">
+    <div class="form-container">
+        <form id="AddOrEditCustomerForm" onsubmit="">
+            <div class="form-row">
+                <div class="form-group ">
+                    <label for="customerName">Name of Customer:</label>
+                    <input type="text" id="customerName" oninput="HandleCustomerNameInput(this)" list="customerOptions" name="customerName" autocomplete="off" required value="">
+
+               
+                    <datalist id="customerOptions">
+                        @{
+                            var customerDictionary = Model.CustomerLists.ToDictionary(e => e.Name, e => e.xeroId);
+                            var sortedCustomerDictionary = customerDictionary.OrderBy(e => e.Key).ToDictionary(e => e.Key, e => e.Value);
+                        }
+
+                        @foreach (var customer in sortedCustomerDictionary)
+                        {
+                            <option value="@customer.Key" data-id="@customer.Value"></option>
+                        }
+                    </datalist>
+
+           
+                    <input type="hidden" id="customerId" name="customerId">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="network-form-row">
+                    <div class="form-group">
+                        <button type="button" value="Keyfuels"  onclick="openUniqueNetworkOverlay(this)">Keyfuels</button>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" value="Texaco" onclick="openUniqueNetworkOverlay(this)">Texaco</button>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" value="UkFuel" onclick="openUniqueNetworkOverlay(this)">UkFuel</button>
+                    </div>
+                    <div class="form-group">
+                        <button type ="button" value="FuelGenie" onclick="openUniqueNetworkOverlay(this)">FuelGenie</button>
+                    </div>
+                </div>
+               
+            </div>
+
+            <div class="form-row-centered">
+                <button id="SubmitButton" class="button" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="Section" id="CustomerFixSection">
+    <p>CustomerFixSection</p>
+</div>

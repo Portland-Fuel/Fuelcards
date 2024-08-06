@@ -1,0 +1,82 @@
+﻿@* @model InvoicePreCheckModels;
+<h1><center>Pre Checks</h1></center>
+
+<h2>Texaco Volumes</h2>
+<p1>Texaco Diesel Band 7 Volume - @Model.TexacoVolume.DieselBand7</p1>
+<br />
+<p1>Texaco Unleaded Volume - @Model.TexacoVolume.Unleaded</p1>
+<br />
+<p1>Texaco Adblue Volume - @Model.texacoVolume.Adblue</p1>
+<br />
+<p1>Texaco Super Unleaded Volume - @Model.texacoVolume.SuperUnleaded</p1>
+<br />
+
+<h2>Failed Sites</h2>
+
+<p1>
+    Keyfuels Failed :
+    @foreach (var item in Model.FailedKeyfuelsSites)
+    {
+        <p>
+            @item
+        </p>
+
+        <br />
+    }
+    <br />
+
+    <p1>
+        Uk fuels Failed :
+        @foreach (var item in Model.FailedUkfuelSites)
+        {
+            <p>
+                @item
+            </p>
+
+            <br />
+        }
+        <br />
+
+        <p1>
+            Texaco Failed :
+            @foreach (var item in Model.FailedTexacoSites)
+            {
+                <p>
+                    @item
+                </p>
+
+                <br />
+            }
+            <br />
+
+            <h3> Keyfuels Customers To Invoice </h3>
+            <select>
+                @foreach (var item in Model.keyfuelsInvoiceList.Result)
+                {
+                    <option>@item.name : @item.addon</option>
+                }
+
+
+            </select>
+
+            <br />
+            <h3> Uk fuels Customers To Invoice </h3>
+            <select>
+                @foreach (var item in Model.ukFuelInvoiceList.Result)
+                {
+                    <option>@item.name : @item.addon</option>
+                }
+
+
+            </select>
+            <br />
+            <h3> Texaco Customers To Invoice </h3>
+            <select>
+                @foreach (var item in Model.texacoInvoiceList.Result)
+                {
+                    <option>@item.name : @item.addon</option>
+                }
+
+
+            </select>
+ *@
