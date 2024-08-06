@@ -105,6 +105,7 @@ namespace Fuelcards.InvoiceMethods
                 {
                     FloatingRate = (cost + 100)/100;
                 }
+
             }
             if(custType == EnumHelper.CustomerType.Fix)
             {
