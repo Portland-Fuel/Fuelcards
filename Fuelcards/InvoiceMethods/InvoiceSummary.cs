@@ -46,7 +46,7 @@ namespace Fuelcards.InvoiceMethods
                     VAT = Convert.ToDouble(Math.Round(Convert.ToDecimal(band.Value.Sum(t => t.invoicePrice) * 0.2), 2, MidpointRounding.AwayFromZero))
                 };
                 dieselRow.Quantity = TransactionBuilder.ConvertToLitresBasedOnNetwork(dieselRow.Quantity, network);
-                if(dieselRow.productName == "Diesel - " && invoice.CustomerType == EnumHelper.CustomerType.ExpiredFixWithVolume)
+                if (dieselRow.productName == "Diesel - " && invoice.CustomerType == EnumHelper.CustomerType.ExpiredFixWithVolume)
                 {
                     dieselRow.productName = "Diesel";
                     dieselRow.Quantity = dieselRow.Quantity - DieselTransaction.RolledVolumeUsedOnThisInvoice;
@@ -206,18 +206,18 @@ namespace Fuelcards.InvoiceMethods
 
         public FixedBox GetFixDetails(CustomerInvoice customerInvoice, EnumHelper.Network network, EnumHelper.CustomerType custType)
         {
-     
+
             FixedBox fixedBox = new();
             fixedBox.TotalDieselVolumeLiftedOnThisInvoice = Round2(customerInvoice.CustomerTransactions.Where(e => e.product == "Diesel").Sum(e => e.quantity));
             fixedBox.TotalDieselVolumeLiftedOnThisInvoice = TransactionBuilder.ConvertToLitresBasedOnNetwork(fixedBox.TotalDieselVolumeLiftedOnThisInvoice, network);
-            if(custType == EnumHelper.CustomerType.Fix)
+            if (custType == EnumHelper.CustomerType.Fix)
             {
                 fixedBox.FixedPriceVolumeForThisPeriod = customerInvoice.fixedInformation.AllFixes.Where(e => e.Id == customerInvoice.fixedInformation.CurrentTradeId).FirstOrDefault()?.FixedVolume;
             }
             else
             {
                 fixedBox.FixedPriceVolumeForThisPeriod = 0;
-            }  
+            }
             fixedBox.FixedPriceVolumeFromPreviousPeriods = customerInvoice.fixedInformation.RolledVolume;
             fixedBox.FixedPriceVolumeUsedOnThisinvoice = Round2(DieselTransaction.FixedVolumeUsedOnThisInvoice);
             fixedBox.FixedPriceRemaining = Round2(DieselTransaction.FixedVolumeRemainingForCurrent) + DieselTransaction.AvailableRolledVolume;

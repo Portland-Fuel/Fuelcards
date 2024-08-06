@@ -14,8 +14,8 @@ namespace Fuelcards.InvoiceMethods
         //public double? Diesel(InvoicingController.TransactionDataFromView data, double? addon, Models.Site site, EnumHelper.Network network, IQueriesRepository _db,EnumHelper.Products product)
         //{
         //    DieselTransaction diesel = new();
-            
-            
+
+
         //    //if(data.customerType == CustomerType.Fix)
         //    //{
         //    //    FixedCustomer processFix = new();
@@ -35,7 +35,7 @@ namespace Fuelcards.InvoiceMethods
                     case EnumHelper.Network.Keyfuels:
                         double? NewValue = 1.6 * (data.cost / 1.1) / 100;
                         //return NewValue;
-                        double? price =  NewValue * 100;
+                        double? price = NewValue * 100;
                         return price / data.quantity;
                     case EnumHelper.Network.UkFuel:
 
@@ -134,7 +134,7 @@ namespace Fuelcards.InvoiceMethods
                 {
                     case EnumHelper.Network.Keyfuels:
                         double? NewValue = 1.35 * (data.cost / 1.15) / 100;
-                        double? price =  NewValue * 100;
+                        double? price = NewValue * 100;
                         return price / data.quantity;
 
                     case EnumHelper.Network.UkFuel:
@@ -281,8 +281,8 @@ namespace Fuelcards.InvoiceMethods
         {
             if (network != EnumHelper.Network.Keyfuels) throw new ArgumentException("So far only keyfuels transactions should be able to enter the calculation for a new card! something has gone badly wrong");
             double? NewValue = 1.25 * (data.cost / 1.1) / 100;
-            var price =  NewValue * 100;
-            return price/data.quantity;
+            var price = NewValue * 100;
+            return price / data.quantity;
         }
         public double? PackagedAdblue(GenericTransactionFile data, EnumHelper.Network network, IQueriesRepository _db)
         {
@@ -353,7 +353,7 @@ namespace Fuelcards.InvoiceMethods
                 return null;
             }
         }
-        public double? DieselFloatingUnitPrice(IQueriesRepository _db, EnumHelper.Products product,InvoicingController.TransactionDataFromView data, EnumHelper.Network network, Models.Site site, double? Addon)
+        public double? DieselFloatingUnitPrice(IQueriesRepository _db, EnumHelper.Products product, InvoicingController.TransactionDataFromView data, EnumHelper.Network network, Models.Site site, double? Addon)
         {
             if (product == EnumHelper.Products.Diesel)
             {
@@ -366,6 +366,6 @@ namespace Fuelcards.InvoiceMethods
             return 0;
         }
 
-        
+
     }
 }

@@ -32,29 +32,7 @@ namespace Fuelcards.Repositories
             _Cdb = cDb;
             _Idb = Idb;
         }
-        public void UploadNewItemInventoryCode(string description, string itemCode)
-        {
-            _db.ProductDescriptionToInventoryItemCodes.Add(new ProductDescriptionToInventoryItemCode { Description = description.Trim(), InventoryItemcode = itemCode.Trim() });
-            _db.SaveChanges();
-        }
 
-        public List<Dictionary<string, string>> GetListOfProducts()
-        {
-            List<Dictionary<string, string>> toreturn = new();
-            var ff = _db.ProductDescriptionToInventoryItemCodes
-                 .Where(e => e.Id > 0)
-                 .ToList();
-
-            foreach (var item in ff)
-            {
-                Dictionary<string, string> dict = new();
-                dict.Add(item.Description, item.InventoryItemcode);
-
-                toreturn.Add(dict);
-            }
-             
-            return toreturn;
-        }
         public string? GetinventoryItemCode(string productName)
         {
             string? ItemInventoryCode = _db.ProductDescriptionToInventoryItemCodes.FirstOrDefault(e => e.Description.ToLower() == productName.ToLower())?.InventoryItemcode;
@@ -81,7 +59,7 @@ namespace Fuelcards.Repositories
         }
         public bool CheckSite(Site item)
         {
-            return _db.SiteNumberToBands.Any(e=>e.SiteNumber == item.code && e.NetworkId == (int)EnumHelper.NetworkEnumFromString(item.Network) && e.Active != false);
+            return _db.SiteNumberToBands.Any(e => e.SiteNumber == item.code && e.NetworkId == (int)EnumHelper.NetworkEnumFromString(item.Network) && e.Active != false);
         }
         public List<Models.Site> GetAllTransactions(List<int> ControlIDs)
         {
@@ -130,7 +108,7 @@ namespace Fuelcards.Repositories
             }
             catch (Exception e)
             {
-                throw new Exception("Error Getting All Transactions:" +  e.Message);   
+                throw new Exception("Error Getting All Transactions:" + e.Message);
             }
         }
         public List<CustomerPricingAddon>? GetListOfAddonsForCustomer(int PortlandId, EnumHelper.Network network)
@@ -266,8 +244,8 @@ namespace Fuelcards.Repositories
             {
                 throw new ArgumentException(e.Message);
             }
-        
-            return Customers.OrderBy(e=>e.name).ToList();
+
+            return Customers.OrderBy(e => e.name).ToList();
         }
         private CustomerInvoice? FixedProperties(CustomerInvoice model, DateOnly invoiceDate, EnumHelper.CustomerType custType)
         {
@@ -299,9 +277,9 @@ namespace Fuelcards.Repositories
                         .Sum(x => x.Volume);
 
                     // Step 5: Assign the sum to model.fixedInformation.RolledVolume
-                    model.fixedInformation.RolledVolume =  InvoiceSummary.Round2(allocatedVolumeSum);
+                    model.fixedInformation.RolledVolume = InvoiceSummary.Round2(allocatedVolumeSum);
 
-                    model.fixedInformation.CurrentTradeId = null; 
+                    model.fixedInformation.CurrentTradeId = null;
                     return model;
                 }
             }
@@ -767,10 +745,10 @@ namespace Fuelcards.Repositories
             ExistingEmail.Bcc = updatedAccount.BccEmail;
             await FcEmailUpdateAsync(ExistingEmail);
             _db.SaveChanges();
-            var portlandId = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e=>e.FcAccountNo == Convert.ToInt32(updatedAccount.account)).PortlandId;
+            var portlandId = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(updatedAccount.account)).PortlandId;
             var XeroIds = _Cdb.PortlandIdToXeroIds.FirstOrDefault(e => e.PortlandId == portlandId && e.XeroTennant == 0).XeroId;
-           DataAccess.Fuelcards.PaymentTerm? ExistingTerms = _db.PaymentTerms.FirstOrDefault(e => e.XeroId == XeroIds && e.Network == (int)network);
-            if(ExistingTerms is null)
+            DataAccess.Fuelcards.PaymentTerm? ExistingTerms = _db.PaymentTerms.FirstOrDefault(e => e.XeroId == XeroIds && e.Network == (int)network);
+            if (ExistingTerms is null)
             {
                 DataAccess.Fuelcards.PaymentTerm newTerms = new();
                 newTerms.Network = (int)network;

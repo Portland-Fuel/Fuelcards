@@ -67,36 +67,36 @@ namespace Fuelcards.GenericClassFiles
         private string GenerateAddress(Xero.NetStandard.OAuth2.Model.Accounting.Contact? item)
         {
             if (item is null) throw new ArgumentException("Xero Id was null therefore no address can be found");
-                string? AddressLine = item.Addresses[0].AddressLine1;
-                string? AddressLine2 = item.Addresses[0].AddressLine2;
-                string? AddressLine3 = item.Addresses[0].AddressLine3;
-                string? City = item.Addresses[0].City;
-                string? Postcode = item.Addresses[0].PostalCode;
-                string? Region = item.Addresses[0].Region;
-                string address = $"{AddressLine},{AddressLine2},{AddressLine3},{City},{Postcode},{Region}";
-                if (address == ",,,,," && item.Addresses.Count() > 1)
-                {
-                    AddressLine = item.Addresses[1].AddressLine1;
-                    AddressLine2 = item.Addresses[1].AddressLine2;
-                    AddressLine3 = item.Addresses[1].AddressLine3;
-                    City = item.Addresses[1].City;
-                    Postcode = item.Addresses[1].PostalCode;
-                    Region = item.Addresses[1].Region;
-                    address = $"{AddressLine},{AddressLine2},{AddressLine3},{City},{Postcode},{Region}";
+            string? AddressLine = item.Addresses[0].AddressLine1;
+            string? AddressLine2 = item.Addresses[0].AddressLine2;
+            string? AddressLine3 = item.Addresses[0].AddressLine3;
+            string? City = item.Addresses[0].City;
+            string? Postcode = item.Addresses[0].PostalCode;
+            string? Region = item.Addresses[0].Region;
+            string address = $"{AddressLine},{AddressLine2},{AddressLine3},{City},{Postcode},{Region}";
+            if (address == ",,,,," && item.Addresses.Count() > 1)
+            {
+                AddressLine = item.Addresses[1].AddressLine1;
+                AddressLine2 = item.Addresses[1].AddressLine2;
+                AddressLine3 = item.Addresses[1].AddressLine3;
+                City = item.Addresses[1].City;
+                Postcode = item.Addresses[1].PostalCode;
+                Region = item.Addresses[1].Region;
+                address = $"{AddressLine},{AddressLine2},{AddressLine3},{City},{Postcode},{Region}";
 
-                }
-                AddressLine = null;
-                City = null;
-                Postcode = null;
-                Region = null;
-
-                if (item.Name == "Portland Fuel Ltd") item.EmailAddress = "info@portland-fuel.co.uk";
-                if (address == ",,,,,")
-                {
-                    throw new Exception("Address could not be established.");
-                }
-            return address;
             }
+            AddressLine = null;
+            City = null;
+            Postcode = null;
+            Region = null;
+
+            if (item.Name == "Portland Fuel Ltd") item.EmailAddress = "info@portland-fuel.co.uk";
+            if (address == ",,,,,")
+            {
+                throw new Exception("Address could not be established.");
+            }
+            return address;
+        }
         private List<FixedPriceContract>? getAllFixedData(int account)
         {
             List<FixedPriceContract>? contracts = _db.AllFixContracts(account);
@@ -151,5 +151,5 @@ namespace Fuelcards.GenericClassFiles
         }
     }
 
-  
+
 }

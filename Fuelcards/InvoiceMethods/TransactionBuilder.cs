@@ -29,7 +29,7 @@ namespace Fuelcards.InvoiceMethods
             transactionDataFromView.transaction.quantity = ConvertToLitresBasedOnNetwork(transactionDataFromView.transaction.quantity, network);
             double? Addon = _db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.portlandId, transactionDataFromView.transaction.transactionDate, network, transactionDataFromView.IfuelsCustomer, (int)transactionDataFromView.account);
             if (Addon is null) throw new ArgumentException($"Addon should not be null - {transactionDataFromView.name} with account = {transactionDataFromView.account}")
-;            double? UnitPrice = Math.Round(Convert.ToDouble(CalculateUnitPrice(_db, product, transactionDataFromView, network, Addon, siteInfo)), 4, MidpointRounding.AwayFromZero);
+; double? UnitPrice = Math.Round(Convert.ToDouble(CalculateUnitPrice(_db, product, transactionDataFromView, network, Addon, siteInfo)), 4, MidpointRounding.AwayFromZero);
 
             double? invoicePrice = transactionDataFromView.transaction.quantity * UnitPrice;
             invoicePrice = Convert.ToDouble(Math.Round(Convert.ToDecimal(invoicePrice), 2, MidpointRounding.AwayFromZero));
@@ -40,12 +40,12 @@ namespace Fuelcards.InvoiceMethods
                 UnitPrice = UnitPrice.HasValue ? UnitPrice.Value.ToString("F4") : null,
                 InvoicePrice = invoicePrice.HasValue ? invoicePrice.Value.ToString("F2") : null
             };
-            
+
             return model;
 
         }
 
-        private double? CalculateUnitPrice(IQueriesRepository _db,EnumHelper.Products? product,TransactionDataFromView data, EnumHelper.Network network, double? Addon, Models.Site site)
+        private double? CalculateUnitPrice(IQueriesRepository _db, EnumHelper.Products? product, TransactionDataFromView data, EnumHelper.Network network, double? Addon, Models.Site site)
         {
             try
             {

@@ -11,7 +11,7 @@ namespace Fuelcards.InvoiceMethods
         public static double? VolumeChargedAtFix = 0;
         public static double? VolumeChargedAtFloating = 0;
         public static double? VolumeChargedAtRolled = 0;
-        public static double? TotalDieselUsed {  get; set; }
+        public static double? TotalDieselUsed { get; set; }
         public static int? account = null;
         public static double? FixedVolumeUsedOnThisInvoice = null;
         public static double? RolledVolumeUsedOnThisInvoice = null;
@@ -38,7 +38,7 @@ namespace Fuelcards.InvoiceMethods
         {
             try
             {
-                GetFixAndFloatingRate(FixedPrice, SiteInfo, addon, _db.GetBasePrice((DateOnly)data.transaction.transactionDate), (EnumHelper.CustomerType)data.customerType, network,data.transaction.cost,data.fixedInformation);
+                GetFixAndFloatingRate(FixedPrice, SiteInfo, addon, _db.GetBasePrice((DateOnly)data.transaction.transactionDate), (EnumHelper.CustomerType)data.customerType, network, data.transaction.cost, data.fixedInformation);
 
                 if (data.customerType == GenericClassFiles.EnumHelper.CustomerType.Floating)
                 {
@@ -46,7 +46,7 @@ namespace Fuelcards.InvoiceMethods
                 }
                 else
                 {
-                    if(data.customerType == EnumHelper.CustomerType.Fix)
+                    if (data.customerType == EnumHelper.CustomerType.Fix)
                     {
                         UpdateStaticVariablesIfNeeded(
                         (int?)data.account,
@@ -99,19 +99,18 @@ namespace Fuelcards.InvoiceMethods
             VolumeChargedAtFloating = 0;
             VolumeChargedAtRolled = 0;
             FloatingRate = basePrice + addon + siteInfo.Surcharge + siteInfo.transactionalSiteSurcharge;
-            if(network == EnumHelper.Network.UkFuel)
+            if (network == EnumHelper.Network.UkFuel)
             {
-                if(siteInfo.band == "9" || siteInfo.band == "8")
+                if (siteInfo.band == "9" || siteInfo.band == "8")
                 {
-                    FloatingRate = (cost + 100)/100;
+                    FloatingRate = (cost + 100) / 100;
                 }
-
             }
-            if(custType == EnumHelper.CustomerType.Fix)
+            if (custType == EnumHelper.CustomerType.Fix)
             {
-                if(FixedPrice is null)
+                if (FixedPrice is null)
                 {
-                    FixRate = fixInfo.AllFixes.Where(e=>e.Id == fixInfo.CurrentTradeId).FirstOrDefault()?.FixedPriceIncDuty + siteInfo.Surcharge + siteInfo.transactionalSiteSurcharge;
+                    FixRate = fixInfo.AllFixes.Where(e => e.Id == fixInfo.CurrentTradeId).FirstOrDefault()?.FixedPriceIncDuty + siteInfo.Surcharge + siteInfo.transactionalSiteSurcharge;
                 }
                 else
                 {
@@ -126,13 +125,13 @@ namespace Fuelcards.InvoiceMethods
 
         private static async Task ProcessRolloverVolumes(InvoicingController.TransactionDataFromView data, EnumHelper.Network network, Models.Site siteInfo)
         {
-            
+
             double QuantityRemainingToBeAllocated = (double)data.transaction.quantity;
             if (network == EnumHelper.Network.UkFuel && (siteInfo.band == "9" || siteInfo.band == "8"))
             {
                 VolumeChargedAtFloating = QuantityRemainingToBeAllocated;
                 TotalDieselUsed += QuantityRemainingToBeAllocated;
-                return; 
+                return;
             }
             while (QuantityRemainingToBeAllocated > 0 && FixedVolumeRemainingForCurrent > 0)
             {
@@ -156,7 +155,7 @@ namespace Fuelcards.InvoiceMethods
         private static double? CalculatePrice(InvoicingController.TransactionDataFromView data, EnumHelper.Network network)
         {
             double? FixPrice = null;
-            if(data.customerType == EnumHelper.CustomerType.ExpiredFixWithVolume)
+            if (data.customerType == EnumHelper.CustomerType.ExpiredFixWithVolume)
             {
                 FixPrice = (VolumeChargedAtRolled * FixRate) / 100;
             }
@@ -164,14 +163,14 @@ namespace Fuelcards.InvoiceMethods
             {
                 FixPrice = (VolumeChargedAtFix * FixRate) / 100;
             }
-            if (VolumeChargedAtFix ==0 && VolumeChargedAtRolled == 0) FixPrice = 0;
+            if (VolumeChargedAtFix == 0 && VolumeChargedAtRolled == 0) FixPrice = 0;
             //FixedVolumeUsedOnThisInvoice += VolumeChargedAtFix;
             double? FloatingPrice = (VolumeChargedAtFloating * FloatingRate) / 100;
 
             if (network == EnumHelper.Network.Fuelgenie) FloatingPrice = data.transaction.cost;
             if (FixPrice is null) FixPrice = 0;
             if (FloatingPrice is null) FloatingPrice = 0;
-            var unitPrice = (FixPrice + FloatingPrice)/data.transaction.quantity;
+            var unitPrice = (FixPrice + FloatingPrice) / data.transaction.quantity;
             return unitPrice;
         }
 
@@ -212,7 +211,7 @@ namespace Fuelcards.InvoiceMethods
                 VolumeChargedAtFix = newVolume;
                 //TotalDieselUsed += newVolume;
                 newVolume = 0;
-                
+
                 return newVolume;
             }
             else

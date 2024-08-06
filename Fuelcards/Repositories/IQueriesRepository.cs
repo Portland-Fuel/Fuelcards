@@ -32,7 +32,7 @@ namespace Fuelcards.Repositories
         void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network);
         List<int?>? CheckForDuplicateTransactions(EnumHelper.Network network);
         void UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network);
-        
+
         Task FcEmailUpdateAsync(FcEmail source);
         Task NewFix(NewCustomerDetailsModel.Fix newFixesForCustomer, string customerName, EnumHelper.Network network);
         List<SiteNumberToBand> GetAllSiteInformation();
@@ -46,7 +46,5 @@ namespace Fuelcards.Repositories
         bool CheckSite(Site item);
         void AddSiteNumberToBand(Site site);
         string? GetinventoryItemCode(string productName);
-        List<Dictionary<string, string>> GetListOfProducts();
-        void UploadNewItemInventoryCode(string description, string itemCode);
     }
 }

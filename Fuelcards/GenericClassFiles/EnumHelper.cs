@@ -350,6 +350,6 @@ namespace Fuelcards.GenericClassFiles
             Default,
             Pan,
         }
-        
+
     }
 }

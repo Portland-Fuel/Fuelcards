@@ -1178,10 +1178,12 @@ namespace Fuelcards.Models
 
         #endregion
 
-        public static void GenerateXeroCSV(List<InvoicePDFModel> listInvoicePDFModel, List<Dictionary<string, string>> listOfProducts)
+        public static void GenerateXeroCSV(List<InvoicePDFModel> listInvoicePDFModel)
         {
             try
-            {
+            {   
+                List<Dictionary<string, string>> listOfProducts = new List<Dictionary<string, string>>();
+
                 List<FileHelperForInvoicing.XeroCsv> ListOfDataToGoOnTheCSV = new List<FileHelperForInvoicing.XeroCsv>();
                 string XeroFileName = FileHelperForInvoicing.BuildingFileNameForXeroCSV(listInvoicePDFModel[0]);
                 string FilePathForXeroCSV = Path.Combine(FileHelperForInvoicing.BuildingFilePathForXeroCSV(listInvoicePDFModel[0]), XeroFileName);
