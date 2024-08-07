@@ -1,10 +1,10 @@
-window.onload = function() {
+window.onload = function () {
     window.zoomlevel = "90%";
 }
 
 
-document.addEventListener("DOMContentLoaded", function() {
-  
+document.addEventListener("DOMContentLoaded", function () {
+
     var modelKey = 'invoicePreCheckModel';
     var storedModel = localStorage.getItem(modelKey);
 
@@ -13,13 +13,13 @@ document.addEventListener("DOMContentLoaded", function() {
         $.ajax({
             url: '/Invoicing/GetInvoicePreCheckModel',
             dataType: 'json',
-            success: function(data) {
+            success: function (data) {
                 localStorage.setItem(modelKey, JSON.stringify(data));
                 model = data; // No need to parse since data is already an object
                 console.log('Model fetched from server and stored in local storage:', model);
                 initializePage(model);
             },
-            error: async function(error) {
+            error: async function (error) {
                 document.getElementById("InitialPageLoad").hidden = true;
                 document.getElementById("ModelError").hidden = false;
 
@@ -50,14 +50,14 @@ var model = null;
 let GCB; // Global check model
 let selectedNetwork;
 
-let Invoicing = false;  
+let Invoicing = false;
 
-async function RefreshPage(){
+async function RefreshPage() {
     window.location.reload(true);
     localStorage.removeItem('invoicePreCheckModel');
 }
-function goBackFromNetworkCheck(buttonEle){
-    document.getElementById('ApproveButton').hidden = true; 
+function goBackFromNetworkCheck(buttonEle) {
+    document.getElementById('ApproveButton').hidden = true;
     document.getElementById("NetworkToInvoice").hidden = false;
     document.getElementById("CheckListContainer").hidden = true;
 
@@ -152,7 +152,7 @@ async function getHeaderList(network) {
         case "ukfuels":
             return ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Product 18", "Customer List"];
         case "texaco":
-            return ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates","Texaco Volumes", "Customer List"];
+            return ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Texaco Volumes", "Customer List"];
         case "fuelgenie":
             return ["Floating price data", "Invoice period", "Number of imports", "Errors in v+w", "Duplicates", "Customer List"];
         default:
@@ -191,7 +191,7 @@ async function createCheckListRows(model, network) {
     const failedSiteList = getFailedSiteList(network);
     if (failedSiteList.length > 0 || failedSiteList === undefined) {
         const TDButton = createButton("FailedSitesButton", "View Failed Sites");
-        TDButton.onclick = function() {
+        TDButton.onclick = function () {
             ShowSiteErrorForm(failedSiteList);
         };
         rows[3].appendChild(TDButton);
@@ -206,7 +206,7 @@ async function createCheckListRows(model, network) {
     } else {
         rows[4].appendChild(createCell("No duplicates"), "green");
     }
-    if(network.toLowerCase() === "texaco"){
+    if (network.toLowerCase() === "texaco") {
         rows[5].appendChild(createVolumesList(network));
         rows[6].appendChild(createSelectCustomerList(network));
     }
@@ -214,15 +214,15 @@ async function createCheckListRows(model, network) {
         rows[5].appendChild(createCell("NEed to do this!"));
         rows[6].appendChild(createSelectCustomerList(network));
     }
-    else if(network.toLowerCase() === "fuelgenie"){
+    else if (network.toLowerCase() === "fuelgenie") {
         rows[5].appendChild(createSelectCustomerList(network));
 
     }
-    else if(network.toLowerCase() === "keyfuels"){
+    else if (network.toLowerCase() === "keyfuels") {
         rows[5].appendChild(createSelectCustomerList(network));
 
     }
-    else{
+    else {
         rows[5].appendChild(createCell("Error"));
     }
 
@@ -237,14 +237,14 @@ async function createCheckListRows(model, network) {
 
 
 
-function createCell(content,color) {
-    if(color === undefined) color = "white";
+function createCell(content, color) {
+    if (color === undefined) color = "white";
     const td = document.createElement("td");
     td.style.color = color;
     td.innerHTML = content;
     return td;
 }
-function createButton(className,textContent) {
+function createButton(className, textContent) {
     const button = document.createElement("button");
     button.classList.add(className);
     button.textContent = textContent;
@@ -288,12 +288,12 @@ function createSelectCustomerList(network) {
     select.id = "CustomerList";
     select.name = "CustomerList";
     select.classList.add("CustomerListSelect");
-    if(CustList.length == 0|| CustList == "Error"){
+    if (CustList.length == 0 || CustList == "Error") {
         const option = document.createElement("option");
         option.value = "No Customers";
         option.text = "No Customers";
         select.appendChild(option);
-    }else{
+    } else {
         CustList.forEach(customer => {
             const option = document.createElement("option");
             const Val = customer.name + " - " + customer.addon;
@@ -302,7 +302,7 @@ function createSelectCustomerList(network) {
             select.appendChild(option);
         });
     }
-   
+
 
     const td = document.createElement("td");
     td.appendChild(select);
@@ -324,7 +324,7 @@ async function selectAllCheckBoxes() {
     showApproveIfCheckboxesAllChecked();
 
 
-    
+
 }
 
 //InvoiceSectionFunctions
@@ -338,10 +338,10 @@ async function ApproveButtonClick() {
     var CustList = getCustomerListFromNetwork(selectedNetwork);
     SetCustCountToBeInvoiced(CustList);
 }
-async function startInvoicingLoader(){
+async function startInvoicingLoader() {
     document.getElementById("InvoiceingLoader").hidden = false;
 }
-async function stopInvoicingLoader(){
+async function stopInvoicingLoader() {
     document.getElementById("InvoiceingLoader").hidden = true;
 }
 async function StartInvoicing(btn) {
@@ -356,7 +356,7 @@ async function StartInvoicing(btn) {
 }
 let currentCustomerIndex = 0;
 async function InvoiceCustomers(CustList, startIndex = 0) {
-    for (; currentCustomerIndex < CustList.length; ) {
+    for (; currentCustomerIndex < CustList.length;) {
         const customer = CustList[currentCustomerIndex];
         console.log("Current Customer Index: ", currentCustomerIndex);
         console.log("Customer: ", customer);
@@ -371,11 +371,11 @@ async function InvoiceCustomers(CustList, startIndex = 0) {
         var result = await InvoiceCustomer(customer);
 
 
-        if(!result){
-            currentCustomerIndex  = currentCustomerIndex - 1;
+        if (!result) {
+            currentCustomerIndex = currentCustomerIndex - 1;
             return;
         }
-        else{
+        else {
             await MinusCustCountToBeinvoiced();
 
             continue
@@ -408,14 +408,14 @@ async function InvoiceCustomer(Customer) {
                 type: 'POST',
                 data: JSON.stringify(Customer),
                 contentType: 'application/json',
-                success: function(data) {
+                success: function (data) {
                     Toast.fire({
                         icon: 'success',
                         title: Customer.name + ": Invoiced Successfully"
                     });
                     resolve(data);
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     HandleInvoicingError(xhr);
                     reject(new Error('Error invoicing customer.'));
                 }
@@ -446,13 +446,13 @@ async function ConfirmInvoicing(network) {
                 data: JSON.stringify(network),
                 contentType: 'application/json',
                 type: 'POST',
-                success: function(data) {
+                success: function (data) {
                     Toast.fire({
                         icon: 'success',
                         title: 'Invoicing Complete'
                     })
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     HandleConfirmInvoicingError(xhr.responseText);
                 }
             });
@@ -467,10 +467,10 @@ async function StartLoopThroughTransactions(Customer) {
 
     for (const transaction of Customer.customerTransactions) {
         await DisplayTransactionOnPage(transaction);
-        
+
         const DataFromTReturn = await SendTransactionToControllerToBeProcessed(transaction, Customer);
         const Data = JSON.parse(DataFromTReturn);
-        
+
         transaction.siteName = Data.siteName;
         transaction.invoicePrice = Data.invoicePrice;
         transaction.unitPrice = Data.unitPrice;
@@ -500,14 +500,14 @@ async function PopulateAddtionalTransactionData(Transaction) {
     if (RecentRow == undefined) {
         showErrorBox("Error: Transaction not added to table");
     }
-    else{
+    else {
         const cells = RecentRow.querySelectorAll("td");
         cells[cells.length - 4].innerHTML = Transaction.siteName;
         cells[cells.length - 3].innerHTML = Transaction.invoicePrice;
         cells[cells.length - 2].innerHTML = Transaction.unitPrice;
         cells[cells.length - 1].innerHTML = Transaction.product;
         console.log("Transaction Added to Table");
-        
+
     }
 }
 async function DisplayTransactionOnPage(Transaction) {
@@ -559,7 +559,7 @@ async function DisplayTransactionOnPage(Transaction) {
 }
 
 
-async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
+async function SendTransactionToControllerToBeProcessed(Transaction, customer) {
     var TransactionDataFromView = {
         name: customer.name,
         addon: customer.addon,
@@ -570,7 +570,7 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
         transaction: Transaction,
     }
 
-   
+
 
     try {
         let response = await $.ajax({
@@ -578,7 +578,7 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
             type: 'POST',
             data: JSON.stringify(TransactionDataFromView),
             contentType: 'application/json',
-            success: function(data) {
+            success: function (data) {
                 var stringifyed = JSON.stringify(data)
                 var ParsedData = JSON.parse(stringifyed);
                 var stringifyedParse = JSON.stringify(ParsedData);
@@ -588,10 +588,10 @@ async function SendTransactionToControllerToBeProcessed(Transaction,customer) {
 
         return JSON.stringify(response);
     }
-    catch(xhr){
+    catch (xhr) {
         HandleInvoicingError(xhr);
     }
-    
+
 }
 
 async function InvoicingCompletion() {
@@ -600,15 +600,15 @@ async function InvoicingCompletion() {
     stopInvoicingLoader();
 }
 
-async function MinusCustCountToBeinvoiced(){
+async function MinusCustCountToBeinvoiced() {
     var CustCountH3 = document.getElementById("CountOfCustomersToBeInvoiced");
     var CustCount = CustCountH3.textContent;
-    CustCount = CustCount.replace("Number of Customers to be Invoiced: ","");
+    CustCount = CustCount.replace("Number of Customers to be Invoiced: ", "");
     CustCount = parseInt(CustCount);
     CustCount = CustCount - 1;
-    if(CustCount == 0){
+    if (CustCount == 0) {
         CustCountH3.hidden = false;
-    }else{
+    } else {
         var CustText = "Number of Customers to be Invoiced: " + CustCount;
         CustCountH3.textContent = CustText;
     }
@@ -621,7 +621,7 @@ async function SetCustCountToBeInvoiced(CustList) {
     var CustText = "Number of Customers to be Invoiced: " + CustCount;
     CustCountH3.textContent = CustText;
     console.log(CustCount);
-    
+
 }
 
 async function DisplayIntialPageText(customer) {
@@ -639,5 +639,3 @@ async function StopInvoicingbtn() {
     document.getElementById("ResumeInvoicingBTN").hidden = false;
     document.getElementById("PauseInvoicingBTN").hidden = true;
 }
-
-

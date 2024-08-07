@@ -32,7 +32,28 @@ namespace Fuelcards.Repositories
             _Cdb = cDb;
             _Idb = Idb;
         }
+        public void UploadNewItemInventoryCode(string description, string itemCode)
+        {
+            _db.ProductDescriptionToInventoryItemCodes.Add(new ProductDescriptionToInventoryItemCode { Description = description.Trim(), InventoryItemcode = itemCode.Trim() });
+            _db.SaveChanges();
+        }
+        public List<Dictionary<string, string>> GetListOfProducts()
+        {
+            List<Dictionary<string, string>> toreturn = new();
+            var ff = _db.ProductDescriptionToInventoryItemCodes
+                 .Where(e => e.Id > 0)
+                 .ToList();
 
+            foreach (var item in ff)
+            {
+                Dictionary<string, string> dict = new();
+                dict.Add(item.Description, item.InventoryItemcode);
+
+                toreturn.Add(dict);
+            }
+
+            return toreturn;
+        }
         public string? GetinventoryItemCode(string productName)
         {
             string? ItemInventoryCode = _db.ProductDescriptionToInventoryItemCodes.FirstOrDefault(e => e.Description.ToLower() == productName.ToLower())?.InventoryItemcode;

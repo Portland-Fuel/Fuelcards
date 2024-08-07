@@ -46,5 +46,8 @@ namespace Fuelcards.Repositories
         bool CheckSite(Site item);
         void AddSiteNumberToBand(Site site);
         string? GetinventoryItemCode(string productName);
+
+        List<Dictionary<string, string>> GetListOfProducts();
+        void UploadNewItemInventoryCode(string description, string itemCode);
     }
 }

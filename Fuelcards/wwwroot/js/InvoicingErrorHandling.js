@@ -1,4 +1,4 @@
-﻿function HandleInvoicingError(xhr){
+﻿function HandleInvoicingError(xhr) {
     document.getElementById("ResumeInvoicingBTN").hidden = false;
     document.getElementById("PauseInvoicingBTN").hidden = true;
     Invoicing = false;
@@ -18,67 +18,67 @@ function HandleConfirmInvoicingError(responseText) {
     }
 }
 async function ShowItemCodeNotFoundinDatabaseForm(description) {
-        const { value: formValues } = await Swal.fire({
-            title: 'Item Code Not Found',
-            html:
-                '<label for="description">Description</label>' +
-                `<input id="description" class="swal2-input" value="${description}" readonly>` +
-                '<label for="itemCode">Item Code</label>' +
-                '<input id="itemCode" class="swal2-input" placeholder="Item Code">',
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Submit',
-            cancelButtonText: 'Cancel',
-            preConfirm: () => {
-                return {
-                    description: document.getElementById('description').value,
-                    itemCode: document.getElementById('itemCode').value
-                };
-            }
-        });
-    
-
-        if (formValues) {
-            const { description, itemCode } = formValues;
-
-            // Do something with the input values
-            console.log('Description:', description);
-            console.log('Item Code:', itemCode);
-
-
-            var ItemCodeAndProductData = {
-                Description: description,
-                ItemCode: itemCode
+    const { value: formValues } = await Swal.fire({
+        title: 'Item Code Not Found',
+        html:
+            '<label for="description">Description</label>' +
+            `<input id="description" class="swal2-input" value="${description}" readonly>` +
+            '<label for="itemCode">Item Code</label>' +
+            '<input id="itemCode" class="swal2-input" placeholder="Item Code">',
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Submit',
+        cancelButtonText: 'Cancel',
+        preConfirm: () => {
+            return {
+                description: document.getElementById('description').value,
+                itemCode: document.getElementById('itemCode').value
             };
-            try {
-                let response = await $.ajax({
-                    url: '/Invoicing/UploadNewItemInventoryCode',
-                    type: 'POST',
-                    data: JSON.stringify(ItemCodeAndProductData),
-                    contentType: 'application/json;charset=utf-8'
-                });
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Item code uploaded successfully'
-                });
-
-            } catch (xhr) {
-                console.error('XHR Response:', xhr.responseText || 'No response from server');
-                console.error('Error:', xhr.statusText || 'No error message');
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Error uploading item code',
-                    text: xhr.statusText + ': ' + xhr.responseText,
-                    footer: "Contact IT if you have issues <a href='https://192.168.0.17:666/Home/ReportIssue'>Report Issue</a>"
-                });
-                return;
-            }
         }
+    });
 
-        await ConfirmInvoicing();
+
+    if (formValues) {
+        const { description, itemCode } = formValues;
+
+        // Do something with the input values
+        console.log('Description:', description);
+        console.log('Item Code:', itemCode);
+
+
+        var ItemCodeAndProductData = {
+            Description: description,
+            ItemCode: itemCode
+        };
+        try {
+            let response = await $.ajax({
+                url: '/Invoicing/UploadNewItemInventoryCode',
+                type: 'POST',
+                data: JSON.stringify(ItemCodeAndProductData),
+                contentType: 'application/json;charset=utf-8'
+            });
+            Toast.fire({
+                icon: 'success',
+                title: 'Item code uploaded successfully'
+            });
+
+        } catch (xhr) {
+            console.error('XHR Response:', xhr.responseText || 'No response from server');
+            console.error('Error:', xhr.statusText || 'No error message');
+            Toast.fire({
+                icon: 'error',
+                title: 'Error uploading item code',
+                text: xhr.statusText + ': ' + xhr.responseText,
+                footer: "Contact IT if you have issues <a href='https://192.168.0.17:666/Home/ReportIssue'>Report Issue</a>"
+            });
+            return;
+        }
     }
 
-async function ShowSiteErrorForm(FailedSites){
+    await ConfirmInvoicing();
+}
+
+async function ShowSiteErrorForm(FailedSites) {
     for (let i = 0; i < FailedSites.length; i++) {
         const failedSite = FailedSites[i];
         const { value: formValues } = await Swal.fire({
@@ -117,9 +117,9 @@ async function ShowSiteErrorForm(FailedSites){
 
             try {
                 let response = await $.ajax({
-                    url: '/Invoicing/HandleFailedSite', 
+                    url: '/Invoicing/HandleFailedSite',
                     type: 'POST',
-                    data: JSON.stringify(SiteData), 
+                    data: JSON.stringify(SiteData),
                     contentType: 'application/json;charset=utf-8'
                 });
                 Toast.fire({
@@ -134,7 +134,7 @@ async function ShowSiteErrorForm(FailedSites){
                     title: 'Error submitting site information',
                     text: xhr.statusText + ': ' + xhr.responseText,
                     footer: "Contact IT if you have issues <a href='https://192.168.0.17:666/Home/ReportIssue'>Report Issue</a>"
-    
+
                 });
             }
             document.getElementById('siteName').value = '';
@@ -144,7 +144,7 @@ async function ShowSiteErrorForm(FailedSites){
     }
 }
 
-async function showErrorBox(Msg){
+async function showErrorBox(Msg) {
     await Swal.fire({
         icon: 'error',
         title: 'Error',

@@ -77,12 +77,23 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
-
+        [HttpPost]
+        public JsonResult UploadNewItemInventoryCode([FromBody] ItemCodeAndPorductData itemCodeAndPorductData)
+        {
+            _db.UploadNewItemInventoryCode(itemCodeAndPorductData.description, itemCodeAndPorductData.itemCode);
+            return Json("True");
+        }
+        public struct ItemCodeAndPorductData
+        {
+            public string description { get; set; }
+            public string itemCode { get; set; }
+        }
         [HttpPost]
         public JsonResult ConfirmInvoicing([FromBody] string Network)
         {
             try
             {
+                var ListOfProducts = _db.GetListOfProducts();
                 InvoiceGenerator.GenerateXeroCSV(invoices);
 
 
@@ -98,61 +109,43 @@ namespace Fuelcards.Controllers
         [HttpPost]
         public JsonResult GetInvoicePng([FromBody] CustomerInvoice customerInvoice)
         {
-            // THIS IS TEMP
-
-            foreach (var item in reportList)
-            {
-                Console.WriteLine(item.Total);
-            }
-
-            InvoiceReport summaryReport = new InvoiceReport();
-            summaryReport.DieselVol = reportList.Sum(e => e.DieselVol);
-            summaryReport.PetrolVol = reportList.Sum(e => e.PetrolVol);
-            summaryReport.LubesVol = reportList.Sum(e => e.LubesVol);
-            summaryReport.GasoilVol = reportList.Sum(e => e.GasoilVol);
-            summaryReport.AdblueVol = reportList.Sum(e => e.AdblueVol);
-            summaryReport.PremDieselVol = reportList.Sum(e => e.PremDieselVol);
-            summaryReport.SuperUnleadedVol = reportList.Sum(e => e.SuperUnleadedVol);
-            summaryReport.BrushTollVol = reportList.Sum(e => e.BrushTollVol);
-            summaryReport.TescoVol = reportList.Sum(e => e.TescoVol);
-            summaryReport.OtherVol = reportList.Sum(e => e.OtherVol);
-
-            summaryReport.DieselPrice = reportList.Sum(e => e.DieselPrice);
-            summaryReport.PetrolPrice = reportList.Sum(e => e.PetrolPrice);
-            summaryReport.LubesPrice = reportList.Sum(e => e.LubesPrice);
-            summaryReport.GasoilPrice = reportList.Sum(e => e.GasoilPrice);
-            summaryReport.AdbluePrice = reportList.Sum(e => e.AdbluePrice);
-            summaryReport.PremDieselPrice = reportList.Sum(e => e.PremDieselPrice);
-            summaryReport.SuperUnleadedPrice = reportList.Sum(e => e.SuperUnleadedPrice);
-            summaryReport.BrushTollPrice = reportList.Sum(e => e.BrushTollPrice);
-            summaryReport.TescoPrice = reportList.Sum(e => e.TescoPrice);
-            summaryReport.OthersPrice = reportList.Sum(e => e.OthersPrice);
-
-            summaryReport.Rolled = reportList.Sum(e => e.Rolled);
-            summaryReport.Current = reportList.Sum(e => e.Current);
-            summaryReport.RollAvailable = reportList.Sum(e => e.RollAvailable);
-            summaryReport.DieselLifted = reportList.Sum(e => e.DieselLifted);
-            summaryReport.Fixed = reportList.Sum(e => e.Fixed);
-            summaryReport.Floating = reportList.Sum(e => e.Floating);
-            summaryReport.TescoVol = reportList.Sum(e => e.TescoVol);
-            summaryReport.NetTotal = reportList.Sum(e => e.NetTotal);
-            summaryReport.Vat = reportList.Sum(e => e.Vat);
-            summaryReport.Total = reportList.Sum(e => e.Total);
-            // END
-
-
-
-
             try
             {
-                throw new Exception("Error getting Png");
-                return Json("");
+                var invoice = invoices.Where(e => e.CustomerDetails.CompanyName == customerInvoice.name).FirstOrDefault();
+                if (invoice == null)
+                {
+                    throw new Exception("Invoice not found");
+                }
+
+                string fileName = FileHelperForInvoicing.BuildingFileNameForInvoicing(invoice, invoice.CustomerDetails.CompanyName);
+                string path = Path.Combine(
+                    FileHelperForInvoicing._startingDirectory,
+                    FileHelperForInvoicing._year.ToString(),
+                    invoice.InvoiceDate.ToString("yyMMdd"),
+                    GetNetworkName(invoice.CustomerDetails.Network),
+                    "PDFImages",
+                    fileName + ".png"
+                );
+
+                return Json(path);
             }
             catch (Exception e)
             {
                 Response.StatusCode = 500;
-                return Json("Error:" + e.Message);
+                return Json("Error: Could not get PNG " + e.Message);
             }
+        }
+
+        public string GetNetworkName(string Network)
+        {
+            switch (Network)
+            {
+                case "Texaco":
+                    return "FastFuel";
+                default:
+                    return Network;
+            }
+
         }
         [HttpPost]
         public JsonResult CompleteInvoicing([FromBody] CustomerInvoice customerInvoice)
@@ -180,7 +173,6 @@ namespace Fuelcards.Controllers
                 }
 
 
-                newInvoice.InvoiceDate = DateOnly.FromDateTime(DateTime.Now);
                 invoices.Add(newInvoice);
 
                 reportList.Add(_report.CreateNewInvoiceReport(newInvoice));
@@ -189,6 +181,7 @@ namespace Fuelcards.Controllers
                     InvoiceGenerator invoiceGenerator = new(newInvoice);
                     FileHelperForInvoicing.CheckOrCorrectDirectorysBeforePDFCreation();
                     invoiceGenerator.generatePDF(newInvoice);
+                    invoiceGenerator.generatePDFImage(newInvoice);
                 }
                 catch (Exception e)
                 {
