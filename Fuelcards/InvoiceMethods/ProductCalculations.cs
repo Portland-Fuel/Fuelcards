@@ -45,9 +45,9 @@ namespace Fuelcards.InvoiceMethods
                     //return NewValue2 * 100;
                     case EnumHelper.Network.Texaco:
 
-                        double? NewValue3 = 1.6 * (data.cost / 100);
+                        double? Price = 1.6 * (data.cost / 100);
                         //return NewValue3 * 100;
-                        return NewValue3;
+                        return Price / data.quantity;
                     case EnumHelper.Network.Fuelgenie:
                         return data.cost;
                 }
@@ -98,9 +98,9 @@ namespace Fuelcards.InvoiceMethods
                         //var priceU = NewValueU * 100;
                         return NewValueU;
                     case EnumHelper.Network.Texaco:
-                        double? NewValue3 = (1.1 * data.cost) / 100;
+                        double? Price = (1.1 * data.cost) / 100;
                         //var priceU3 = NewValue3 * 100;
-                        return NewValue3;
+                        return Price / data.quantity;
                     case EnumHelper.Network.Fuelgenie:
                         return data.cost;
 
@@ -143,9 +143,8 @@ namespace Fuelcards.InvoiceMethods
                         double? UnitPrice = NewValue2 / data.quantity;
                         return UnitPrice;
                     case EnumHelper.Network.Texaco:
-                        double? NewValue3 = 1.2 * (data.cost) / 100;
-                        //return NewValue3 * 100;
-                        return NewValue3;
+                        double? Price = 1.2 * (data.cost) / 100;
+                        return Price / data.quantity;
                     case EnumHelper.Network.Fuelgenie:
                         return data.cost;
                     default: return null;
@@ -176,7 +175,8 @@ namespace Fuelcards.InvoiceMethods
                     case EnumHelper.Network.Texaco:
                         if (data.cost > 500) data.cost = data.cost / 100;
                         double? NewValue3 = 1.2 * (data.cost) / 100;
-                        return NewValue3 * 100;
+                        var price2 =  NewValue3/data.quantity;
+                        return price2;
                     case EnumHelper.Network.Fuelgenie:
                         return data.cost;
                     default: return null;
@@ -225,9 +225,8 @@ namespace Fuelcards.InvoiceMethods
                     return price / data.quantity;
 
                 case EnumHelper.Network.Texaco:
-                    double? NewValue3 = (1.2 * data.cost) / 100;
-                    //return NewValue3 * 100;
-                    return NewValue3;
+                    double? Price = (1.2 * data.cost) / 100;
+                    return Price/data.quantity;
                 case EnumHelper.Network.Fuelgenie:
                     return data.cost;
                 default: return null;
@@ -249,8 +248,8 @@ namespace Fuelcards.InvoiceMethods
                         return UnitPrice;
                     case EnumHelper.Network.Texaco:
 
-                        double? NewValue3 = (1.6 * data.cost) / 100;
-                        return NewValue3;
+                        double? Price = (1.6 * data.cost) / 100;
+                        return Price/data.quantity;
                     case EnumHelper.Network.Fuelgenie:
                         return data.cost;
                     default: return null;

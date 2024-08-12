@@ -47,7 +47,11 @@ namespace Fuelcards.Repositories
         void AddSiteNumberToBand(Site site);
         string? GetinventoryItemCode(string productName);
 
-        List<Dictionary<string, string>> GetListOfProducts();
+        double? GetRemaingVolumeForCurrentAllocation(int currentAllocation);
         void UploadNewItemInventoryCode(string description, string itemCode);
+        List<Dictionary<string, string>> GetListOfProducts();
+        string? getNewInvoiceNumber(int network);
+        double? GetHandlingCharge(int network);
+      
     }
 }

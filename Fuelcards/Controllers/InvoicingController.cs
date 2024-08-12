@@ -33,7 +33,7 @@ namespace Fuelcards.Controllers
             try
             {
                 InvoicePreCheckModels checks = new();
-                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-7)));
+                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-11)));
                 checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);
                 checks.PlattsPrice = checks.BasePrice - 52.95;
                 checks.KeyfuelImports = _db.GetTotalEDIs(0);
@@ -77,12 +77,7 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
-        [HttpPost]
-        public JsonResult UploadNewItemInventoryCode([FromBody] ItemCodeAndPorductData itemCodeAndPorductData)
-        {
-            _db.UploadNewItemInventoryCode(itemCodeAndPorductData.description, itemCodeAndPorductData.itemCode);
-            return Json("True");
-        }
+
         public struct ItemCodeAndPorductData
         {
             public string description { get; set; }
@@ -111,6 +106,15 @@ namespace Fuelcards.Controllers
         {
             try
             {
+                var netTotal = reportList.Sum(e => e.NetTotal);
+                var DieselLifted = reportList.Sum(e => e.DieselLifted);
+                var TescoPrice = reportList.Sum(e => e.TescoPrice);
+                var TTotal = reportList.Sum(e => e.Total);
+                Console.Clear();
+                foreach (var item in reportList)
+                {
+                    Console.WriteLine(item.Total);
+                }
                 var invoice = invoices.Where(e => e.CustomerDetails.CompanyName == customerInvoice.name).FirstOrDefault();
                 if (invoice == null)
                 {
@@ -155,11 +159,12 @@ namespace Fuelcards.Controllers
             {
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)customerInvoice.account);
                 InvoicePDFModel newInvoice = new();
-
+                newInvoice.InvoiceDate = customerInvoice.invoiceDate;
                 if (customerInvoice.CustomerType != EnumHelper.CustomerType.Floating)
                 {
                     newInvoice.fixedBox = summary.GetFixDetails(customerInvoice, network, customerInvoice.CustomerType);
                 }
+                
                 newInvoice.rows = summary.ProductBreakdown(customerInvoice, network);
                 newInvoice.transactions = summary.TurnsTransactionsToPdf(customerInvoice.CustomerTransactions);
                 newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
@@ -167,6 +172,7 @@ namespace Fuelcards.Controllers
                 {
                     newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice, _db, HomeController.PFLXeroCustomersData.Where(e => e.Name == customerInvoice.name).FirstOrDefault().ContactID.ToString(), (int)customerInvoice.CustomerTransactions[0].network);
                 }
+                
                 else
                 {
                     newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice, _db, "FTC", (int)customerInvoice.CustomerTransactions[0].network);
@@ -235,6 +241,7 @@ namespace Fuelcards.Controllers
         }
         public struct TransactionDataFromView
         {
+            public DateOnly invoiceDate { get; set; }
             public string? name { get; set; }
             public double? addon { get; set; }
             public int? account { get; set; }

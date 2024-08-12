@@ -119,7 +119,10 @@ namespace Fuelcards.Models
                 };
                 renderer.PrepareRenderPages();
                 renderer.RenderDocument();
-
+                if (FileName.Contains("/"))
+                {
+                    FileName = FileName.Replace('/', ' ');
+                }
                 string FullSavePath = Path.Combine(SavePath, FileName);
                 _PDFFilePath = FullSavePath;
                 renderer.PdfDocument.Save(FullSavePath);

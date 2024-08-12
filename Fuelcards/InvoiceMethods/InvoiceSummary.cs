@@ -65,6 +65,7 @@ namespace Fuelcards.InvoiceMethods
 
         private (Dictionary<string, List<GenericTransactionFile>> transactionsByProduct, Dictionary<string, List<GenericTransactionFile>> dieselTransactionsByBand) UkFuelsVersion(CustomerInvoice invoice, EnumHelper.Network network)
         {
+            string bandKey = string.Empty;
             // Initialize dictionaries to hold transactions by product and bands for Diesel
             Dictionary<string, List<GenericTransactionFile>> transactionsByProduct = new Dictionary<string, List<GenericTransactionFile>>();
             Dictionary<string, List<GenericTransactionFile>> dieselTransactionsByBand = new Dictionary<string, List<GenericTransactionFile>>();
@@ -85,17 +86,30 @@ namespace Fuelcards.InvoiceMethods
                     transactionsByProduct[transaction.product] = new List<GenericTransactionFile>();
                 }
                 transactionsByProduct[transaction.product].Add(transaction);
-
+                
                 // Further group Diesel by band
                 if (transaction.product == "Diesel")
                 {
-                    string bandKey = transaction.band switch
+                    if(network == EnumHelper.Network.UkFuel)
                     {
-                        "8" => "Sainsburys",
-                        "9" => "Tesco",
-                        _ => ""
-                    };
+                        bandKey = transaction.band switch
+                        {
+                            "8" => "Sainsburys",
+                            "9" => "Tesco",
+                            _ => ""
+                        };
 
+                    }
+                    if (network == EnumHelper.Network.Keyfuels)
+                    {
+                        bandKey = transaction.productCode.ToString() switch
+                        {
+                            "70" => "Retail",
+                            _ => ""
+                        };
+
+                    }
+                    
                     if (!dieselTransactionsByBand.ContainsKey(bandKey))
                     {
                         dieselTransactionsByBand[bandKey] = new List<GenericTransactionFile>();
@@ -120,12 +134,15 @@ namespace Fuelcards.InvoiceMethods
             double? FixVolume = invoice.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == invoice.fixedInformation.CurrentTradeId)?.FixedVolume;
             double? FixPrice = invoice.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == invoice.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty;
             double? RemainingToCharge = Round2(DieselTransaction.FixedVolumeRemainingForCurrent);
+            var total = invoice.CustomerTransactions.Where(e=>e.product == "Diesel").Sum(e => e.invoicePrice);
+            double? PriceOfRemainingVolume = RemainingToCharge * 1.2302;
+
 
             if (RemainingToCharge > 0)
             {
                 newRow.Quantity = FixVolume;
                 double? RemainingVolumeCharge = RemainingToCharge * (FixPrice / 100);
-                newRow.NetTotal = Round2(newRow.NetTotal + RemainingVolumeCharge);
+                newRow.NetTotal = Round2(total + RemainingVolumeCharge);
                 newRow.VAT = Round2(newRow.NetTotal * 0.2);
             }
             return newRow;
@@ -176,12 +193,13 @@ namespace Fuelcards.InvoiceMethods
             if (!terms.HasValue) throw new ArgumentException($"There are no payment terms for this customer - {customerInvoice.name}");
             CustomerDetails details = new();
             details.CompanyName = customerInvoice.name;
+            
             details.account = customerInvoice.account;
             details.paymentDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now)).AddDays((int)terms);
             details.Network = EnumHelper.NetworkEnumFromInt(network).ToString();
             var address = HomeController.PFLXeroCustomersData.Where(e => e.Name == details.CompanyName).FirstOrDefault();
             details.AddressArr = GetAddress(address, xeroID);
-            details.InvoiceNumber = "123";
+            details.InvoiceNumber = _db.getNewInvoiceNumber(network);
             details.InvoiceType = _db.GetInvoiceDisplayGroup(details.CompanyName, details.Network);
             return details;
         }

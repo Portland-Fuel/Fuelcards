@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using DataAccess.Tickets;
 using Site = Fuelcards.Models.Site;
+using static Fuelcards.GenericClassFiles.EnumHelper;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -248,10 +249,21 @@ namespace Fuelcards.Repositories
                     }
                     if (model.name.ToLower().Contains("portland")) model.name = "The Fuel Trading Company";
                     model.addon = Convert.ToDouble(Math.Round(Convert.ToDecimal(BasePrice + model.addon), 2));
+                    if (model.addon == 0) throw new ArgumentException($"No Addon found for the following customer - {model.name} with account {model.account}");
                     model.account = item[0].customerCode;
                     model.CustomerTransactions = new();
                     model.CustomerType = await customerType((int)model.account, invoiceDate);
-                    model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
+                    model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-7)));
+                    var portlandId = GetPortlandIdFromAccount((int)model.account).Result;
+                    var invoiceType = _db.InvoicingOptions.FirstOrDefault(e => e.PortlandId == portlandId && e.GroupedNetwork.Contains((int)item[0].network))?.Displaygroup;
+                    if (invoiceType == 1)
+                    {
+                        model.CustomerTransactions = item.OrderBy(e => e.cardNumber).ThenBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
+                    }
+                    else
+                    {
+                        model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
+                    }
                     model.IfuelsCustomer = IfuelsCustomer((int)model.account);
                     if (model.CustomerType != EnumHelper.CustomerType.Floating)
                     {
@@ -265,8 +277,9 @@ namespace Fuelcards.Repositories
             {
                 throw new ArgumentException(e.Message);
             }
+           var CustomersOrdered = Customers.OrderBy(e => e.name).ToList();
 
-            return Customers.OrderBy(e => e.name).ToList();
+            return CustomersOrdered;
         }
         private CustomerInvoice? FixedProperties(CustomerInvoice model, DateOnly invoiceDate, EnumHelper.CustomerType custType)
         {
@@ -934,27 +947,44 @@ namespace Fuelcards.Repositories
         {
             if (!isIfuels)
             {
+                portlandId = GetPortlandIdFromAquaidAccount(portlandId, account);
                 if (portlandId is null) throw new ArgumentException("Portland ID should not be null at this stage.");
                 return _db.CustomerPricingAddons.Where(e => e.PortlandId == portlandId && e.Network == (int)network && e.EffectiveDate <= transactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon;
             }
             else
             {
-                return GetIfuelsAddon(account);
+                return GetIfuelsAddon(account, network);
             }
             return 0;
         }
+
+        private int? GetPortlandIdFromAquaidAccount(int? portlandId, int account)
+        {
+            switch (account)
+            {
+                case 139461:return 100028;
+                case 677112:return 100030;
+                case 139464:return 100032;
+                case 139462:return 100029;
+                case 139463:return 100031;
+                default: return portlandId;
+            }
+        }
+
         public bool IfuelsCustomer(int account)
         {
             bool Exists = _Idb.IfuelsCustomers.FirstOrDefault(e => e.CustomerNumber == account) != null;
             return Exists;
         }
-        internal double? GetIfuelsAddon(int account)
+        internal double? GetIfuelsAddon(int account, EnumHelper.Network network)
         {
-            return _Idb.IfuelsAddons
+            var addon = _Idb.IfuelsAddons
                 .Where(e => e.CustomerNumber == account)
                 .OrderByDescending(e => e.EffectiveFrom)
                 .Select(e => e.Addon)
                 .FirstOrDefault();
+            double? ifuelsCost = _db.TransactionSiteSurcharges.FirstOrDefault(e => e.Network == (int)network && e.ChargeType == "i-fuelcards cost price")?.Surcharge;
+            return addon + ifuelsCost;
         }
         public double? TransactionalSiteSurcharge(EnumHelper.Network network, int site, int productCode)
         {
@@ -978,5 +1008,42 @@ namespace Fuelcards.Repositories
             if (DisplayGroup == null) return 0;
             else return (int)DisplayGroup;
         }
+        public double? GetRemaingVolumeForCurrentAllocation(int currentAllocation)
+        {
+            return _db.AllocatedVolumes.FirstOrDefault(e => e.AllocationId == currentAllocation)?.Volume;
+        }
+        public string? getNewInvoiceNumber(int network)
+        {
+            //string prefix = string.Empty;
+            //switch (network)
+            //{
+            //    case 1:
+            //        prefix = "PF";
+            //        break;
+            //    case 0:
+            //        prefix = "";
+            //        break;
+            //    case 3:
+            //        prefix = "TX";
+            //        break;
+            //    default:
+            //        break;
+
+            //}
+            InvoiceNumber model = new()
+            {
+                Network = network,
+            };
+            _db.InvoiceNumbers.Add(model);
+            _db.SaveChanges();
+            return model.InvoiceNumber1.ToString();
+
+
+        }
+        public double? GetHandlingCharge(int network)
+        {
+            return _db.TransactionSiteSurcharges.FirstOrDefault(e => e.Network == (int)network && e.ChargeType == "Texaco Handling Charge")?.Surcharge;
+        }
+       
     }
 }

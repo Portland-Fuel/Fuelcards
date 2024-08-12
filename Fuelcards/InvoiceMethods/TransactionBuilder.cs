@@ -25,9 +25,13 @@ namespace Fuelcards.InvoiceMethods
         internal DataToPassBack processTransaction(InvoicingController.TransactionDataFromView transactionDataFromView, EnumHelper.Network network)
         {
             EnumHelper.Products? product = EnumHelper.GetProductFromProductCode(Convert.ToInt32(transactionDataFromView.transaction.productCode), network);
+
             Models.Site? siteInfo = getSite(transactionDataFromView.transaction.siteCode, network, (int)transactionDataFromView.transaction.productCode, (EnumHelper.Products)product);
+
             transactionDataFromView.transaction.quantity = ConvertToLitresBasedOnNetwork(transactionDataFromView.transaction.quantity, network);
+
             double? Addon = _db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.portlandId, transactionDataFromView.transaction.transactionDate, network, transactionDataFromView.IfuelsCustomer, (int)transactionDataFromView.account);
+
             if (Addon is null) throw new ArgumentException($"Addon should not be null - {transactionDataFromView.name} with account = {transactionDataFromView.account}")
 ; double? UnitPrice = Math.Round(Convert.ToDouble(CalculateUnitPrice(_db, product, transactionDataFromView, network, Addon, siteInfo)), 4, MidpointRounding.AwayFromZero);
 

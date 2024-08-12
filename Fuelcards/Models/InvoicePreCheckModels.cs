@@ -27,6 +27,7 @@ namespace Fuelcards.Models
     }
     public class CustomerInvoice
     {
+        public DateOnly invoiceDate {  get; set; }
         public string name { get; set; }
         public double? addon { get; set; }
         public int? account { get; set; }

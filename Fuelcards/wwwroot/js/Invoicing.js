@@ -561,6 +561,7 @@ async function DisplayTransactionOnPage(Transaction) {
 
 async function SendTransactionToControllerToBeProcessed(Transaction, customer) {
     var TransactionDataFromView = {
+        invoiceDate: customer.invoiceDate,
         name: customer.name,
         addon: customer.addon,
         account: customer.account,

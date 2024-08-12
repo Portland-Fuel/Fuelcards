@@ -4,6 +4,8 @@ using Fuelcards.Controllers;
 using Fuelcards.GenericClassFiles;
 using Fuelcards.Repositories;
 using Microsoft.Graph;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Xero.NetStandard.OAuth2.Model.Accounting;
 namespace Fuelcards.InvoiceMethods
 {
     public class DieselTransaction
@@ -38,8 +40,11 @@ namespace Fuelcards.InvoiceMethods
         {
             try
             {
-                GetFixAndFloatingRate(FixedPrice, SiteInfo, addon, _db.GetBasePrice((DateOnly)data.transaction.transactionDate), (EnumHelper.CustomerType)data.customerType, network, data.transaction.cost, data.fixedInformation);
-
+                bool CanReturnNow = GetFixAndFloatingRate(FixedPrice, SiteInfo, addon, _db.GetBasePrice((DateOnly)data.transaction.transactionDate), (EnumHelper.CustomerType)data.customerType, network, data.transaction.cost, data.fixedInformation, data.transaction.quantity, _db);
+                if (CanReturnNow)
+                {
+                    return FloatingRate;
+                }
                 if (data.customerType == GenericClassFiles.EnumHelper.CustomerType.Floating)
                 {
                     VolumeChargedAtFloating = data.transaction.quantity;
@@ -48,12 +53,14 @@ namespace Fuelcards.InvoiceMethods
                 {
                     if (data.customerType == EnumHelper.CustomerType.Fix)
                     {
+
+                        var FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation(data.fixedInformation.CurrentAllocation);
                         UpdateStaticVariablesIfNeeded(
-                        (int?)data.account,
-                        data.fixedInformation.RolledVolume,
-                        data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
-                        data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedVolume
-                    );
+                    (int?)data.account,
+                    data.fixedInformation.RolledVolume,
+                    data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
+                    FixedVolumeRemainingForCurrent
+                );
                     }
                     else if (data.customerType == EnumHelper.CustomerType.ExpiredFixWithVolume)
                     {
@@ -93,19 +100,44 @@ namespace Fuelcards.InvoiceMethods
 
 
 
-        private static void GetFixAndFloatingRate(double? fixedPrice, Models.Site siteInfo, double? addon, double? basePrice, EnumHelper.CustomerType custType, EnumHelper.Network network, double? cost, Models.FixedInformation fixInfo)
+        private static bool GetFixAndFloatingRate(double? fixedPrice, Models.Site siteInfo, double? addon, double? basePrice, EnumHelper.CustomerType custType, EnumHelper.Network network, double? cost, Models.FixedInformation fixInfo, double? quantity, IQueriesRepository _db)
         {
             VolumeChargedAtFix = 0;
             VolumeChargedAtFloating = 0;
             VolumeChargedAtRolled = 0;
             FloatingRate = basePrice + addon + siteInfo.Surcharge + siteInfo.transactionalSiteSurcharge;
-            if (network == EnumHelper.Network.UkFuel)
+            if (network == EnumHelper.Network.UkFuel || network == EnumHelper.Network.Texaco)
             {
                 if (siteInfo.band == "9" || siteInfo.band == "8")
                 {
-                    FloatingRate = (cost + 100) / 100;
+                    if (network == EnumHelper.Network.Texaco)
+                    {
+                        if (siteInfo.band == "9")
+                        {
+                            double? TescoTexacoHandlingCharge = _db.GetHandlingCharge((int)network);
+                            FloatingRate = ((cost / 100) / quantity) + 0.03 - (TescoTexacoHandlingCharge / 100);
+                            return true;
+                        }
+                        if(siteInfo.band == "7")
+                        {
+                            //double? CostAddon = _db.GetCostAddonTexaco();
+                        }
+                        FloatingRate = ((cost + 100) / 100) / quantity;
+                        return true;
+                    }
+                    else
+                    {
+                        FloatingRate = (cost + 100) / 100;
+                    }
                 }
             }
+            //if (network == EnumHelper.Network.Keyfuels)
+            //{
+            //    if ( productNum == 70)
+            //    {
+            //        FloatingRate = (cost + 100) / 100;
+            //    }
+            //}
             if (custType == EnumHelper.CustomerType.Fix)
             {
                 if (FixedPrice is null)
@@ -121,6 +153,7 @@ namespace Fuelcards.InvoiceMethods
             {
                 FixRate = siteInfo.Surcharge + siteInfo.transactionalSiteSurcharge;
             }
+            return false;
         }
 
         private static async Task ProcessRolloverVolumes(InvoicingController.TransactionDataFromView data, EnumHelper.Network network, Models.Site siteInfo)
@@ -133,7 +166,7 @@ namespace Fuelcards.InvoiceMethods
                 TotalDieselUsed += QuantityRemainingToBeAllocated;
                 return;
             }
-            while (QuantityRemainingToBeAllocated > 0 && FixedVolumeRemainingForCurrent > 0)
+            while (QuantityRemainingToBeAllocated > 0 && (FixedVolumeRemainingForCurrent > 0 || FixedVolumeRemainingForCurrent is null))
             {
 
                 var originalVolume = AvailableRolledVolume;
@@ -217,6 +250,7 @@ namespace Fuelcards.InvoiceMethods
             else
             {
                 VolumeChargedAtFix = FixedVolumeRemainingForCurrent;
+                FixedVolumeUsedOnThisInvoice += FixedVolumeRemainingForCurrent;
                 newVolume = newVolume - FixedVolumeRemainingForCurrent;
                 FixedVolumeRemainingForCurrent = 0;
                 return newVolume;
