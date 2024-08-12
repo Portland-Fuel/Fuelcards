@@ -90,7 +90,7 @@ namespace Fuelcards.Controllers
             {
                 var ListOfProducts = _db.GetListOfProducts();
                 InvoiceGenerator.GenerateXeroCSV(invoices);
-
+                _db.ConfirmChanges(Network);
 
                 return Json("Success");
             }

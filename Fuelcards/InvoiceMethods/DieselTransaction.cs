@@ -112,16 +112,13 @@ namespace Fuelcards.InvoiceMethods
                 {
                     if (network == EnumHelper.Network.Texaco)
                     {
-                        if (siteInfo.band == "9")
+                        if (siteInfo.band == "9" || siteInfo.band == "8")
                         {
                             double? TescoTexacoHandlingCharge = _db.GetHandlingCharge((int)network);
                             FloatingRate = ((cost / 100) / quantity) + 0.03 - (TescoTexacoHandlingCharge / 100);
                             return true;
                         }
-                        if(siteInfo.band == "7")
-                        {
-                            //double? CostAddon = _db.GetCostAddonTexaco();
-                        }
+                        
                         FloatingRate = ((cost + 100) / 100) / quantity;
                         return true;
                     }

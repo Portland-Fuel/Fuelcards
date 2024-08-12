@@ -52,6 +52,6 @@ namespace Fuelcards.Repositories
         List<Dictionary<string, string>> GetListOfProducts();
         string? getNewInvoiceNumber(int network);
         double? GetHandlingCharge(int network);
-      
+        void ConfirmChanges(string network);
     }
 }
