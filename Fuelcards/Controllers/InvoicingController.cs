@@ -6,7 +6,18 @@ using Fuelcards.Models;
 using Fuelcards.Repositories;
 using KellermanSoftware.CompareNetObjects;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph.SecurityNamespace;
+using Microsoft.Graph;
 using Microsoft.IdentityModel.Tokens;
+using MigraDoc.DocumentObjectModel;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Xero.NetStandard.OAuth2.Model.Accounting;
+using DataAccess.Cdata;
+using System.Numerics;
+using System.Threading;
+using System.Transactions;
+using Fuelcards.CustomExceptions;
 
 namespace Fuelcards.Controllers
 {
@@ -69,9 +80,9 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                throw new Exception("Error getting Email body");
+                string html = "<html><body><h1>Email Body</h1><p>This is the email body content.</p></body></html>";
 
-                return Json("");
+                return Json(html);
             }
             catch (Exception e)
             {
@@ -101,6 +112,10 @@ namespace Fuelcards.Controllers
                 }
                 _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList());
 
+                    throw new InventoryItemCodeNotInDb(e.Message.Split(":")[1]);
+                }
+       
+
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)
@@ -129,39 +144,52 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                var netTotal = reportList.Sum(e => e.NetTotal);
-                var DieselLifted = reportList.Sum(e => e.DieselLifted);
-                var TescoPrice = reportList.Sum(e => e.TescoPrice);
-                var TTotal = reportList.Sum(e => e.Total);
-                Console.Clear();
-                foreach (var item in reportList)
+                // Ensure customerInvoice is not null and has a valid name
+                if (customerInvoice == null || string.IsNullOrEmpty(customerInvoice.name))
                 {
-                    Console.WriteLine(item.Total);
-                }
-                var invoice = invoices.Where(e => e.CustomerDetails.CompanyName == customerInvoice.name).FirstOrDefault();
-                if (invoice == null)
-                {
-                    throw new Exception("Invoice not found");
+                    Response.StatusCode = 400;
+                    return Json("Error: Invalid input.");
                 }
 
+                // Locate the invoice based on the company name
+                var invoice = invoices.FirstOrDefault(e => e.CustomerDetails.CompanyName == customerInvoice.name);
+                if (invoice == null)
+                {
+                    Response.StatusCode = 404;
+                    return Json("Error: Invoice not found.");
+                }
+
+                // Build the file name and path
                 string fileName = FileHelperForInvoicing.BuildingFileNameForInvoicing(invoice, invoice.CustomerDetails.CompanyName);
+                string startingDirectory = FileHelperForInvoicing._startingDirectory.TrimEnd(Path.DirectorySeparatorChar);
+                string yearDirectory = FileHelperForInvoicing._year.ToString().TrimEnd(Path.DirectorySeparatorChar);
+                string invoiceDateDirectory = invoice.InvoiceDate.ToString("yyMMdd").TrimEnd(Path.DirectorySeparatorChar);
+                string networkNameDirectory = GetNetworkName(invoice.CustomerDetails.Network).TrimEnd(Path.DirectorySeparatorChar);
+
+                // Combine the path components
                 string path = Path.Combine(
-                    FileHelperForInvoicing._startingDirectory,
-                    FileHelperForInvoicing._year.ToString(),
-                    invoice.InvoiceDate.ToString("yyMMdd"),
-                    GetNetworkName(invoice.CustomerDetails.Network),
+                    startingDirectory,
+                    yearDirectory,
+                    invoiceDateDirectory,
+                    networkNameDirectory,
                     "PDFImages",
                     fileName + ".png"
                 );
 
+                // Ensure the path uses forward slashes for compatibility with JavaScript
+                path = path.Replace(Path.DirectorySeparatorChar, '/');
+
+                // Return the path as a JSON result
                 return Json(path);
             }
             catch (Exception e)
             {
                 Response.StatusCode = 500;
-                return Json("Error: Could not get PNG " + e.Message);
+                return Json("Error: Could not get PNG. " + e.Message);
             }
         }
+
+
 
         public string GetNetworkName(string Network)
         {

@@ -631,9 +631,6 @@ async function DisplayIntialPageText(customer) {
     var custnameH1 = document.getElementById("CustNameInvoicing");
     custnameH1.textContent = CustText;
 }
-
-
-
 async function StopInvoicingbtn() {
     Invoicing = false;
     stopInvoicingLoader();
