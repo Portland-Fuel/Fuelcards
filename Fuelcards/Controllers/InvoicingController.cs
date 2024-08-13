@@ -4,7 +4,7 @@ using Fuelcards.GenericClassFiles;
 using Fuelcards.InvoiceMethods;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
-using KellermanSoftware.CompareNetObjects;
+using ImageMagick;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Graph.SecurityNamespace;
 using Microsoft.Graph;
@@ -104,18 +104,13 @@ namespace Fuelcards.Controllers
                 try
                 {
                     var ListOfProducts = _db.GetListOfProducts();
-                    InvoiceGenerator.GenerateXeroCSV(invoices);
+                    InvoiceGenerator.GenerateXeroCSV(invoices, ListOfProducts);
                 }
                 catch (Exception e)
                 {
-                    throw new InventoryItemCodeNotInDb(e.Message.Split(';')[1]);
+                    throw new InventoryItemCodeNotInDb(e.Message.Split(':')[1]);
                 }
                 _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList());
-
-                    throw new InventoryItemCodeNotInDb(e.Message.Split(":")[1]);
-                }
-       
-
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)
@@ -283,6 +278,21 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
+        [HttpPost]
+        public JsonResult UploadNewItemInventoryCode([FromBody] ItemCodeAndPorductData itemCodeAndPorductData)
+        {
+            try
+            {
+                _db.UploadNewItemInventoryCode(itemCodeAndPorductData.itemCode, itemCodeAndPorductData.description);
+                return Json("Success");
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return Json("Error:" + e.Message);
+            }
+        }
+
         public struct DataToPassBack
         {
             public string? SiteName { get; set; }

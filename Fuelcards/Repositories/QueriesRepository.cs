@@ -48,7 +48,7 @@ namespace Fuelcards.Repositories
             foreach (var item in ff)
             {
                 Dictionary<string, string> dict = new();
-                dict.Add(item.Description, item.InventoryItemcode);
+                dict.Add( item.InventoryItemcode,item.Description);
 
                 toreturn.Add(dict);
             }
@@ -1047,8 +1047,8 @@ namespace Fuelcards.Repositories
        public async Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices)
         {
             EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
-
             var Transactions = await GetCustomersToInvoice((int)NetworkEnum, invoices[0].InvoiceDate, 0);
+            PushChangesToDatabase.SubmitFinalTransactionToDatabase();
             //THIS IS NOT DONE
         }
     }

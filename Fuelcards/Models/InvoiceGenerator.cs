@@ -1181,11 +1181,11 @@ namespace Fuelcards.Models
 
         #endregion
 
-        public static void GenerateXeroCSV(List<InvoicePDFModel> listInvoicePDFModel)
+        public static void GenerateXeroCSV(List<InvoicePDFModel> listInvoicePDFModel, List<Dictionary<string, string>> listofProducts)
         {
             try
             {   
-                List<Dictionary<string, string>> listOfProducts = new List<Dictionary<string, string>>();
+                //List<Dictionary<string, string>> listOfProducts = new List<Dictionary<string, string>>();
 
                 List<FileHelperForInvoicing.XeroCsv> ListOfDataToGoOnTheCSV = new List<FileHelperForInvoicing.XeroCsv>();
                 string XeroFileName = FileHelperForInvoicing.BuildingFileNameForXeroCSV(listInvoicePDFModel[0]);
@@ -1196,7 +1196,7 @@ namespace Fuelcards.Models
                 {
                     List<FileHelperForInvoicing.XeroCsv> ListToAdd = new List<FileHelperForInvoicing.XeroCsv>();
 
-                    ListToAdd = GetListOfCSVData(invoicePDFModel,listOfProducts);
+                    ListToAdd = GetListOfCSVData(invoicePDFModel, listofProducts);
                     ListOfDataToGoOnTheCSV.AddRange(ListToAdd);
                 }
                 WriteOutTheCsv(ListOfDataToGoOnTheCSV, FilePathForXeroCSV);
@@ -1310,7 +1310,7 @@ namespace Fuelcards.Models
             {
                 var productItem = listOfProducts.FirstOrDefault(p => p.ContainsKey(productName));
 
-                if (productItem != null && productItem.TryGetValue(productName, out string itemCode))
+                 if (productItem != null && productItem.TryGetValue(productName, out string itemCode))
                 {
                     return itemCode;
                 }
