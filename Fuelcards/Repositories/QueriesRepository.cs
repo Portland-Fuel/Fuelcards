@@ -1049,7 +1049,7 @@ namespace Fuelcards.Repositories
             EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
 
             var Transactions = await GetCustomersToInvoice((int)NetworkEnum, invoices[0].InvoiceDate, 0);
-            ]//THIS IS NOT DONE
+            //THIS IS NOT DONE
         }
     }
 }
