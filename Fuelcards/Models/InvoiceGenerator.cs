@@ -1350,7 +1350,7 @@ namespace Fuelcards.Models
                     image.Alpha(AlphaOption.Remove);
 
                     // Define the output file path
-                    string outputFilePath = $"{outputDirectory}/{Path.GetFileName(pdfFilePath)}.png";
+                    string outputFilePath = $"{outputDirectory}\\{Path.GetFileName(pdfFilePath)}.png";
 
                     // Write the image to file
                     image.Write(outputFilePath);
