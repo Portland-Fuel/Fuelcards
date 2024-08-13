@@ -1,8 +1,10 @@
 ﻿using DataAccess.Fuelcards;
+using Fuelcards.CustomExceptions;
 using Fuelcards.GenericClassFiles;
 using Fuelcards.InvoiceMethods;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
+using KellermanSoftware.CompareNetObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -88,17 +90,38 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                var ListOfProducts = _db.GetListOfProducts();
-                InvoiceGenerator.GenerateXeroCSV(invoices);
-                _db.ConfirmChanges(Network);
+                try
+                {
+                    var ListOfProducts = _db.GetListOfProducts();
+                    InvoiceGenerator.GenerateXeroCSV(invoices);
+                }
+                catch (Exception e)
+                {
+                    throw new InventoryItemCodeNotInDb(e.Message.Split(';')[1]);
+                }
+                _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList());
 
                 return Json("Success");
             }
+            catch (InventoryItemCodeNotInDb e)
+            {
+                var res = new
+                {
+                    exceptionType = "InventoryItemCodeNotInDb",
+                    message = "Inventory Item Code not in database",
+                    description = e.Message
+                };
+                Response.StatusCode = 500;
+                return Json(res);
+            }
+
+
             catch (Exception e)
             {
                 Response.StatusCode = 500;
                 return Json("Error:" + e.Message);
             }
+
         }
 
         [HttpPost]
@@ -157,15 +180,16 @@ namespace Fuelcards.Controllers
             InvoiceSummary summary = new();
             try
             {
-                EnumHelper.Network network = _db.getNetworkFromAccount((int)customerInvoice.account);
                 InvoicePDFModel newInvoice = new();
+                newInvoice.network = _db.getNetworkFromAccount((int)customerInvoice.account);
+
                 newInvoice.InvoiceDate = customerInvoice.invoiceDate;
                 if (customerInvoice.CustomerType != EnumHelper.CustomerType.Floating)
                 {
-                    newInvoice.fixedBox = summary.GetFixDetails(customerInvoice, network, customerInvoice.CustomerType);
+                    newInvoice.fixedBox = summary.GetFixDetails(customerInvoice, newInvoice.network, customerInvoice.CustomerType);
                 }
                 
-                newInvoice.rows = summary.ProductBreakdown(customerInvoice, network);
+                newInvoice.rows = summary.ProductBreakdown(customerInvoice, newInvoice.network);
                 newInvoice.transactions = summary.TurnsTransactionsToPdf(customerInvoice.CustomerTransactions);
                 newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
                 if (customerInvoice.name != "The Fuel Trading Company")
@@ -177,7 +201,6 @@ namespace Fuelcards.Controllers
                 {
                     newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice, _db, "FTC", (int)customerInvoice.CustomerTransactions[0].network);
                 }
-
 
                 invoices.Add(newInvoice);
 

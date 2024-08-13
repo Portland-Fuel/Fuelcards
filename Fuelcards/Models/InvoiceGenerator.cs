@@ -1201,6 +1201,7 @@ namespace Fuelcards.Models
                 }
                 WriteOutTheCsv(ListOfDataToGoOnTheCSV, FilePathForXeroCSV);
             }
+
             catch (Exception e)
             {
                 
@@ -1324,7 +1325,9 @@ namespace Fuelcards.Models
             }
         }
 
-        public  void generatePDFImage(InvoicePDFModel newInvoice)
+
+
+        public void generatePDFImage(InvoicePDFModel newInvoice)
         {
 
             string pdfFilePath = _PDFFilePath;

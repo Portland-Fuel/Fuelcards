@@ -1044,6 +1044,12 @@ namespace Fuelcards.Repositories
         {
             return _db.TransactionSiteSurcharges.FirstOrDefault(e => e.Network == (int)network && e.ChargeType == "Texaco Handling Charge")?.Surcharge;
         }
-       
+       public async Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices)
+        {
+            EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
+
+            var Transactions = await GetCustomersToInvoice((int)NetworkEnum, invoices[0].InvoiceDate, 0);
+            ]//THIS IS NOT DONE
+        }
     }
 }

@@ -269,6 +269,7 @@ namespace Fuelcards.InvoiceMethods
         public InvoiceTotals totals { get; set; }
         public List<TransactionsPDF> transactions { get; set; }
         public FixedBox fixedBox { get; set; }
+        public EnumHelper.Network network { get; set; }
     }
     public class TransactionsPDF
     {

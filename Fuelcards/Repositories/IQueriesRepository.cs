@@ -3,6 +3,7 @@ using DataAccess.Fuelcards;
 using Fuelcards.GenericClassFiles;
 using Fuelcards.Controllers;
 using DataAccess.Cdata;
+using Fuelcards.InvoiceMethods;
 
 namespace Fuelcards.Repositories
 {
@@ -52,6 +53,7 @@ namespace Fuelcards.Repositories
         List<Dictionary<string, string>> GetListOfProducts();
         string? getNewInvoiceNumber(int network);
         double? GetHandlingCharge(int network);
-        void ConfirmChanges(string network);
+        void ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices);
+
     }
 }
