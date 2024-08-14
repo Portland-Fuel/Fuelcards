@@ -2,7 +2,12 @@ window.onload = function () {
     window.zoomlevel = "90%";
 }
 
-
+function GoTOEmail(){
+    document.getElementById("EmailOutSection").hidden = false;
+    document.getElementById("InvoiceSection").hidden = true;
+    document.getElementById("CheckListContainer").hidden = true;
+    document.getElementById("NetworkToInvoice").hidden = true;
+}
 document.addEventListener("DOMContentLoaded", function () {
 
     var modelKey = 'invoicePreCheckModel';
@@ -49,6 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
 var model = null;
 let GCB; // Global check model
 let selectedNetwork;
+let isPaused = false;
 
 let Invoicing = false;
 
@@ -338,11 +344,15 @@ async function ApproveButtonClick() {
     var CustList = getCustomerListFromNetwork(selectedNetwork);
     SetCustCountToBeInvoiced(CustList);
 }
-async function startInvoicingLoader() {
+async function startInvoicingLoader(Pause = false) {
     document.getElementById("InvoiceingLoader").hidden = false;
+    if(Pause){
+        document.getElementById("PauseBTN").hidden = false;
+    }
 }
 async function stopInvoicingLoader() {
     document.getElementById("InvoiceingLoader").hidden = true;
+  
 }
 async function StartInvoicing(btn) {
     startInvoicingLoader();
@@ -370,14 +380,17 @@ async function InvoiceCustomers(CustList, startIndex = 0) {
         console.log("Invoicing Customer...")
         var result = await InvoiceCustomer(customer);
 
-
+        
         if (!result) {
             currentCustomerIndex = currentCustomerIndex - 1;
             return;
         }
         else {
+            Toast.fire({
+                icon: 'success',
+                title: customer.name + ": Invoiced Successfully"
+            });
             await MinusCustCountToBeinvoiced();
-
             continue
         }
 
@@ -409,10 +422,7 @@ async function InvoiceCustomer(Customer) {
                 data: JSON.stringify(Customer),
                 contentType: 'application/json',
                 success: function (data) {
-                    Toast.fire({
-                        icon: 'success',
-                        title: Customer.name + ": Invoiced Successfully"
-                    });
+                   
                     resolve(data);
                 },
                 error: function (xhr) {
@@ -462,6 +472,22 @@ async function ConfirmInvoicing(network) {
         console.error("Error Confirming Invoicing");
     }
 }
+async function PauseLoader(btn) {
+    stopInvoicingLoader();
+    const elements = document.querySelectorAll('.s, .bigcon, .big');
+    const button = document.querySelector('.loader--control-button');
+
+    if (isPaused) {
+        elements.forEach(el => el.style.animationPlayState = 'running');
+        button.textContent = 'Pause';
+    } else {
+        elements.forEach(el => el.style.animationPlayState = 'paused');
+        button.textContent = 'Play';
+    }
+
+    isPaused = !isPaused;
+}
+
 async function StartLoopThroughTransactions(Customer) {
     const updatedTransactions = [];
 

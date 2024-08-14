@@ -80,9 +80,93 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                string html = "<html><body><h1>Email Body</h1><p>This is the email body content.</p></body></html>";
+                // Define variables for to, cc, bcc, and subject
+                string to = "Hello"; // Replace with actual customer email
+                string cc = "why you reading this"; // Replace with actual cc recipients
+                string bcc = "plonkers"; // Replace with actual bcc recipients
+                string subject = "Your Portland Fuelcard Invoice"; // Replace with actual subject
 
-                return Json(html);
+                // Define the HTML email body
+                string html = $@"
+                    <!DOCTYPE html>
+                    <html lang='en'>
+                    <head>
+                        <meta charset='UTF-8'>
+                        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                        <style>
+                            body {{
+                                font-family: Arial, sans-serif;
+                                color: #333;
+                            }}
+      
+                            .header {{
+                                margin-bottom: 20px;
+                            }}
+                            .header p {{
+                                margin: 2px 0;
+                            }}
+                            .footer {{
+                                font-size: 0.9em;
+                                color: #777;
+                            }}
+                            .footer p {{
+                                margin: 5px 0;
+                            }}
+                            .footer img {{
+                                max-width: 50%;
+                                height: auto;
+                            }}
+                            .email-details {{
+                                margin-bottom: 20px;
+                                padding: 10px;
+                                background-color: #e8f0fe;
+                                border-left: 4px solid #4285f4;
+                                border-radius: 4px;
+                            }}
+                            .email-details p {{
+                                margin: 5px 0;
+                                font-size: 0.9em;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class='header'>
+                            <h1>Email Details</h1>
+                            <div class='email-details'>
+                                <p id='EmailTo'><strong>To:</strong> {to}</p>
+                                <p id='EmailCC'><strong>CC:</strong> {cc}</p>
+                                <p id='EmailBCC'><strong>BCC:</strong> {bcc}</p>
+                                <p id='EmailSubject'><strong>Subject:</strong> {subject}</p>
+                            </div>
+                        </div>
+
+                        <p>Please find your latest Portland Fuelcard invoice attached.</p>
+                        <p>Kind regards,</p>
+                        <p><strong>Portland Fuel Cards</strong></p>
+                        <hr>
+                        <div class='footer'>
+                            <p>Portland Fuel Ltd</p>
+                            <p>Company Reg No: 07020627</p>
+                            <p>1 Toft Green | York | YO1 6JT</p>
+                            <p>Tel: 01904 570021 | Fax: 01904 652082</p>
+                            <p><a href='http://www.portland-fuel.co.uk'>www.portland-fuel.co.uk</a></p>
+                            <img src='\lib\Portland Fuel Card Footer.png' alt='Portland Fuel Card Footer'>
+                            <p><em>Did you know we now also supply Ad Blue? Contact us to find out more.</em></p>
+                        </div>
+                    </body>
+                    </html>";
+
+
+                // Return the JSON object
+                var JsonToReturn = new
+                {
+                    to = to,
+                    cc = cc,
+                    bcc = bcc,
+                    subject = subject,
+                    html = html,
+                };
+                return Json(JsonToReturn);
             }
             catch (Exception e)
             {
@@ -90,6 +174,7 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
+
 
         public struct ItemCodeAndPorductData
         {
@@ -110,7 +195,7 @@ namespace Fuelcards.Controllers
                 {
                     throw new InventoryItemCodeNotInDb(e.Message.Split(':')[1]);
                 }
-                _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList());
+               // _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList());
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)
@@ -133,20 +218,17 @@ namespace Fuelcards.Controllers
             }
 
         }
-
         [HttpPost]
         public JsonResult GetInvoicePng([FromBody] CustomerInvoice customerInvoice)
         {
             try
             {
-                // Ensure customerInvoice is not null and has a valid name
                 if (customerInvoice == null || string.IsNullOrEmpty(customerInvoice.name))
                 {
                     Response.StatusCode = 400;
                     return Json("Error: Invalid input.");
                 }
 
-                // Locate the invoice based on the company name
                 var invoice = invoices.FirstOrDefault(e => e.CustomerDetails.CompanyName == customerInvoice.name);
                 if (invoice == null)
                 {
@@ -154,28 +236,28 @@ namespace Fuelcards.Controllers
                     return Json("Error: Invoice not found.");
                 }
 
-                // Build the file name and path
                 string fileName = FileHelperForInvoicing.BuildingFileNameForInvoicing(invoice, invoice.CustomerDetails.CompanyName);
-                string startingDirectory = FileHelperForInvoicing._startingDirectory.TrimEnd(Path.DirectorySeparatorChar);
-                string yearDirectory = FileHelperForInvoicing._year.ToString().TrimEnd(Path.DirectorySeparatorChar);
-                string invoiceDateDirectory = invoice.InvoiceDate.ToString("yyMMdd").TrimEnd(Path.DirectorySeparatorChar);
-                string networkNameDirectory = GetNetworkName(invoice.CustomerDetails.Network).TrimEnd(Path.DirectorySeparatorChar);
-
-                // Combine the path components
                 string path = Path.Combine(
-                    startingDirectory,
-                    yearDirectory,
-                    invoiceDateDirectory,
-                    networkNameDirectory,
+                    FileHelperForInvoicing._startingDirectory.TrimEnd(Path.DirectorySeparatorChar),
+                    FileHelperForInvoicing._year.ToString().TrimEnd(Path.DirectorySeparatorChar),
+                    invoice.InvoiceDate.ToString("yyMMdd").TrimEnd(Path.DirectorySeparatorChar),
+                    GetNetworkName(invoice.CustomerDetails.Network).TrimEnd(Path.DirectorySeparatorChar),
                     "PDFImages",
                     fileName + ".png"
                 );
 
-                // Ensure the path uses forward slashes for compatibility with JavaScript
-                path = path.Replace(Path.DirectorySeparatorChar, '/');
+                if (!System.IO.File.Exists(path))
+                {
+                    Response.StatusCode = 404;
+                    return Json("Error: Image not found.");
+                }
 
-                // Return the path as a JSON result
-                return Json(path);
+                // Load the image and convert it to a base64 string
+                byte[] imageBytes = System.IO.File.ReadAllBytes(path);
+                string base64Image = Convert.ToBase64String(imageBytes);
+                string imageSrc = $"data:image/png;base64,{base64Image}";
+
+                return Json(imageSrc);
             }
             catch (Exception e)
             {
@@ -252,7 +334,11 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                throw new Exception("Error sending email");
+                var jsonToReturn = new
+                {
+                    success = true,
+                };
+                return Json(jsonToReturn);
             }
             catch (Exception e)
             {
@@ -270,6 +356,7 @@ namespace Fuelcards.Controllers
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
                 TransactionBuilder tb = new(_sites, _db);
                 DataToPassBack model = tb.processTransaction(transactionDataFromView, network);
+
                 return Json(model);
             }
             catch (Exception e)

@@ -1,6 +1,4 @@
 html, body {
-    height: 100%;
-    width: 100%;
     margin: 0;
     display: flex;
     justify-content: center;
@@ -289,26 +287,59 @@ html, body {
     flex-direction: column;
     align-items: center;
     width: 100%;
+    height: 100vh;
     box-sizing: border-box;
 }
+.EmailOutSection button{
+    background-color: #194979;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+}
+.EmailOutSection button:hover{
+    background-color: #4b7baa;
+    color: #f8f9fa;
+    transform: scale(1.05);
+}
+
+
 .EmailOutSection .CustDetailsContainer{
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 300px;
     width: 100%;
+    padding: 10px;
+    background-color: transparent;
+    border: 2px solid rgb(26, 27, 26);
 
 }
+.EmailOutSection .CustDetailsContainer .CustomerDetails-item{
+    background-color: transparent;  
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    margin-bottom: 10px;
+    text-align: center;
+    height: 98%;
 
+}
+.EmailOutSection .CustDetailsContainer .CustomerDetails-item:hover{
+    transform: scale(1.05);
+}
 .EmailOutSection .CustDetailsContainer label{
     color: white;
     margin-bottom: 10px;
     font-size: 18px;
     text-align: center;
     width: 100%;
-
-
+    display: block;
+    padding: 10px;    
 }
+
 .EmailOutSection .CustDetailsContainer input{
     width: 100%;
     color: white;
@@ -328,26 +359,33 @@ html, body {
 }
 
 .EmailOutSection .DisplayItemsContainer {
-    display: flex;
-    justify-content: space-around;
     width: 100%;
-    max-width: 1200px;
+    height: 100%;
+    max-width: 1400px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 .EmailOutSection .HtmlOrPdf {
-    width: 48%;
-    box-sizing: border-box;
+    width: 100%;
+    margin: 1%;
+    display: inline-block;
     transition: transform 0.3s, box-shadow 0.3s;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+}
+.EmailOutSection .HtmlAndPDfSeperator{
+    display:flex;
+    width:100%;
+    gap:180px;
 }
 .EmailOutSection .HtmlOrPdf label{
     color: white;
     font-size: 18px;
+    position: absolute;
     margin-bottom: 10px;
-    text-align: center;
-
+}
+.EmailOutSection .EmailButtons{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 
@@ -356,65 +394,25 @@ html, body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.EmailOutSection .HtmlOrPdf .PDFImageContainer,
-.EmailOutSection .HtmlOrPdf .EmailContainer {
-    width: 100%;
-    box-sizing: border-box;
-}
 
-.EmailOutSection .HtmlOrPdf img {
+.EmailOutSection .HtmlOrPdf img[alt="PDF"] {
     width: 100%;
-    height: auto;
-    max-height: 600px;
+    max-height: 550px;
+    max-width: 600px;
+    display: flex;
 }
 
 .EmailOutSection .HtmlOrPdf #EmailHtml {
-    background-color: white;
-    color: black;
-    width: 100%;
-    max-height: 500px; 
-    overflow-y: auto;
-    box-sizing: border-box;
+    max-width: 600px;   
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
 }
-.EmailOutSection .HtmlOrPdf .PDFImageContainer label,
-.EmailOutSection .HtmlOrPdf #EmailHtml  label{
-    background-color: white;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-.EmailOutSection .EmailDetails {
-    display: flex;
-    flex-direction: column;
-    justify-content: center; 
-    align-items: center;
-    height: 100%;
-    gap: 10px;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-.EmailOutSection .EmailDetails label {
-    font-weight: bold;
-    color: white;
-    width: 100%; 
-    text-align: left; 
-}
-
-.EmailOutSection .EmailDetails input {
-    width: 100%;
-    padding: 8px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-
 * {
     box-sizing: border-box;
-  }
-  
-  
-  .s2 {
+}
+
+.s2 {
     position: absolute;
     height: 100px;
     width: 100px;
@@ -422,9 +420,9 @@ html, body {
     top: 50vh;
     left: 50%;
     transform: translate(-50%, -50%);
-  }
-  
-  .s1 {
+}
+
+.s1 {
     position: absolute;
     height: 100px;
     width: 100px;
@@ -433,9 +431,9 @@ html, body {
     transform-origin: center;
     transform: translate(-50%, -50%) rotate(45deg);
     background-color: transparent;
-  }
-  
-  .bigcon {
+}
+
+.bigcon {
     position: absolute;
     height: 95px;
     width: 95px;
@@ -446,41 +444,41 @@ html, body {
     background-color: transparent;
     animation: bigcon 2s infinite linear;
     animation-delay: 0.25s;
-  }
-  
-  .b {
+}
+
+.b {
     border-radius: 50%;
     position: absolute;
-  }
-  
-  .s {
+}
+
+.s {
     width: 25px;
     height: 25px;
     animation: small 2s infinite ease;
     box-shadow: 0px 2px rgba(0,0,0,0.3);
-  }
-  
-  .s:nth-child(1) {
+}
+
+.s:nth-child(1) {
     top: 0%;
     left: 0%;
-  }
-  
-  .s:nth-child(2) {
+}
+
+.s:nth-child(2) {
     top: 0%;
     right: 0%;
-  }
-  
-  .s:nth-child(3) {
+}
+
+.s:nth-child(3) {
     right: 0%;
     bottom: 0%;
-  }
-  
-  .s:nth-child(4) {
+}
+
+.s:nth-child(4) {
     bottom: 0%;
     left: 0%;
-  }
-  
-  .big {
+}
+
+.big {
     width: 20px;
     height: 20px;
     border-radius: 15px;
@@ -488,65 +486,88 @@ html, body {
     z-index: 1;
     background-color: #912222;
     animation: bigball 1s infinite linear;
-  }
-  
-  .sb1{
+}
+
+.sb1 {
     animation-delay: -1.75s;
-  }
-  .sb6{
+}
+
+.sb6 {
     animation-delay: -1.5s;
-  }
-  .sb2{
+}
+
+.sb2 {
     animation-delay: -1.25s;
-  }
-  .sb7{
+}
+
+.sb7 {
     animation-delay: -1s;
-  }
-  .sb3{
+}
+
+.sb3 {
     animation-delay: -0.75s;
-  }
-  .sb8{
+}
+
+.sb8 {
     animation-delay: -0.5s;
-  }
-  .sb4{
+}
+
+.sb4 {
     animation-delay: -0.25s;
-  }
-  .sb5{
-    animation-delay: -0s;
-  }
-  
-  @keyframes bigcon {
+}
+
+.sb5 {
+    animation-delay: 0s;
+}
+
+.loader--control-button {
+    position: absolute;
+    top: 70vh;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+@keyframes bigcon {
     0% {
-      transform-origin: center;
-      transform: translate(-50%, -50%) rotate(45deg);
+        transform-origin: center;
+        transform: translate(-50%, -50%) rotate(45deg);
     }
     100% {
-      transform-origin: center;
-      transform: translate(-50%, -50%) rotate(405deg);
+        transform-origin: center;
+        transform: translate(-50%, -50%) rotate(405deg);
     }
-  }
-  
-  @keyframes small {
+}
+
+@keyframes small {
     0% {
-      transform: scale(1);
-       background-color: #f85454;
+        transform: scale(1);
+        background-color: #f85454;
     }
     10% {
-      transform: scale(1.3);
-      background-color: #912222;
+        transform: scale(1.3);
+        background-color: #912222;
     }
     15% {
-      transform: scale(1);
+        transform: scale(1);
     }
-    25%{
-  transform: scale(1);
-       background-color: #f85454;
+    25% {
+        transform: scale(1);
+        background-color: #f85454;
     }
-    100%{
-      transform: scale(1);
-       background-color: #f85454;
+    100% {
+        transform: scale(1);
+        background-color: #f85454;
     }
-  }
+}
+
 
 :root {
     --loader-width: 250px;

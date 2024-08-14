@@ -1376,6 +1376,9 @@ public static class FileHelperForInvoicing
     public static string BuildingFileNameForInvoicing(InvoicePDFModel newInvoice, string CustomerName)
     {
         string prefix = string.Empty;
+        newInvoice.CustomerDetails.InvoiceNumber = newInvoice.CustomerDetails.InvoiceNumber.Replace("TX", "");
+        newInvoice.CustomerDetails.InvoiceNumber = newInvoice.CustomerDetails.InvoiceNumber.Replace("PF", "");
+
         switch (newInvoice.CustomerDetails.Network.ToString())
         {
             case "UkFuel":

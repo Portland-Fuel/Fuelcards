@@ -1,29 +1,73 @@
-async function StartSendingEmails(){
-    var NetworkUserSelected = selectedNetwork;
-    var CustomerList = getCustomerListFromNetwork(NetworkUserSelected);
-    
-    for (const Customer of CustomerList) {
-        var CustomerName = Customer.name;
-    
-        await fillInputs(Customer);
-        ClearPDfAndHtmlLoadErrors();
-        if(await getCustomerInvoicePng(Customer)){
-            await showErrorBox("Error loading PDF or HTML");
-        };
-        if(await getEmailBody(Customer)){
-            await showErrorBox("Error loading PDF or HTML");
-        };
+async function StartEmailing(Btn) {
+    Btn.hidden = true;
+    startInvoicingLoader();
 
+    selectedNetwork = "Texaco";
+    var Customers = getCustomerListFromNetwork(selectedNetwork);    
+    var FirstCustomer = Customers[0];
+    await loadDetailsForNextCustomer(FirstCustomer);
+    var Count = document.getElementById('CountOfCustomersToBeEmailed');
+    Count.textContent = Customers.length;
+    stopInvoicingLoader();
 
-    
-        document.getElementById('DisplayEmailItemsContainer').hidden = false;
-    
-        await Toast.fire({
-            icon: 'success',
-            title: 'Email sent to ' + CustomerName
-        })
-    }
 }
+
+
+let loopedCustomerCount = 0;
+async function loadDetailsForNextCustomer(customer) {
+    await fillInputs(customer);
+    document.getElementById('DisplayEmailItemsContainer').hidden = false;
+    await getEmailBody(customer);
+    await getCustomerInvoicePng(customer);
+}
+async function ResumeEmails() {
+    EmailPause = false;
+    document.getElementById('ResumeEmailsBTN').hidden = true;
+    document.getElementById('PauseEmailsBTN').hidden = false;
+    SendAllEmails(loopedCustomerCount);
+}
+async function PauseEmails() {
+    EmailPause = true;
+    document.getElementById('PauseEmailsBTN').hidden = true;
+    document.getElementById('ResumeEmailsBTN').hidden = false;
+}
+async function SendAllEmails(Btn,startIndex = 0) {
+    Btn.hidden = true;
+    startInvoicingLoader(true);
+    var Customers = getCustomerListFromNetwork(selectedNetwork);
+
+    for (let i = startIndex; i < Customers.length; i++) {
+        if (isPaused) {
+            Toast.fire({
+                icon: 'info',
+                title: 'Emailing paused'
+            })
+            break;
+        }
+
+        const Customer = Customers[i];
+        await loadDetailsForNextCustomer(Customer, Customers.length);
+        var SendEmailResult = await SendEmailToCustomer(Customer);
+        
+        if (!SendEmailResult) {
+            await showErrorBox("Error sending email to " + Customer.name);
+        }
+
+        var Count = document.getElementById('CountOfCustomersToBeEmailed');
+        Count.textContent = parseInt(Count.textContent) - 1;
+        loopedCustomerCount++;
+
+        if (loopedCustomerCount === Customers.length) {
+            document.getElementById('DisplayEmailItemsContainer').hidden = true;
+        }
+    }
+
+    stopInvoicingLoader();
+}
+
+
+
+
 async function SendEmailToCustomer(Customer){
     var SendEmailInformation = {
         EmailDetails: {
@@ -31,13 +75,10 @@ async function SendEmailToCustomer(Customer){
             emailTo: document.getElementById("EmailTo").textContent,
             emailCc: document.getElementById("EmailCC").textContent,
             emailBcc: document.getElementById("EmailBCC").textContent,
-            emailSubject: document.getElementById("EmailSubject").value,
+            emailSubject: document.getElementById("EmailSubject").textContent,
         },
         CustomerInvoice: Customer,
     }
-
-
-
 
     try {
         let response = await $.ajax({
@@ -46,22 +87,27 @@ async function SendEmailToCustomer(Customer){
             data: JSON.stringify(SendEmailInformation),
             contentType: 'application/json',
         });
-
-        if (response && response.success) {
-            console.log('Email sent successfully:', response);
+        var res1 = JSON.stringify(response);
+        var res2 = JSON.parse(res1);
+        if (res2 && res2.success) {
+            Toast.fire({
+                icon: 'success',
+                title: 'Email sent successfully'
+            });
+            return true;
         } else {
             throw new Error('Invalid response data');
         }
     } catch (error) {
         console.error('Error in SendEmailToCustomer:', error);
-        await showErrorBox("Error sending email to " + Customer.name);
+        return false;
     }
 
 }
 
 async function fillInputs(Customer){
-    document.getElementById('EmailCustomerName').value = Customer.name;
-    document.getElementById('EmailAccountNumber').value = Customer.account;
+    document.getElementById('EmailCustomerName').textContent = Customer.name;
+    document.getElementById('EmailAccountNumber').textContent = Customer.account;
 }
 
 
@@ -81,7 +127,7 @@ async function ClearPDfAndHtmlLoadErrors(){
     }
 }
 
-async function getCustomerInvoicePng(Customer){
+async function getCustomerInvoicePng(Customer) {
     let Errored = false;
     try {
         let response = await $.ajax({
@@ -89,32 +135,79 @@ async function getCustomerInvoicePng(Customer){
             type: 'POST',
             data: JSON.stringify(Customer),
             contentType: 'application/json',
+            statusCode: {
+                400: async function() {
+                    const errorMessage = 'Invalid input data.';
+                    console.error(errorMessage);
+                    await showErrorBox(errorMessage);
+                },
+                404: async function() {
+                    const errorMessage = 'Invoice not found.';
+                    console.error(errorMessage);
+                    await showErrorBox(errorMessage);
+                },
+                500:  async function() {
+                    const errorMessage = 'Server error occurred.';
+                    console.error(errorMessage);
+                    await showErrorBox(errorMessage);
+                }
+            }
         });
 
-        if (response && typeof response === 'string') {
+        if (response && typeof response === 'string' && response.startsWith("data:image/png;base64,")) {
             var Img = document.createElement('img');
             Img.src = response;
+            Img.alt = 'PDF';
+
             var container = document.getElementById('PDFImgContainer');
             if (container) {
+                var elements = container.querySelectorAll("*");
+                for (let i = 0; i < elements.length; i++) {
+                    const element = elements[i];
+                    element.remove();
+                }
                 container.appendChild(Img);
             } else {
-                console.error('PDFImgContainer element not found');
+                const errorMessage = 'PDFImgContainer element not found';
+                console.error(errorMessage);
+                await showErrorBox(errorMessage);
             }
         } else {
-            console.error('Invalid response data for image source:', response);
+            const errorMessage = 'Invalid response data for image source: ' + response;
+            console.error(errorMessage);
+            await showErrorBox(errorMessage);
         }
         return response;
     } catch (error) {
         Errored = true;
-        console.error('Error in getCustomerInvoicePng:', error);
+        const errorMessage = 'Error in getCustomerInvoicePng: ' + error;
+        console.error(errorMessage);
+        await showErrorBox(errorMessage);
+        var container = document.getElementById('PDFImgContainer');
+        if (container) {
+            var elements = container.querySelectorAll("*");
+            for (let i = 0; i < elements.length; i++) {
+                const element = elements[i];
+                element.remove();
+            }
+        }
         var ee = document.getElementById('PFfCon');
         if (ee) {
             var ErrorLabel = await CreateErrorLabelForPDFOrHtml();
-            ee.appendChild(ErrorLabel);
+            if (ErrorLabel) {
+                ee.appendChild(ErrorLabel);
+            } else {
+                const errorMessage = 'ErrorLabel creation failed.';
+                console.error(errorMessage);
+                await showErrorBox(errorMessage);
+            }
+        } else {
+            const errorMessage = 'PFfCon element not found';
+            console.error(errorMessage);
+            await showErrorBox(errorMessage);
         }
     }
     return Errored;
-
 }
 
 async function getEmailBody(Customer) {
@@ -127,11 +220,11 @@ async function getEmailBody(Customer) {
             data: JSON.stringify(Customer),
             contentType: 'application/json'
         });
-
+        var res1 = JSON.stringify(response);
+        var res2 = JSON.parse(res1);
         // Ensure response.html exists and is valid before assigning it
-        if (response && response.html) {
+        if (res2 && res2.html) {
             document.getElementById('EmailHtml').innerHTML = response.html;
-            document.getElementById('EmailDetails').hidden = false;
         } else {
             throw new Error('Invalid response format');
         }

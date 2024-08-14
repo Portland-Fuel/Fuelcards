@@ -3,6 +3,8 @@
 <script src="~/js/invoicingerrorhandling.js"></script>
 <script src="~/js/emailinvoicing.js"></script>
 <link href="~/css/invoicing.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/phosphor-icons@1.4.1/dist/phosphor.min.css">
+
 <script>
 
 </script>
@@ -16,9 +18,9 @@
             <div class="loader--dot"></div>
             <div class="loader--dot"></div>
             <div class="loader--dot"></div>
+            <button class="loader--control-button" onclick="toggleLoader()">Pause</button>
             <div class="loader--text1"></div>
             <div class="loader--text"></div>
-
         </div>
     </div>
 </div>
@@ -32,6 +34,8 @@
 
 </div>
 <div hidden class="NetworkToInvoice" id="NetworkToInvoice">
+    <button class="button" onclick="GoTOEmail()">Go to email</button>
+
     <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
     <h1>Please Select a network to check</h1>
     <select>
@@ -44,6 +48,7 @@
 </div>
 
 <div id="CheckListContainer" class="CheckListContainer" hidden>
+
     <button class="button" onclick="goBackFromNetworkCheck(this)">Back</button>
     <button class="button" onclick="selectAllCheckBoxes(this)">Select All</button>
 
@@ -71,7 +76,6 @@
         </div>
         <div class="CustomerDetails-item">
             <label id="CountOfCustomersToBeInvoiced">Number of Customers to be Invoiced: 0</label>
-
         </div>
     </div>
     <div id="TransactionsTableContainer">
@@ -108,7 +112,6 @@
         <div class="s b sb4"></div>
     </div>
 
-
     <div class="s2">
         <div class="s b sb5"></div>
         <div class="s b sb6"></div>
@@ -120,45 +123,54 @@
         <div class="big b"></div>
     </div>
 
+    <button hidden id="PauseBTN" class="loader--control-button" onclick="PauseLoader(this)">Pause</button>
+</div>
+<div class="InvoicingLoaderContainer" id="InvoiceingLoader">
+    <button hidden id="ResumeBTN" class="loader--control-button" onclick="PauseLoader(this)">Resume</button>
 </div>
 
+
+
+
 <div hidden id="EmailOutSection" class="EmailOutSection">
-    <button onclick="StartSendingEmails()" class="button">Start Sending Emails</button>
+    <button onclick="StartEmailing(this)" id="StartEmail">Start emailing</button>
 
     <div class="section">
-        <div class="CustDetailsContainer">
-            <div>
-                <label>Customer Name:</label>
-                <input id="EmailCustomerName"readonly type="text" name="name" value="" />
-            </div>
-            <div>
-                <label >Account Number:</label>
-                <input id="EmailAccountNumber" readonly type="text" name="name" value="" />
-            </div>
-        </div>
+        
     </div>
     <div class="DisplayItemsContainer" hidden id="DisplayEmailItemsContainer">
-        <div id="HtmlCon" class="HtmlOrPdf">
-            <div class="EmailContainer">
-                <div id="EmailHtml" class="EmailHtml">
+        <div >
+            <div class="CustDetailsContainer">
+                <div class="CustomerDetails-item">
+                    <label>Customer Name:</label>
+                    <label id="EmailCustomerName"></label>
+                </div>
+                <div class="CustomerDetails-item">
+                    <label>Number of Customers to be emailed:</label>
+                    <label id="CountOfCustomersToBeEmailed"></label>
+
+                </div>
+                <div class="CustomerDetails-item">
+                    <label>Account Number:</label>
+                    <label id="EmailAccountNumber"></label>
                 </div>
             </div>
-            <div class="EmailDetails" hidden id="EmailDetails">
-                <label>Subject</label>
-                <input type="text" id="EmailSubject" />
-                <label>To</label>
-                <input type="text" id="EmailTo" />
-                <label>CC</label>
-                <input  type="text" id="EmailCC" />
-                <label>BCC</label>
-                <input type="text" id="EmailBCC" />
-            </div>
+            <div class="HtmlAndPDfSeperator">
+                <div id="HtmlCon" class="HtmlOrPdf">
+                    <div class="EmailContainer">
+                        <div id="EmailHtml" class="EmailHtml">
+                        </div>
+                    </div>
+                </div>
 
-        </div>
-        <div id="PFfCon" class="HtmlOrPdf">
-            <div id="PDFImgContainer" class="PDFImageContainer">
+                <div id="PFfCon" class="HtmlOrPdf">
+                    <div id="PDFImgContainer" class="PDFImageContainer">
+                    </div>
+                </div>
             </div>
+        </div>
+        <div class="EmailButtons">
+            <button onclick="SendAllEmails(this)" id="SendEmails">Send all emails</button>
         </div>
     </div>
-
 </div>
