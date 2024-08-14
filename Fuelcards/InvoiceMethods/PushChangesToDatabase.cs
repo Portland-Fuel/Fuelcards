@@ -1,11 +1,17 @@
 ﻿
+using Fuelcards.Repositories;
+using Microsoft.Graph;
+
 namespace Fuelcards.InvoiceMethods
 {
     public class PushChangesToDatabase
     {
-        internal static void SubmitFinalTransactionToDatabase()
+        internal static void SubmitFinalTransactionToDatabase(InvoicePDFModel? invoice, IQueriesRepository _db)
         {
-            throw new NotImplementedException();
+            foreach (var transaction in invoice.transactions)
+            {
+                var Transaction = _db.GetTransaction(transaction.TransactionNumber, invoice.network);
+            }
         }
     }
 }

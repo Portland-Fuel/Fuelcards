@@ -54,6 +54,6 @@ namespace Fuelcards.Repositories
         string? getNewInvoiceNumber(int network);
         double? GetHandlingCharge(int network);
         Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices);
-
+        object GetTransaction(string transactionNumber, EnumHelper.Network network);
     }
 }

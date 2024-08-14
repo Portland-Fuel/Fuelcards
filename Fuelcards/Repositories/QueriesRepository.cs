@@ -1047,9 +1047,30 @@ namespace Fuelcards.Repositories
        public async Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices)
         {
             EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
-            var Transactions = await GetCustomersToInvoice((int)NetworkEnum, invoices[0].InvoiceDate, 0);
-            PushChangesToDatabase.SubmitFinalTransactionToDatabase();
+            foreach (var invoice in invoices)
+            {
+                PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice);
+            }
             //THIS IS NOT DONE
+        }
+        public TexacoTransaction? GetTransaction(string transactionNumber, EnumHelper.Network network)
+        {
+            switch (network)
+            {
+                case EnumHelper.Network.Keyfuels:
+                    break;
+                case EnumHelper.Network.UkFuel:
+                    break;
+                case EnumHelper.Network.Texaco:
+                    return _db.TexacoTransactions.FirstOrDefault(e => e.TranNoItem.ToString() == transactionNumber);
+                    break;
+                case EnumHelper.Network.Fuelgenie:
+                    break;
+                default:
+                    break;
+
+                    return null;
+            }
         }
     }
 }
