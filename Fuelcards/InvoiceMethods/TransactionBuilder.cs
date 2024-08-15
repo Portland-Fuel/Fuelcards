@@ -19,6 +19,9 @@ namespace Fuelcards.InvoiceMethods
             _sites = sites;
             _db = db;
         }
+
+
+
         internal DataToPassBack processTransaction(InvoicingController.TransactionDataFromView transactionDataFromView, EnumHelper.Network network)
         {
             EnumHelper.Products? product = EnumHelper.GetProductFromProductCode(Convert.ToInt32(transactionDataFromView.transaction.productCode), network);

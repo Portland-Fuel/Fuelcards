@@ -159,11 +159,11 @@ namespace Fuelcards.Repositories
             List<FixedPriceContract>? fix = _db.FixedPriceContracts.Where(e => e.FcAccount == account).ToList();
             return fix;
         }
-        public Email AllEmail(int acccount)
+        public Fuelcards.Models.Email AllEmail(int acccount)
         {
             FcEmail? email = _db.FcEmails.FirstOrDefault(e => e.Account == acccount);
             if (email is null) throw new Exception($"No Email found for Keyfuels customer on account {acccount}");
-            Email emailModel = new()
+            Fuelcards.Models.Email emailModel = new()
             {
                 To = email.To,
                 Cc = email.Cc,

@@ -13,7 +13,7 @@ namespace Fuelcards.Repositories
         int? GetPortlandIdFromXeroId(string xeroId);
         int? GetPaymentTerms(string xeroId);
         List<FixedPriceContract>? AllFixContracts(int account);
-        Email AllEmail(int account);
+        Fuelcards.Models.Email AllEmail(int account);
         int[]? GetAccounts(int portlandId);
         EnumHelper.Network getNetworkFromAccount(int account);
         double? GetBasePrice(DateOnly invoiceDate);
