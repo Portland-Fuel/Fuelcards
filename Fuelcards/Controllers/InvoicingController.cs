@@ -195,7 +195,7 @@ namespace Fuelcards.Controllers
                 {
                     throw new InventoryItemCodeNotInDb(e.Message.Split(':')[1]);
                 }
-                _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList(), _db);
+                //_db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList(), _db);
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)
@@ -346,8 +346,19 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
-
-
+        [HttpGet]
+        public JsonResult GetInvoiceReport()
+        {
+            try
+            {
+                return Json(reportList);
+            }
+            catch (Exception e)
+            {
+                Response.StatusCode = 500;
+                return Json("Error:" + e.Message);
+            }
+        }
         [HttpPost]
         public JsonResult ProcessTransactionFromPage([FromBody] TransactionDataFromView transactionDataFromView)
         {

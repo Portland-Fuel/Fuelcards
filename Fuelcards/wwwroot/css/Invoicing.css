@@ -49,7 +49,6 @@ html, body {
     border-radius: 5px;
     border: none;
     cursor: pointer;
-    margin: 10px;
 
 }
 .button:hover{
@@ -183,38 +182,40 @@ html, body {
     font-size: 18px;
 }
 
-#InvoiceSectionTransactionTable{
+table {
     border-collapse: collapse;
     background-color: transparent;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(209, 202, 202, 0.1);
     width: 100%;
-    margin-bottom: 20px; 
-    overflow:  auto;
+    overflow: auto;
     max-height: 500px;
-
 }
-#InvoiceSectionTransactionTable thead {
+
+thead {
     background-color: transparent;
 }
-#InvoiceSectionTransactionTable th {
+
+th {
     color: white;
     font-size: 20px;
     border: 2px solid #f8f9fa;
     padding: 10px;
-    font: bold;
+    font-weight: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
-#InvoiceSectionTransactionTable td {
+td {
     font-size: 18px;
     color: white;
     overflow: auto;
     text-align: center;
     padding: 10px;
     border: 2px solid #f8f9fa;
-    text-overflow:ellipsis;
+    text-overflow: ellipsis;
 }
-
 .CustomerDetails .CustomerDetails-item{
     background-color: transparent;  
     width: 100%;  

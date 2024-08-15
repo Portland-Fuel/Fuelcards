@@ -1,10 +1,19 @@
 window.onload = function () {
-    window.zoomlevel = "90%";
+    Toast.fire({
+        icon: 'success',
+        title: 'Select a network to start invoicing'
+    })
 }
 
 function GoTOEmail(){
     document.getElementById("EmailOutSection").hidden = false;
     document.getElementById("InvoiceSection").hidden = true;
+    document.getElementById("CheckListContainer").hidden = true;
+    document.getElementById("NetworkToInvoice").hidden = true;
+}
+function GoToInvoiceReport(){
+    document.getElementById("EmailOutSection").hidden = true;
+    document.getElementById("InvoiceReportSection").hidden = false;
     document.getElementById("CheckListContainer").hidden = true;
     document.getElementById("NetworkToInvoice").hidden = true;
 }
@@ -58,6 +67,69 @@ let isPaused = false;
 
 let Invoicing = false;
 
+async function LoadInvoiceReport(){
+    startInvoicingLoader();
+    var InvoiceReportTable = document.getElementById("InvoiceReportTable");
+    var tbody = InvoiceReportTable.querySelector("tbody");
+    tbody.innerHTML = "";
+    var thead = InvoiceReportTable.querySelector("thead");
+    var InvoiceReport = await getInvoiceReport();
+    console.log(InvoiceReport);
+    
+
+    var firstItem = InvoiceReport[0];
+    var values = Object.values(firstItem);
+    var headers = Object.keys(firstItem);
+    createInvoiceReportHeaders(thead, headers);
+    createInvoiceReportRows(tbody, InvoiceReport, headers);
+    console.log("Number of th elements:", thead.getElementsByTagName("th").length);
+    console.log("Number of td elements in the first row:", tbody.querySelector("tr:first-child").getElementsByTagName("td").length);
+
+    let tble = new DataTable('#InvoiceReportTable', {
+        responsive: true
+    });
+    stopInvoicingLoader();
+   
+}
+function createInvoiceReportHeaders(thead, headers) {
+    thead.innerHTML = ""; // Clear existing headers
+
+    headers.forEach(headerText => {
+        const th = document.createElement("th");
+        th.innerHTML = headerText;
+        thead.appendChild(th);
+    });
+}
+function createInvoiceReportRows(tbody, InvoiceReport, headers) {
+    InvoiceReport.forEach(item => {
+        const tr = document.createElement("tr");
+        headers.forEach(header => {
+            const td = document.createElement("td");
+            td.innerHTML = item[header];
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+}
+    
+async function getInvoiceReport(){
+    try {
+        let response = await $.ajax({
+            url: '/Invoicing/GetInvoiceReport',
+            type: 'GET',
+            success: function (data) {
+                return data;
+            },
+            error: function (xhr) {
+                HandleInvoicingError(xhr);
+            }
+        });
+        return response;
+    }
+    catch (xhr) {
+        HandleInvoicingError(xhr);
+    }
+}
 async function RefreshPage() {
     window.location.reload(true);
     localStorage.removeItem('invoicePreCheckModel');
@@ -355,7 +427,7 @@ async function stopInvoicingLoader() {
   
 }
 async function StartInvoicing(btn) {
-    startInvoicingLoader();
+    startInvoicingLoader(true);
     document.getElementById("PauseInvoicingBTN").hidden = false;
     document.getElementById("StartInvoicingBTN").hidden = true;
     document.getElementById("ResumeInvoicingBTN").hidden = true;
@@ -440,6 +512,7 @@ async function InvoiceCustomer(Customer) {
 }
 
 async function ConfirmInvoicing(network) {
+    
     try {
         const result = await Swal.fire({
             title: 'Confirm Invoicing',
@@ -453,7 +526,7 @@ async function ConfirmInvoicing(network) {
         if (result.isConfirmed) {
             let response = await $.ajax({
                 url: '/Invoicing/ConfirmInvoicing',
-                data: JSON.stringify(network),
+                data: JSON.stringify(selectedNetwork),
                 contentType: 'application/json',
                 type: 'POST',
                 success: function (data) {
@@ -623,7 +696,7 @@ async function SendTransactionToControllerToBeProcessed(Transaction, customer) {
 
 async function InvoicingCompletion() {
     document.getElementById("InvoiceSection").hidden = true;
-    document.getElementById('EmailOutSection').hidden = false;
+    document.getElementById('InvoiceReportSection').hidden = false;
     stopInvoicingLoader();
 }
 
