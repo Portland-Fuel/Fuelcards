@@ -195,7 +195,7 @@ namespace Fuelcards.Controllers
                 {
                     throw new InventoryItemCodeNotInDb(e.Message.Split(':')[1]);
                 }
-                //_db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList(), _db);
+                _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList(), _db);
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)
@@ -334,6 +334,21 @@ namespace Fuelcards.Controllers
         {
             try
             {
+                var Invoice = invoices.FirstOrDefault(e=>e.CustomerDetails.account == sendEmailInformation.CustomerInvoice.account);
+                 Fuelcards.InvoiceMethods.Email.SendEmail email = new("prices@portland-fuel.co.uk", "fuJeXU5BgLAM69Tqch3&#mQ%4");
+                email.message.AddTo(sendEmailInformation.EmailDetails.emailTo);
+                email.message.AddCC(sendEmailInformation.EmailDetails.emailCc);
+                email.message.AddBCC(sendEmailInformation.EmailDetails.emailBcc);
+                email.message.AddSubject(sendEmailInformation.EmailDetails.emailSubject);
+                string GeneralPath = FileHelperForInvoicing.BuidlingPDFFilePath(Invoice, sendEmailInformation.CustomerInvoice.invoiceDate);
+                string file = FileHelperForInvoicing.BuildingFileNameForInvoicing(Invoice, sendEmailInformation.CustomerInvoice.name);
+                string PDF = Path.Combine(GeneralPath, file);
+                string CSVfilePath = ""; // Chuckles will code this!
+
+                email.message.AddAttachment(PDF);
+                email.message.AddAttachment(CSVfilePath);
+                //email.message.SendEmail(); DO NOT UNCOMMENT THIS UNDER ANY CIRCUMSTANCES. UNLESS THOSE CIRCUMSTANCES ARE A WORKING APP!
+
                 var jsonToReturn = new
                 {
                     success = true,

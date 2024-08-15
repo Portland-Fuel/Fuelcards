@@ -49,7 +49,7 @@ namespace Fuelcards.Repositories
             foreach (var item in ff)
             {
                 Dictionary<string, string> dict = new();
-                dict.Add( item.InventoryItemcode,item.Description);
+                dict.Add(item.InventoryItemcode, item.Description);
 
                 toreturn.Add(dict);
             }
@@ -278,7 +278,7 @@ namespace Fuelcards.Repositories
             {
                 throw new ArgumentException(e.Message);
             }
-           var CustomersOrdered = Customers.OrderBy(e => e.name).ToList();
+            var CustomersOrdered = Customers.OrderBy(e => e.name).ToList();
 
             return CustomersOrdered;
         }
@@ -963,11 +963,11 @@ namespace Fuelcards.Repositories
         {
             switch (account)
             {
-                case 139461:return 100028;
-                case 677112:return 100030;
-                case 139464:return 100032;
-                case 139462:return 100029;
-                case 139463:return 100031;
+                case 139461: return 100028;
+                case 677112: return 100030;
+                case 139464: return 100032;
+                case 139462: return 100029;
+                case 139463: return 100031;
                 default: return portlandId;
             }
         }
@@ -1045,30 +1045,67 @@ namespace Fuelcards.Repositories
         {
             return _db.TransactionSiteSurcharges.FirstOrDefault(e => e.Network == (int)network && e.ChargeType == "Texaco Handling Charge")?.Surcharge;
         }
-       public async Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices, IQueriesRepository _iquery)
+        public async Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices, IQueriesRepository _iquery)
         {
             EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
             foreach (var invoice in invoices)
             {
                 await PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice, _iquery);
-                
+
             }
             //THIS IS NOT DONE
         }
-        public async Task UpdateDatabaseTransaction(TransactionsPDF transaction,string invoiceNumber, EnumHelper.Network network)
+        public async Task UpdateDatabaseTransaction(TransactionsPDF transaction, string invoiceNumber, EnumHelper.Network network)
         {
             switch (network)
             {
                 case EnumHelper.Network.Keyfuels:
+                    try
+                    {
+                        var dbTransaction = _db.KfE1E3Transactions.FirstOrDefaultAsync(e => e.TransactionNumber.ToString() == transaction.TransactionNumber).Result;
+                        dbTransaction.Invoiced = true;
+                        dbTransaction.InvoicePrice = transaction.Value;
+                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber);
+                        dbTransaction.Commission = transaction.Commission;
+                        _db.KfE1E3Transactions.Update(dbTransaction);
+                        _db.SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ArgumentException($"There was an error updating the Keyfuels transaction with number {transaction.TransactionNumber} in the database with the post invoice details - {e.Message}");
+                    }
                     break;
                 case EnumHelper.Network.UkFuel:
+                    try
+                    {
+                        var dbTransaction = _db.UkfTransactions.FirstOrDefaultAsync(e => e.TranNoItem.ToString() == transaction.TransactionNumber).Result;
+                        dbTransaction.Invoiced = true;
+                        dbTransaction.InvoicePrice = transaction.Value;
+                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber);
+                        dbTransaction.Commission = transaction.Commission;
+                        _db.UkfTransactions.Update(dbTransaction);
+                        _db.SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ArgumentException($"There was an error updating the Uk fuels transaction with number {transaction.TransactionNumber} in the database with the post invoice details - {e.Message}");
+                    }
                     break;
                 case EnumHelper.Network.Texaco:
-                    var dbTransaction = _db.TexacoTransactions.FirstOrDefaultAsync(e => e.TranNoItem.ToString() == transaction.TransactionNumber).Result;
-                    dbTransaction.Invoiced = true;
-                    dbTransaction.InvoicePrice = transaction.Value;
-                    dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber);
-                    dbTransaction.Commission = transaction.Commission;
+                    try
+                    {
+                        var dbTransaction = _db.TexacoTransactions.FirstOrDefaultAsync(e => e.TranNoItem.ToString() == transaction.TransactionNumber).Result;
+                        dbTransaction.Invoiced = true;
+                        dbTransaction.InvoicePrice = transaction.Value;
+                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber);
+                        dbTransaction.Commission = transaction.Commission;
+                        _db.TexacoTransactions.Update(dbTransaction);
+                        _db.SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ArgumentException($"There was an error updating the texaco transaction with number {transaction.TransactionNumber} in the database with the post invoice details - {e.Message}");
+                    }
 
                     break;
                 case EnumHelper.Network.Fuelgenie:
