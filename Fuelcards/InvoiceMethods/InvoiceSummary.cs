@@ -286,6 +286,7 @@ namespace Fuelcards.InvoiceMethods
         public double? Value { get; set; }
         public string? Band { get; set; }
         public int? productCode { get; set; }
+        public double? Commission { get; set; }
     }
     public class CustomerDetails
     {

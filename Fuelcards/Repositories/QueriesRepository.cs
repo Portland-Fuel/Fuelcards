@@ -20,6 +20,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using DataAccess.Tickets;
 using Site = Fuelcards.Models.Site;
 using static Fuelcards.GenericClassFiles.EnumHelper;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -1044,16 +1045,17 @@ namespace Fuelcards.Repositories
         {
             return _db.TransactionSiteSurcharges.FirstOrDefault(e => e.Network == (int)network && e.ChargeType == "Texaco Handling Charge")?.Surcharge;
         }
-       public async Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices)
+       public async Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices, IQueriesRepository _iquery)
         {
             EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
             foreach (var invoice in invoices)
             {
-                PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice);
+                await PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice, _iquery);
+                
             }
             //THIS IS NOT DONE
         }
-        public TexacoTransaction? GetTransaction(string transactionNumber, EnumHelper.Network network)
+        public async Task UpdateDatabaseTransaction(TransactionsPDF transaction,string invoiceNumber, EnumHelper.Network network)
         {
             switch (network)
             {
@@ -1062,14 +1064,17 @@ namespace Fuelcards.Repositories
                 case EnumHelper.Network.UkFuel:
                     break;
                 case EnumHelper.Network.Texaco:
-                    return _db.TexacoTransactions.FirstOrDefault(e => e.TranNoItem.ToString() == transactionNumber);
+                    var dbTransaction = _db.TexacoTransactions.FirstOrDefaultAsync(e => e.TranNoItem.ToString() == transaction.TransactionNumber).Result;
+                    dbTransaction.Invoiced = true;
+                    dbTransaction.InvoicePrice = transaction.Value;
+                    dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber);
+                    dbTransaction.Commission = transaction.Commission;
+
                     break;
                 case EnumHelper.Network.Fuelgenie:
                     break;
                 default:
                     break;
-
-                    return null;
             }
         }
     }

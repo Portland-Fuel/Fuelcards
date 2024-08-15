@@ -53,7 +53,7 @@ namespace Fuelcards.Repositories
         List<Dictionary<string, string>> GetListOfProducts();
         string? getNewInvoiceNumber(int network);
         double? GetHandlingCharge(int network);
-        Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices);
-        object GetTransaction(string transactionNumber, EnumHelper.Network network);
+        Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices, IQueriesRepository _iquery);
+        Task UpdateDatabaseTransaction(TransactionsPDF transaction,string invoiceNumber, EnumHelper.Network network);
     }
 }
