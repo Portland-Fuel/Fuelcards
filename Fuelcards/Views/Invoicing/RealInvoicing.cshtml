@@ -79,7 +79,7 @@
         </div>
     </div>
     <div id="TransactionsTableContainer">
-        <table id="InvoiceSectionTransactionTable">
+        <table class="InvoicingTable" id="InvoiceSectionTransactionTable">
             <thead>
                 <tr>
                     <th>TransactionNumber</th>
@@ -129,15 +129,23 @@
     <button hidden id="ResumeBTN" class="loader--control-button" onclick="PauseLoader(this)">Resume</button>
 </div>
 
-<div hidden id="InvoiceReportSection">
-    <button class="button" onclick="LoadInvoiceReport()">Load Invoice Report</button>
-    <table id="InvoiceReportTable">
-        <thead>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+<div hidden class="LargeTableDiv" id="InvoiceReportSection">
+    <div class="Grouping">
+        <button class="button" onclick="LoadInvoiceReport()">Load Invoice Report</button>
+        <button class="button" onclick="ContinueAfterInvoiceReport()">Continue</button>
+    </div>
+    <div class="table-container">
+        <table id="InvoiceReportTable">
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
 </div>
+
+
+
 
 
 <div hidden id="EmailOutSection" class="EmailOutSection">

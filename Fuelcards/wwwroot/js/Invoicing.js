@@ -66,40 +66,40 @@ let selectedNetwork;
 let isPaused = false;
 
 let Invoicing = false;
-
+function ContinueAfterInvoiceReport(){
+    document.getElementById("InvoiceReportSection").hidden = true;
+    document.getElementById("EmailOutSection").hidden = false;
+}
 async function LoadInvoiceReport(){
     startInvoicingLoader();
     var InvoiceReportTable = document.getElementById("InvoiceReportTable");
     var tbody = InvoiceReportTable.querySelector("tbody");
-    tbody.innerHTML = "";
     var thead = InvoiceReportTable.querySelector("thead");
-    var InvoiceReport = await getInvoiceReport();
-    console.log(InvoiceReport);
-    
+    tbody.innerHTML = "";
+    thead.innerHTML = "";
 
-    var firstItem = InvoiceReport[0];
-    var values = Object.values(firstItem);
-    var headers = Object.keys(firstItem);
+    var InvoiceReport = await getInvoiceReport();
+    if(InvoiceReport == null || InvoiceReport.length == 0){
+        showErrorBox("No Invoice Report Data Found");
+        stopInvoicingLoader();
+        return;
+    }
+
+    var headers = Object.keys(InvoiceReport[0]);
     createInvoiceReportHeaders(thead, headers);
     createInvoiceReportRows(tbody, InvoiceReport, headers);
-    console.log("Number of th elements:", thead.getElementsByTagName("th").length);
-    console.log("Number of td elements in the first row:", tbody.querySelector("tr:first-child").getElementsByTagName("td").length);
 
-    let tble = new DataTable('#InvoiceReportTable', {
-        responsive: true
-    });
     stopInvoicingLoader();
-   
 }
-function createInvoiceReportHeaders(thead, headers) {
-    thead.innerHTML = ""; // Clear existing headers
 
+function createInvoiceReportHeaders(thead, headers) {
     headers.forEach(headerText => {
         const th = document.createElement("th");
         th.innerHTML = headerText;
         thead.appendChild(th);
     });
 }
+
 function createInvoiceReportRows(tbody, InvoiceReport, headers) {
     InvoiceReport.forEach(item => {
         const tr = document.createElement("tr");

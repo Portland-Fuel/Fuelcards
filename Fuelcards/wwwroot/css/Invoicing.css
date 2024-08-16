@@ -1,12 +1,9 @@
 html, body {
     margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     font-family: 'Calibri';
     font-size: 14px;
     color: #333;
-    background: linear-gradient(to bottom, #c83d3d, #b77275);
+    /*background: linear-gradient(to bottom, #c83d3d, #b77275);*/
 }
 
 
@@ -30,7 +27,7 @@ html, body {
 }
 
 .NetworkToInvoice select{
-    width: 100%;
+    width: 20%;
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #f8f9fa;
@@ -182,21 +179,102 @@ html, body {
     font-size: 18px;
 }
 
-table {
-    border-collapse: collapse;
+
+.LargeTableDiv{
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.LargeTableDiv .Grouping{
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 300px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.LargeTableDiv .table-container{
+    align-items: center;
+    width: 95%;
+    height: 100%;
+    max-height:800px;
+    overflow-y: scroll;
+}
+.LargeTableDiv table{
+    background-color: transparent;
+    border-radius: 5px;
+    width: 100%;
+    height: 100%;
+}
+.LargeTableDiv thead{
+    background-color: transparent;
+    display: table-header-group;
+    color: white;
+  
+}
+.LargeTableDiv th{
+    display: table-cell;
+    color: white;
+    font-size: 20px;
+    border: 2px solid #f8f9fa;
+    padding: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-align: center;
+}
+.LargeTableDiv th{
+    position: sticky;
+    top: 0;
+    background-color: #333;
+    border: 2px solid #f8f9fa;
+}
+.LargeTableDiv td{
+    display: table-cell;
+    font-size: 18px;
+    color: white;
+    overflow: auto;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid #f8f9fa;
+    text-align: center;
+    text-overflow: ellipsis;
+}
+.LargeTableDiv thead.sticky {
+    background-color: #333; 
+  }
+
+
+
+
+
+.InvoicingTable table {
+    display: table;
     background-color: transparent;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(209, 202, 202, 0.1);
-    width: 100%;
+    width: 50%;
     overflow: auto;
     max-height: 500px;
 }
 
-thead {
+.InvoicingTable thead {
     background-color: transparent;
+    display: table-header-group;
+    color: white;
 }
 
-th {
+.InvoicingTable th {
+    width: 60%;
+    display: table-cell;
     color: white;
     font-size: 20px;
     border: 2px solid #f8f9fa;
@@ -207,7 +285,9 @@ th {
     overflow: hidden;
 }
 
-td {
+.InvoicingTable td {
+    display: table-cell;
+    width: 50%;
     font-size: 18px;
     color: white;
     overflow: auto;
