@@ -1,0 +1,256 @@
+.DateSelectDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    background-color: #2c3e50; 
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+}
+.modal {
+    display: block;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes slideIn {
+    from {transform: translateY(-20px); opacity: 0;}
+    to {transform: translateY(0); opacity: 1;}
+}
+
+.DateSelectDiv label {
+    font-size: 22px;
+    color: #ecf0f1; 
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.DateSelectDiv input[type="text"] {
+    width: 220px;
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid #bdc3c7;
+    padding: 8px 12px;
+    font-size: 18px;
+    background-color: #ecf0f1; 
+    color: #2c3e50; 
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); 
+    transition: all 0.3s ease-in-out; 
+}
+
+.DateSelectDiv input[type="text"]:focus {
+    border-color: #3498db; 
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.6); 
+    outline: none; 
+}
+
+.DateSelectDiv input[type="text"]:hover {
+    background-color: #e0e0e0; 
+}
+
+
+.DateSelectDiv input[type="text"]::placeholder {
+    color: #95a5a6; 
+    transition: opacity 0.3s ease-in-out; 
+}
+
+.DateSelectDiv input[type="text"]:focus::placeholder {
+    opacity: 0.5; 
+}
+
+.flatpickr-calendar {
+    background-color: #34495e; 
+    border: 1px solid #2c3e50;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    color: #ecf0f1; 
+}
+
+.flatpickr-day {
+    border-radius: 5px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.flatpickr-day:hover {
+    background-color: #3498db; 
+    transform: scale(1.1); 
+}
+
+.flatpickr-day.selected {
+    background-color: #e74c3c; 
+    color: #fff; 
+}
+
+.flatpickr-day.today {
+    background-color: #f39c12; 
+    color: #fff; 
+}
+
+.flatpickr-weekdays {
+    background-color: #2c3e50;
+    color: #bdc3c7;
+}
+
+.flatpickr-month {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+}
+
+.flatpickr-next-month,
+.flatpickr-prev-month {
+    color: #ecf0f1;
+    transition: color 0.2s ease;
+}
+
+.flatpickr-next-month:hover,
+.flatpickr-prev-month:hover {
+    color: #3498db;
+}
+
+
+
+.LargeTableDiv{
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.LargeTableDiv .Grouping{
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 300px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.LargeTableDiv .Grouping button{
+    background: #5E5DF0;
+    border-radius: 999px;
+    box-shadow: #5E5DF0 0 10px 20px -10px;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-family: Inter,Helvetica,"Apple Color Emoji","Segoe UI Emoji",NotoColorEmoji,"Noto Color Emoji","Segoe UI Symbol","Android Emoji",EmojiSymbols,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+    opacity: 1;
+    outline: 0 solid transparent;
+    padding: 8px 18px;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: fit-content;
+    word-break: break-word;
+    border: 0;
+}
+.LargeTableDiv .Grouping button:hover{
+    background-color: #0056b3;
+}
+.LargeTableDiv .table-container{
+    align-items: center;
+    width: 95%;
+    height: 100%;
+    max-height:800px;
+    overflow-y: scroll;
+}
+.LargeTableDiv table{
+    background-color: transparent;
+    border-radius: 5px;
+    width: 100%;
+    height: 100%;
+}
+.LargeTableDiv thead{
+    background-color: transparent;
+    display: table-header-group;
+    color: white;
+  
+}
+.LargeTableDiv th{
+    display: table-cell;
+    color: white;
+    font-size: 20px;
+    border: 2px solid #f8f9fa;
+    padding: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-align: center;
+}
+.LargeTableDiv th{
+    position: sticky;
+    top: 0;
+    background-color: #333;
+    border: 2px solid #f8f9fa;
+}
+.LargeTableDiv td{
+    display: table-cell;
+    font-size: 18px;
+    color: white;
+    overflow: auto;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid #f8f9fa;
+    text-align: center;
+    text-overflow: ellipsis;
+}
+.LargeTableDiv thead.sticky {
+    background-color: #333; 
+  }
+
+
+
+

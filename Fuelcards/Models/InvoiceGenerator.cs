@@ -37,6 +37,8 @@ using ImageMagick;
 using Fuelcards.Models;
 using PdfSharp.Pdf.AcroForms;
 using DataAccess.Fuelcards;
+using System.Text;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 namespace Fuelcards.Models
 {
     public class InvoiceGenerator
@@ -1199,7 +1201,7 @@ namespace Fuelcards.Models
                     ListToAdd = GetListOfCSVData(invoicePDFModel, listofProducts);
                     ListOfDataToGoOnTheCSV.AddRange(ListToAdd);
                 }
-                WriteOutTheCsv(ListOfDataToGoOnTheCSV, FilePathForXeroCSV);
+                WriteOutTheXeroCSV(ListOfDataToGoOnTheCSV, FilePathForXeroCSV);
             }
 
             catch (Exception e)
@@ -1209,7 +1211,7 @@ namespace Fuelcards.Models
             }
         }
 
-        private static void WriteOutTheCsv(List<FileHelperForInvoicing.XeroCsv> listOfDataToGoOnTheCSV, string filePathForXeroCSV)
+        private static void WriteOutTheXeroCSV(List<FileHelperForInvoicing.XeroCsv> listOfDataToGoOnTheCSV, string filePathForXeroCSV)
         {
             try
             {
@@ -1365,6 +1367,317 @@ namespace Fuelcards.Models
             Console.WriteLine("PDF pages converted to images successfully.");
         }
 
+        internal void generateCSV(InvoicePDFModel newInvoice)
+        {
+            string pathToSaveCSVTo = FileHelperForInvoicing.BuildingFilePathForCSV(newInvoice, newInvoice.InvoiceDate);
+            GenerateInvoiceCSV(pathToSaveCSVTo, newInvoice);
+        }
+
+        private static void GenerateInvoiceCSV(string pathToSaveCSVTo, InvoicePDFModel newInvoice)
+        {
+            string customerName = newInvoice.CustomerDetails.CompanyName.Replace("/", " ");
+            string invoiceNumber = newInvoice.CustomerDetails.InvoiceNumber;
+            string accountNumber = newInvoice.CustomerDetails.account?.ToString() ?? "N/A";
+            string documentDate = newInvoice.InvoiceDate.ToString("dd-MMM-yyyy");
+            string vatNumber = "299755033";  // Assuming this is static or from another model property
+            string bankName = "Santander UK"; // Assuming this is static or from another model property
+            string accountName = "Portland Fuel Ltd"; // Assuming this is static or from another model property
+            string accountSortCode = "09-02-22"; // Assuming this is static or from another model property
+            string accountBankNumber = "11084796"; // Assuming this is static or from another model property
+
+            string formattedTotalGoods = newInvoice.totals.Goods.ToString();
+            string formattedTotalVat = newInvoice.totals.VAT.ToString();
+            string formattedTotalAmount = newInvoice.totals.Total.ToString();
+            string formattedInvoiceDate = newInvoice.InvoiceDate.AddDays(14).ToString("dd-MM-yyyy");
+
+
+            using (StreamWriter streamWriter = new StreamWriter(pathToSaveCSVTo, false, Encoding.UTF8))
+            {
+                // Write header information
+                streamWriter.WriteLine(",,,,,,,,,Portland");
+                streamWriter.WriteLine($",{customerName}");
+                streamWriter.WriteLine($",{newInvoice.CustomerDetails.AddressArr[0]}");
+                streamWriter.WriteLine($",{newInvoice.CustomerDetails.AddressArr[1]}");
+                streamWriter.WriteLine($",{newInvoice.CustomerDetails.AddressArr[2]}");
+                streamWriter.WriteLine($",{newInvoice.CustomerDetails.AddressArr[3]}");
+                streamWriter.WriteLine($",{newInvoice.CustomerDetails.AddressArr[4]}");
+                streamWriter.WriteLine();
+
+                // Write sales invoice header
+                streamWriter.WriteLine(",SALES INVOICE,,,,,,,,Account No,,,Document Date,,,Sales Invoice No");
+                streamWriter.WriteLine($",,,,,,,,,{accountNumber},,,{documentDate},,,{invoiceNumber}");
+                streamWriter.WriteLine();
+
+                // Write transaction header
+                streamWriter.WriteLine("Card Type,,,Product Code,,,Description,,,,,,Quantity,,Net Total,,,Net VAT,,,,,VAT Rate");
+
+                // Write transaction details
+                foreach (var row in newInvoice.rows)
+                {
+                    var transaction = newInvoice.transactions.FirstOrDefault(t => t.product == row.productName);
+                    string vatRate = row.VAT != null ? $"{row.VAT.Value.ToString("0.00")}" : "0.00";
+                    streamWriter.WriteLine($"Keyfuels,,,{transaction?.productCode},,,{row.productName},,,,,,{row.Quantity},,£{row.NetTotal},,,£{row.VAT},,,,,20%");
+                }
+
+                streamWriter.WriteLine();
+
+                // Write VAT and totals
+                streamWriter.WriteLine($"VAT,VAT Rate,,,Goods Amount,,,VAT Amount,VAT Number: ,,{vatNumber},,,,,,GOODS,,,£{formattedTotalGoods},,,,,,,,");
+                streamWriter.WriteLine($"1,20.00%,,,{formattedTotalGoods},,,{formattedTotalVat},Bank:,,{bankName},,,,,,,,,,,,,,,,,");
+                streamWriter.WriteLine($",,,,,,,,Account Name:,,{accountName},,,,,,VAT,,,£{formattedTotalVat},,,,,,,");
+                streamWriter.WriteLine($",,,,,,,,Account Number:,,{accountBankNumber},,,,,,,,,,,,,,,,,");
+                streamWriter.WriteLine($",,,,,,,,Account Sort Code:,,{accountSortCode},,,,,,TOTAL,,,£{formattedTotalAmount},,,,,,,,");
+                streamWriter.WriteLine($"THIS INVOICE WILL BE DEBITED FROM YOUR ACCOUNT ON OR SHORTLY AFTER,,,,,,,,,,{formattedInvoiceDate},,,,,,,,,,,,,,,,,");
+
+                streamWriter.WriteLine();
+
+                if(newInvoice.fixedBox != null)
+                {
+                    streamWriter.WriteLine($"Total diesel volume lifted on this invoice,,,,,,,," +
+                  $"\"{newInvoice.fixedBox.TotalDieselVolumeLiftedOnThisInvoice?.ToString("N2")}\"");
+                    streamWriter.WriteLine($"Fixed price volume for this period,,,,,,,," +
+                        $"\"{newInvoice.fixedBox.FixedPriceVolumeForThisPeriod?.ToString("N2")}\"");
+                    streamWriter.WriteLine($"Fixed price volume from previous periods,,,,,,,," +
+                        $"\"{newInvoice.fixedBox.FixedPriceVolumeFromPreviousPeriods?.ToString("N2")}\"");
+                    streamWriter.WriteLine($"Fixed price volume used on this invoice,,,,,,,," +
+                        $"\"{newInvoice.fixedBox.FixedPriceVolumeUsedOnThisinvoice?.ToString("N2")}\"");
+                    streamWriter.WriteLine($"Fixed price litres remaining,,,,,,,," +
+                        $"\"{newInvoice.fixedBox.FixedPriceRemaining?.ToString("N2")}\"");
+                }
+              
+
+                streamWriter.WriteLine();
+
+                // Write document details
+                streamWriter.WriteLine($"Document No:{invoiceNumber} Date:{documentDate}");
+
+                // Write transaction records
+                streamWriter.WriteLine("Card No/Cd,Reg No,Mileage,Site Details,Date/Time,Product,Unit Price,Volume,Value");
+
+                foreach (var transaction in newInvoice.transactions)
+                {
+                    string tranDateTime = $"{transaction.TranDate?.ToString("dd/MM/yyyy")} {transaction.TranTime?.ToString("HH:mm")}";
+                    string formattedUnitPrice = transaction.UnitPrice?.ToString("N4");
+                    string formattedVolume = transaction.Volume?.ToString("N2");
+                    string formattedValue = transaction.Value?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-GB"));
+
+                    streamWriter.WriteLine($"{transaction.CardNumber},{transaction.RegNo},{transaction.Mileage},{transaction.SiteName},{tranDateTime},{transaction.product},{formattedUnitPrice},{formattedVolume},{formattedValue}");
+                }
+            }
+        }
+
+
+        /*    private static InvoicePDFModel WritingCSVOut(string pathToSaveCSVTo, InvoicePDFModel newInvoice)
+            {
+                // Construct the file path
+                string CustomerName = newInvoice.CustomerDetails.CompanyName.Replace("/", " ");
+
+                using (StreamWriter streamWriter = new(pathToSaveCSVTo, false, Encoding.UTF8))
+                {
+                    // Write the header
+                    streamWriter.WriteLine(",,,,,,,,," + "Portland");
+                    streamWriter.WriteLine($",{CustomerName}");
+                    streamWriter.WriteLine();
+
+                    // Write the address lines
+                    foreach (var addressLine in newInvoice.CustomerDetails.AddressArr)
+                    {
+                        if (!string.IsNullOrWhiteSpace(addressLine))
+                        {
+                            streamWriter.WriteLine("," + addressLine);
+                        }
+                    }
+                    streamWriter.WriteLine();
+                    streamWriter.WriteLine();
+
+                    // Write the invoice details header
+                    streamWriter.WriteLine(",SALES INVOICE,,,,,,,,Account No,,,Document Date,,,Sales Invoice No");
+
+                    string dateFormatted = newInvoice.InvoiceDate.ToString("dd/MMM/yyyy").Replace("/", "-");
+                    streamWriter.WriteLine($",,,,,,,,,{newInvoice.CustomerDetails.account?.ToString() ?? "N/A"},,,{dateFormatted},,,{newInvoice.CustomerDetails.InvoiceNumber}");
+                    streamWriter.WriteLine();
+
+                    // Write the transactions header
+                    streamWriter.WriteLine("Card Type,,,Product Code,,,Description,,,,,,Quantity,,Net Total,,,Net VAT,,,,,VAT Rate");
+
+                    // Determine the network name to display
+                    string DisplayedNetwork = newInvoice.network.ToString();
+                    if (DisplayedNetwork == "Uk Fuel") DisplayedNetwork = "Commercial";
+
+                    // Iterate through the rows to write each transaction line
+                    foreach (var item in newInvoice.rows)
+                    {
+                        var matchedProduct = newInvoice.transactions
+                            .FirstOrDefault(p => p.product == item.productName);
+
+                        if (matchedProduct == null)
+                        {
+                            matchedProduct = newInvoice.transactions
+                                .FirstOrDefault(p => p.product == "ULSD UN1202");
+                        }
+
+                        if (matchedProduct != null)
+                        {
+                            streamWriter.WriteLine($"{DisplayedNetwork},,,{matchedProduct.productCode?.ToString() ?? "N/A"},,,{matchedProduct.product},,,,,,{item.Quantity ?? 0},,£{item.NetTotal ?? 0},,,£{item.VAT ?? 0},,,,,{item.VAT}.00%");
+                        }
+                        else
+                        {
+                            if (item.productName == "Diesel Retail")
+                            {
+                                item.productName = "TescoDieselNewDiesel";
+                            }
+
+                            var retailMatch = newInvoice.transactions
+                                .FirstOrDefault(p => p.product == item.productName);
+
+                            if (retailMatch == null)
+                            {
+                                retailMatch = newInvoice.transactions
+                                    .FirstOrDefault(p => p.product == "Diesel");
+                            }
+
+                            streamWriter.WriteLine($"{DisplayedNetwork},,,{retailMatch?.productCode?.ToString() ?? "N/A"},,,{retailMatch?.product ?? "N/A"},,,,,,{item.Quantity ?? 0},,£{item.NetTotal ?? 0},,,£{item.VAT ?? 0},,,,,{item.VAT}.00%");
+                        }
+                    }
+
+                    streamWriter.WriteLine();
+
+                    // Writing totals and additional information
+                    string FormaattedGoods = newInvoice.totals.Goods.ToString();
+                    string FormattedVat = newInvoice.totals.VAT.ToString();
+                    string TotalFormatted = newInvoice.totals.Total.ToString();
+
+                    streamWriter.WriteLine($"VAT,VAT Rate,,,Goods Amount,,,VAT Amount,VAT Number: ,,{newInvoice.CustomerDetails.Network},,,,,,GOODS,,,\"" + FormaattedGoods + "\",,,,,,,,");
+                    streamWriter.WriteLine($"1,20.00%,,,\"" + FormaattedGoods + "\",,,\"" + FormattedVat + $"\",Bank:,,{newInvoice.CustomerDetails.Network},,,,,,,,,,,,,,,,,");
+                    streamWriter.WriteLine($",,,,,,,,VAT,,,\"" + FormattedVat + "\",,,,,,,");
+                    streamWriter.WriteLine($",,,,,,,,TOTAL,,,\"" + TotalFormatted + "\",,,,,,,,");
+
+                    DateTime dateTime = new DateTime(newInvoice.InvoiceDate.Year, newInvoice.InvoiceDate.Month, newInvoice.InvoiceDate.Day);
+                    DateTime newDate = dateTime.AddDays(14);
+                    string DateToShow = newDate.ToString("dd-MM-yyyy");
+                    streamWriter.WriteLine($"THIS INVOICE WILL BE DEBITED FROM YOUR ACCOUNT ON OR SHORTLY AFTER,,,,,,,,,,{DateToShow},,,,,,,,,,,,,,,,,");
+
+                    streamWriter.WriteLine();
+
+                    // Write fixed box information
+                    string TotalDieselLiftedOnInvoiceFormatted = newInvoice.fixedBox.TotalDieselVolumeLiftedOnThisInvoice?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-GB"))?.Replace("£", string.Empty);
+                    string FixedPriceVolumeForPeriodFormatted = newInvoice.fixedBox.FixedPriceVolumeForThisPeriod?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-GB"))?.Replace("£", string.Empty);
+                    string FixedVolumeFromPreviousString = newInvoice.fixedBox.FixedPriceVolumeFromPreviousPeriods?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-GB"))?.Replace("£", string.Empty);
+                    string FixedVolumeUsedOnCurrentString = newInvoice.fixedBox.FixedPriceVolumeUsedOnThisinvoice?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-GB"))?.Replace("£", string.Empty);
+                    string FixedPriceLitresRemainingString = newInvoice.fixedBox.FixedPriceRemaining?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-GB"))?.Replace("£", string.Empty);
+
+                    streamWriter.WriteLine("Total diesel volume lifted on this invoice,,,,,,,,\"" + TotalDieselLiftedOnInvoiceFormatted + "\"");
+                    streamWriter.WriteLine("Fixed price volume for this period,,,,,,,,\"" + FixedPriceVolumeForPeriodFormatted + "\"");
+                    streamWriter.WriteLine("Fixed price volume from previous periods,,,,,,,,\"" + FixedVolumeFromPreviousString + "\"");
+                    streamWriter.WriteLine("Fixed price volume used on this invoice,,,,,,,,\"" + FixedVolumeUsedOnCurrentString + "\"");
+                    streamWriter.WriteLine("Fixed price litres remaining,,,,,,,,\"" + FixedPriceLitresRemainingString + "\"");
+                    streamWriter.WriteLine();
+                    streamWriter.WriteLine($"Document No:{newInvoice.CustomerDetails.InvoiceNumber} Date:{dateFormatted}");
+
+                    if (newInvoice.CustomerDetails.Network?.ToLower().Contains("keyfuel") == true)
+                    {
+                        PrintForKeyfuels(newInvoice, dateFormatted, streamWriter);
+                    }
+                    else
+                    {
+                        PrintForUkFuels(newInvoice, dateFormatted, streamWriter);
+                    }
+                }
+
+                return newInvoice;
+            }*/
+        /*  private static void PrintForKeyfuels(InvoicePDFModel invoiceModel, string dateFormatted, StreamWriter streamWriter)
+          {
+              streamWriter.WriteLine("Card No,Transaction No.,Reg No,Fuel Site,Date/Time,Product,Unit Price,Volume,Value");
+
+              if (invoiceModel.CustomerDetails.InvoiceType == 1)
+              {
+                  string previousPanNumber = null;
+                  double VolumeTotalForEachTransactionGroup = 0;
+                  double TotalValueForEachTransactionGroup = 0;
+
+                  foreach (var transaction in invoiceModel.transactions)
+                  {
+                      streamWriter.WriteLine($"{transaction.CardNumber},{transaction.TransactionNumber},{transaction.RegNo},{transaction.SiteName},{transaction.TranDate?.ToString("dd/MM/yyyy")} {transaction.TranTime?.ToString("HH:mm")},{transaction.product},{transaction.UnitPrice ?? 0},{transaction.Volume ?? 0},£{transaction.Value ?? 0}");
+
+                      VolumeTotalForEachTransactionGroup += transaction.Volume ?? 0;
+                      TotalValueForEachTransactionGroup += transaction.Value ?? 0;
+
+                      if (previousPanNumber != null && previousPanNumber != transaction.CardNumber)
+                      {
+                          int countForPreviousPan = invoiceModel.transactions.Count(t => t.CardNumber == previousPanNumber);
+                          streamWriter.WriteLine($"Sub Total for Card No {previousPanNumber},,,,No of Drawings: {countForPreviousPan},,,{Math.Round(VolumeTotalForEachTransactionGroup, 2)},{Math.Round(TotalValueForEachTransactionGroup, 2)}");
+
+                          // Reset totals for the new card number
+                          VolumeTotalForEachTransactionGroup = 0;
+                          TotalValueForEachTransactionGroup = 0;
+                      }
+
+                      previousPanNumber = transaction.CardNumber;
+                  }
+
+                  // Write final subtotal for the last card number
+                  if (!string.IsNullOrEmpty(previousPanNumber))
+                  {
+                      int countForPreviousPan = invoiceModel.transactions.Count(t => t.CardNumber == previousPanNumber);
+                      streamWriter.WriteLine($"Sub Total for Card No {previousPanNumber},,,,No of Drawings: {countForPreviousPan},,,{Math.Round(VolumeTotalForEachTransactionGroup, 2)},{Math.Round(TotalValueForEachTransactionGroup, 2)}");
+                  }
+              }
+              else if (invoiceModel.CustomerDetails.InvoiceType == 0)
+              {
+                  foreach (var transaction in invoiceModel.transactions)
+                  {
+                      streamWriter.WriteLine($"{transaction.CardNumber},{transaction.TransactionNumber},{transaction.RegNo},{transaction.SiteName},{transaction.TranDate?.ToString("dd/MM/yyyy")} {transaction.TranTime?.ToString("HH:mm")},{transaction.product},{transaction.UnitPrice ?? 0},{transaction.Volume ?? 0},£{transaction.Value ?? 0}");
+                  }
+              }
+          }
+  */
+        /*    private static void PrintForUkFuels(InvoicePDFModel invoiceModel, string dateFormatted, StreamWriter streamWriter)
+            {
+                streamWriter.WriteLine("Card No/Cd,Reg No,Mileage,Site Details,Date/Time,Product,Unit Price,Volume,Value");
+
+                if (invoiceModel.CustomerDetails.InvoiceType == 1)
+                {
+                    string previousPanNumber = null;
+                    double VolumeTotalForEachTransactionGroup = 0;
+                    double TotalValueForEachTransactionGroup = 0;
+
+                    foreach (var transaction in invoiceModel.transactions)
+                    {
+                        streamWriter.WriteLine($"{transaction.CardNumber},{transaction.RegNo},{transaction.Mileage},{transaction.SiteName},{transaction.TranDate?.ToString("dd/MM/yyyy")} {transaction.TranTime?.ToString("HH:mm")},{transaction.product},{transaction.UnitPrice ?? 0},{transaction.Volume ?? 0},£{transaction.Value ?? 0}");
+
+                        VolumeTotalForEachTransactionGroup += transaction.Volume ?? 0;
+                        TotalValueForEachTransactionGroup += transaction.Value ?? 0;
+
+                        if (previousPanNumber != null && previousPanNumber != transaction.CardNumber)
+                        {
+                            int countForPreviousPan = invoiceModel.transactions.Count(t => t.CardNumber == previousPanNumber);
+                            streamWriter.WriteLine($"Sub Total for Card No {previousPanNumber},,,,No of Drawings: {countForPreviousPan},,,{Math.Round(VolumeTotalForEachTransactionGroup, 2)},{Math.Round(TotalValueForEachTransactionGroup, 2)}");
+
+                            // Reset totals for the new card number
+                            VolumeTotalForEachTransactionGroup = 0;
+                            TotalValueForEachTransactionGroup = 0;
+                        }
+
+                        previousPanNumber = transaction.CardNumber;
+                    }
+
+                    // Write final subtotal for the last card number
+                    if (!string.IsNullOrEmpty(previousPanNumber))
+                    {
+                        int countForPreviousPan = invoiceModel.transactions.Count(t => t.CardNumber == previousPanNumber);
+                        streamWriter.WriteLine($"Sub Total for Card No {previousPanNumber},,,,No of Drawings: {countForPreviousPan},,,{Math.Round(VolumeTotalForEachTransactionGroup, 2)},{Math.Round(TotalValueForEachTransactionGroup, 2)}");
+                    }
+                }
+                else if (invoiceModel.CustomerDetails.InvoiceType == 0)
+                {
+                    foreach (var transaction in invoiceModel.transactions)
+                    {
+                        streamWriter.WriteLine($"{transaction.CardNumber},{transaction.RegNo},{transaction.Mileage},{transaction.SiteName},{transaction.TranDate?.ToString("dd/MM/yyyy")} {transaction.TranTime?.ToString("HH:mm")},{transaction.product},{transaction.UnitPrice ?? 0},{transaction.Volume ?? 0},£{transaction.Value ?? 0}");
+                    }
+                }
+            }
+    */
     }
 }
 
@@ -1521,6 +1834,18 @@ public static class FileHelperForInvoicing
     {
         string StartingFilePath = BuidlingPDFFilePath(newInvoice, invoiceDate);
         return Path.Combine(StartingFilePath, "PDFImages");
+    }
+
+    internal static string BuildingFilePathForCSV(InvoicePDFModel newInvoice, DateOnly invoiceDate)
+    {
+        string StartingFilePath = BuidlingPDFFilePath(newInvoice, invoiceDate);
+        string FileName = BuildingFileNameForInvoicingCSV(newInvoice, newInvoice.CustomerDetails.CompanyName);
+        return Path.Combine(StartingFilePath, "CSV") + "\\" + FileName;
+    }
+
+    private static string BuildingFileNameForInvoicingCSV(InvoicePDFModel newInvoice, string companyName)
+    {
+        return companyName + " " + newInvoice.CustomerDetails.InvoiceNumber + ".csv";
     }
 
     public class XeroCsv

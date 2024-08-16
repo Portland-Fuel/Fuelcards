@@ -11,12 +11,7 @@ function GoTOEmail(){
     document.getElementById("CheckListContainer").hidden = true;
     document.getElementById("NetworkToInvoice").hidden = true;
 }
-function GoToInvoiceReport(){
-    document.getElementById("EmailOutSection").hidden = true;
-    document.getElementById("InvoiceReportSection").hidden = false;
-    document.getElementById("CheckListContainer").hidden = true;
-    document.getElementById("NetworkToInvoice").hidden = true;
-}
+
 document.addEventListener("DOMContentLoaded", function () {
 
     var modelKey = 'invoicePreCheckModel';
