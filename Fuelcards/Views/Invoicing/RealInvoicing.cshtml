@@ -39,7 +39,7 @@
 
     <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
     <h1>Please Select a network to check</h1>
-    <select>
+    <select id="NetworkSelect">
         <option disabled selected value="">Please Select an option to start</option>
         <option onclick="showSelectedNetworkCheckList(this)" value="Keyfuels">Keyfuels</option>
         <option onclick="showSelectedNetworkCheckList(this)" value="Texaco">Texaco</option>
@@ -67,7 +67,6 @@
 <div hidden id="InvoiceSection" class="InvoiceSection">
     <div id="ButtonGroupInvoicing" class="ChoiceButtonGrouping">
         <button class="Invoicingbtn" onclick="StartInvoicing(this)" id="StartInvoicingBTN">Start Invoicing</button>
-        <button class="StopInvoicingbtn" onclick="StopInvoicingbtn(this)" id="PauseInvoicingBTN" hidden>Pause Invoicing</button>
         <button class="Invoicingbtn" onclick="ResumeInvoicing(this)" id="ResumeInvoicingBTN" hidden>Resume Invoicing</button>
     </div>
     <div id="CustomerDetails" class="CustomerDetails">
@@ -122,12 +121,18 @@
     <div class="bigcon">
         <div class="big b"></div>
     </div>
+    <div class="CreateThisClass">
+        <button hidden id="PauseBTN" class="loader--control-button" onclick="PauseCurrentProcess(this)">Pause</button>
+        <div hidden class="pausing-indicator ">
+            <div class="pause-circle"></div>
+            <div class="pausing-text">Pausing<span class="dots"></span></div>
+        </div>
+    </div>
+   
 
-    <button hidden id="PauseBTN" class="loader--control-button" onclick="PauseLoader(this)">Pause</button>
+
 </div>
-<div class="InvoicingLoaderContainer" id="InvoiceingLoader">
-    <button hidden id="ResumeBTN" class="loader--control-button" onclick="PauseLoader(this)">Resume</button>
-</div>
+
 
 <div hidden class="LargeTableDiv" id="InvoiceReportSection">
     <div class="Grouping">
@@ -149,6 +154,10 @@
 
 
 <div hidden id="EmailOutSection" class="EmailOutSection">
+    <div hidden id="ResumeEmailing" class="TopLeft">
+        <button name="ResumeEmails" class="button" onclick="ResumeEmails(this)">Resume Emailing</button>
+    </div>
+
     <button onclick="StartEmailing(this)" id="StartEmail">Start emailing</button>
 
     <div class="section">

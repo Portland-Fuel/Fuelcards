@@ -66,7 +66,8 @@ let selectedNetwork;
 let isPaused = false;
 
 let Invoicing = false;
-function ContinueAfterInvoiceReport(){
+async function ContinueAfterInvoiceReport(){
+    await ConfirmInvoicing();
     document.getElementById("InvoiceReportSection").hidden = true;
     document.getElementById("EmailOutSection").hidden = false;
 }
@@ -424,11 +425,11 @@ async function startInvoicingLoader(Pause = false) {
 }
 async function stopInvoicingLoader() {
     document.getElementById("InvoiceingLoader").hidden = true;
+    document.getElementsByClassName("pausing-indicator")[0].hidden = true;
   
 }
 async function StartInvoicing(btn) {
     startInvoicingLoader(true);
-    document.getElementById("PauseInvoicingBTN").hidden = false;
     document.getElementById("StartInvoicingBTN").hidden = true;
     document.getElementById("ResumeInvoicingBTN").hidden = true;
     Invoicing = true;
@@ -439,6 +440,17 @@ async function StartInvoicing(btn) {
 let currentCustomerIndex = 0;
 async function InvoiceCustomers(CustList, startIndex = 0) {
     for (; currentCustomerIndex < CustList.length;) {
+        if(isPaused){
+            stopInvoicingLoader();
+            document.getElementById("ResumeInvoicingBTN").hidden = false;
+
+            Toast.fire({
+                icon: 'info',
+                title: 'Invoicing paused'
+            })
+            return;
+        
+        }
         const customer = CustList[currentCustomerIndex];
         console.log("Current Customer Index: ", currentCustomerIndex);
         console.log("Customer: ", customer);
@@ -456,6 +468,7 @@ async function InvoiceCustomers(CustList, startIndex = 0) {
         if (!result) {
             currentCustomerIndex = currentCustomerIndex - 1;
             return;
+            
         }
         else {
             Toast.fire({
@@ -463,22 +476,20 @@ async function InvoiceCustomers(CustList, startIndex = 0) {
                 title: customer.name + ": Invoiced Successfully"
             });
             await MinusCustCountToBeinvoiced();
+
             continue
         }
 
+
     }
 
-    await ConfirmInvoicing();
     await InvoicingCompletion();
 
-    document.getElementById("PauseInvoicingBTN").hidden = true;
     document.getElementById("ResumeInvoicingBTN").hidden = true;
-    document.getElementById("StartInvoicingBTN").hidden = false;
 }
 async function ResumeInvoicing(btn) {
-    Invoicing = true;
-    startInvoicingLoader();
-    document.getElementById("PauseInvoicingBTN").hidden = false;
+    isPaused = false;
+    startInvoicingLoader(true);
     document.getElementById("ResumeInvoicingBTN").hidden = true;
 
     var CustList = await getCustomerListFromNetwork(selectedNetwork);
@@ -545,19 +556,16 @@ async function ConfirmInvoicing(network) {
         console.error("Error Confirming Invoicing");
     }
 }
-async function PauseLoader(btn) {
-    stopInvoicingLoader();
+async function PauseCurrentProcess(btn) {
     const elements = document.querySelectorAll('.s, .bigcon, .big');
     const button = document.querySelector('.loader--control-button');
-
+    btn.hidden = true;
     if (isPaused) {
         elements.forEach(el => el.style.animationPlayState = 'running');
         button.textContent = 'Pause';
-    } else {
-        elements.forEach(el => el.style.animationPlayState = 'paused');
-        button.textContent = 'Play';
     }
-
+    var Pausing = document.getElementsByClassName("pausing-indicator");
+    Pausing[0].hidden = false;
     isPaused = !isPaused;
 }
 
@@ -729,10 +737,4 @@ async function DisplayIntialPageText(customer) {
     var Addon = customer.addon;
     var custnameH1 = document.getElementById("CustNameInvoicing");
     custnameH1.textContent = CustText;
-}
-async function StopInvoicingbtn() {
-    Invoicing = false;
-    stopInvoicingLoader();
-    document.getElementById("ResumeInvoicingBTN").hidden = false;
-    document.getElementById("PauseInvoicingBTN").hidden = true;
 }

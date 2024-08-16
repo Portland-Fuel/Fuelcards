@@ -20,16 +20,12 @@ async function loadDetailsForNextCustomer(customer) {
     await getEmailBody(customer);
     await getCustomerInvoicePng(customer);
 }
-async function ResumeEmails() {
-    EmailPause = false;
-    document.getElementById('ResumeEmailsBTN').hidden = true;
-    document.getElementById('PauseEmailsBTN').hidden = false;
-    SendAllEmails(loopedCustomerCount);
-}
-async function PauseEmails() {
-    EmailPause = true;
-    document.getElementById('PauseEmailsBTN').hidden = true;
-    document.getElementById('ResumeEmailsBTN').hidden = false;
+async function ResumeEmails(btn) {
+    var element = document.getElementById('ResumeEmailing');
+    element.hidden = true;
+    var btn = document.getElementsByName("ResumeEmails");
+    isPaused = false;
+    SendAllEmails(btn,loopedCustomerCount - 1);
 }
 async function SendAllEmails(Btn,startIndex = 0) {
     Btn.hidden = true;
@@ -38,11 +34,15 @@ async function SendAllEmails(Btn,startIndex = 0) {
 
     for (let i = startIndex; i < Customers.length; i++) {
         if (isPaused) {
+            stopInvoicingLoader();
+
+            var element = document.getElementById('ResumeEmailing');
+            element.hidden = false;
             Toast.fire({
                 icon: 'info',
                 title: 'Emailing paused'
             })
-            break;
+            return;
         }
 
         const Customer = Customers[i];
@@ -54,7 +54,12 @@ async function SendAllEmails(Btn,startIndex = 0) {
         }
 
         var Count = document.getElementById('CountOfCustomersToBeEmailed');
-        Count.textContent = parseInt(Count.textContent) - 1;
+        if(Count.textContent === "0"){
+            Count.textContent = Customers.length;
+        }
+        else{
+            Count.textContent = parseInt(Count.textContent) - 1;
+        }
         loopedCustomerCount++;
 
         if (loopedCustomerCount === Customers.length) {
@@ -63,9 +68,31 @@ async function SendAllEmails(Btn,startIndex = 0) {
     }
 
     stopInvoicingLoader();
+
+    await EmailingCompletion()
 }
 
+async function EmailingCompletion(){
+    var element = document.getElementById('ResumeEmailing');
+    element.hidden = true;
+    Toast.fire({
+        icon: 'success',
+        title: 'Emailing completed'
+    })
+    var EmailOutSeciton = document.getElementById('EmailOutSection');
+    EmailOutSeciton.hidden = true;
+    document.getElementById('NetworkToInvoice').hidden = false;
+    var options = document.getElementById('NetworkSelect').options;
+    for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        if (option.value === selectedNetwork) {
+            option.disabled = true;
+            option.selected = false;
+            break;
+        }
+    }
 
+}
 
 
 async function SendEmailToCustomer(Customer){

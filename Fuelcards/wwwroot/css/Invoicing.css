@@ -158,7 +158,6 @@ html, body {
     margin: 0 auto; 
     margin-bottom: 10px;
     display: flex;
-    justify-content: center; 
     align-items: center; 
     height: 100vh;
     flex-direction: column;
@@ -387,54 +386,6 @@ html, body {
 }
 
 
-.EmailOutSection .CustDetailsContainer{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 300px;
-    width: 100%;
-    padding: 10px;
-    background-color: transparent;
-    border: 2px solid rgb(26, 27, 26);
-
-}
-.EmailOutSection .CustDetailsContainer .CustomerDetails-item{
-    background-color: transparent;  
-    padding: 10px;
-    border-radius: 5px;
-    color: white;
-    margin-bottom: 10px;
-    text-align: center;
-    height: 98%;
-
-}
-.EmailOutSection .CustDetailsContainer .CustomerDetails-item:hover{
-    transform: scale(1.05);
-}
-.EmailOutSection .CustDetailsContainer label{
-    color: white;
-    margin-bottom: 10px;
-    font-size: 18px;
-    text-align: center;
-    width: 100%;
-    display: block;
-    padding: 10px;    
-}
-
-.EmailOutSection .CustDetailsContainer input{
-    width: 100%;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    text-align: center;
-    margin-bottom: 10px;
-    background-color: transparent;
-
-}
-
-
-
 .EmailOutSection .section {
     margin-bottom: 20px;
 }
@@ -445,6 +396,30 @@ html, body {
     max-width: 1400px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.EmailOutSection .TopLeft{
+    display: flex;
+    position: sticky;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.EmailOutSection .CustomerDetails-item {
+    background-color: transparent;
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #f8f9fa;
+    color: white;
+    margin-bottom: 10px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.EmailOutSection .CustomerDetails-item label {
+    color: white;
+    font-size: 25px;
 }
 .EmailOutSection .HtmlOrPdf {
     width: 100%;
@@ -489,6 +464,75 @@ html, body {
     padding: 20px;
     background-color: #f9f9f9;
 }
+
+.CreateThisClass {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.pausing-indicator {
+    position: absolute;
+    top: 50vh; /* Position the indicator vertically centered */
+    left: 50%; /* Position the indicator horizontally centered */
+    transform: translate(-50%, -50%); /* Center the element both horizontally and vertically */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    z-index: 999; /* Slightly lower than the button, or adjust as needed */
+}
+
+.pause-circle {
+    width: 20px;
+    height: 20px;
+    background-color: #fffdfd;
+    border-radius: 50%;
+    animation: fade 1s infinite ease-in-out;
+    margin-bottom: 10px;
+}
+
+.pausing-text {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #f8f7f7;
+}
+
+.dots::after {
+    content: "";
+    animation: dots 1.5s infinite steps(4);
+}
+
+@keyframes fade {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+@keyframes dots {
+    0%, 20% {
+        content: "";
+    }
+    40% {
+        content: ".";
+    }
+    60% {
+        content: "..";
+    }
+    80%, 100% {
+        content: "...";
+    }
+}
+
+
 * {
     box-sizing: border-box;
 }
