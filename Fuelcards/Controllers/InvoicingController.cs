@@ -317,6 +317,7 @@ namespace Fuelcards.Controllers
                     FileHelperForInvoicing.CheckOrCorrectDirectorysBeforePDFCreation();
                     invoiceGenerator.generatePDF(newInvoice);
                     invoiceGenerator.generatePDFImage(newInvoice);
+                    invoiceGenerator.generateCSV(newInvoice);
                 }
                 catch (Exception e)
                 {
@@ -371,7 +372,7 @@ namespace Fuelcards.Controllers
             {
 
                 List<InvoiceReport> reports = reportList;
-                InvoiceReport totalsRow = CalculateTotals(reports);
+                InvoiceReport totalsRow = InvoiceReportController.CalculateTotals(reports);
                 reports.Add(totalsRow);
 
                 return Json(reports);
@@ -382,48 +383,7 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
-        public InvoiceReport CalculateTotals(List<InvoiceReport> reportList)
-        {
-            InvoiceReport totalsRow = new InvoiceReport();
-
-            // Calculate totals for each numeric property
-            totalsRow.DieselVol = reportList.Sum(r => r.DieselVol ?? 0);
-            totalsRow.TescoVol = reportList.Sum(r => r.TescoVol ?? 0);
-            totalsRow.PetrolVol = reportList.Sum(r => r.PetrolVol ?? 0);
-            totalsRow.LubesVol = reportList.Sum(r => r.LubesVol ?? 0);
-            totalsRow.GasoilVol = reportList.Sum(r => r.GasoilVol ?? 0);
-            totalsRow.AdblueVol = reportList.Sum(r => r.AdblueVol ?? 0);
-            totalsRow.PremDieselVol = reportList.Sum(r => r.PremDieselVol ?? 0);
-            totalsRow.SuperUnleadedVol = reportList.Sum(r => r.SuperUnleadedVol ?? 0);
-            totalsRow.SainsburysVol = reportList.Sum(r => r.SainsburysVol ?? 0);
-            totalsRow.OtherVol = reportList.Sum(r => r.OtherVol ?? 0);
-            totalsRow.DieselPrice = reportList.Sum(r => r.DieselPrice ?? 0);
-            totalsRow.TescoPrice = reportList.Sum(r => r.TescoPrice ?? 0);
-            totalsRow.PetrolPrice = reportList.Sum(r => r.PetrolPrice ?? 0);
-            totalsRow.LubesPrice = reportList.Sum(r => r.LubesPrice ?? 0);
-            totalsRow.GasoilPrice = reportList.Sum(r => r.GasoilPrice ?? 0);
-            totalsRow.AdbluePrice = reportList.Sum(r => r.AdbluePrice ?? 0);
-            totalsRow.PremDieselPrice = reportList.Sum(r => r.PremDieselPrice ?? 0);
-            totalsRow.SuperUnleadedPrice = reportList.Sum(r => r.SuperUnleadedPrice ?? 0);
-            totalsRow.SainsburysPrice = reportList.Sum(r => r.SainsburysPrice ?? 0);
-            totalsRow.OthersPrice = reportList.Sum(r => r.OthersPrice ?? 0);
-            totalsRow.Rolled = reportList.Sum(r => r.Rolled ?? 0);
-            totalsRow.Current = reportList.Sum(r => r.Current ?? 0);
-            totalsRow.RollAvailable = reportList.Sum(r => r.RollAvailable ?? 0);
-            totalsRow.DieselLifted = reportList.Sum(r => r.DieselLifted ?? 0);
-            totalsRow.Fixed = reportList.Sum(r => r.Fixed ?? 0);
-            totalsRow.Floating = reportList.Sum(r => r.Floating ?? 0);
-            totalsRow.TescoSainsburys = reportList.Sum(r => r.TescoSainsburys ?? 0);
-            totalsRow.NetTotal = reportList.Sum(r => r.NetTotal ?? 0);
-            totalsRow.Vat = reportList.Sum(r => r.Vat ?? 0);
-            totalsRow.Total = reportList.Sum(r => r.Total ?? 0);
-            totalsRow.Commission = reportList.Sum(r => r.Commission ?? 0);
-            totalsRow.BrushTollVol = reportList.Sum(r => r.BrushTollVol ?? 0);
-            totalsRow.BrushTollPrice = reportList.Sum(r => r.BrushTollPrice ?? 0);
-
-
-            return totalsRow;
-        }
+     
         [HttpPost]
         public JsonResult ProcessTransactionFromPage([FromBody] TransactionDataFromView transactionDataFromView)
         {

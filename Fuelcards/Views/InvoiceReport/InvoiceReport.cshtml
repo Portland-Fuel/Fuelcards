@@ -1,0 +1,33 @@
+﻿@model Fuelcards.Models.InvoiceReportVM
+<link href="~/css/invoicereport.css" rel="stylesheet" />
+<script src="~/js/invoicereport.js"></script>
+<link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    let m = @Html.Raw(Json.Serialize(Model));
+
+  
+</script>
+
+<div class="LargeTableDiv" id="InvoiceReportSection">
+   
+    <div class="DateSelectDiv">
+        <label for="DateSelect">Select Date</label>
+        <input type="text" id="DateSelect" />
+    </div>
+
+
+    <div hidden  class="Grouping">
+        <button id="InvoiceReportLoadBTN" class="button" onclick="LoadInvoiceReport()">Load Invoice Report</button>
+    </div>
+
+    <div class="table-container">
+        <table id="InvoiceReportTable">
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>

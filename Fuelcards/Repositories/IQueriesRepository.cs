@@ -4,6 +4,7 @@ using Fuelcards.GenericClassFiles;
 using Fuelcards.Controllers;
 using DataAccess.Cdata;
 using Fuelcards.InvoiceMethods;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fuelcards.Repositories
 {
@@ -55,5 +56,7 @@ namespace Fuelcards.Repositories
         double? GetHandlingCharge(int network);
         Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices, IQueriesRepository _iquery);
         Task UpdateDatabaseTransaction(TransactionsPDF transaction,string invoiceNumber, EnumHelper.Network network);
+        List<DateOnly>? GetInvoiceReportDates();
+        List<InvoiceReport> getInvoiceReport(DateOnly date);
     }
 }

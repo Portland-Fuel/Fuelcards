@@ -21,6 +21,7 @@ using DataAccess.Tickets;
 using Site = Fuelcards.Models.Site;
 using static Fuelcards.GenericClassFiles.EnumHelper;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Microsoft.AspNetCore.Mvc;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -1128,5 +1129,24 @@ namespace Fuelcards.Repositories
                     break;
             }
         }
+
+        public List<DateOnly>? GetInvoiceReportDates()
+        {
+            try
+            {
+                return _db.InvoiceReports.Where(e=>e.InvoiceDate > DateOnly.MinValue).Select(e => e.InvoiceDate).ToList();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public List<InvoiceReport> getInvoiceReport(DateOnly date)
+        {
+            return  _db.InvoiceReports.Where(e => e.InvoiceDate == date).ToList();
+        }
     }
+
 }

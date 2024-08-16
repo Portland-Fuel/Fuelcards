@@ -1,9 +1,8 @@
 ﻿function HandleInvoicingError(xhr) {
     document.getElementById("ResumeInvoicingBTN").hidden = false;
-    document.getElementById("PauseInvoicingBTN").hidden = true;
     Invoicing = false;
     stopInvoicingLoader();
-    alert(xhr.responseText);
+    showErrorBox(xhr.statusText + ': ' + xhr.responseText);
 }
 function HandleConfirmInvoicingError(responseText) {
     var response = JSON.parse(responseText);

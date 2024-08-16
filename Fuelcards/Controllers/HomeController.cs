@@ -23,6 +23,26 @@ namespace Fuelcards.Controllers
             _logger = logger;
             _db = db;
         }
+
+
+
+        public IActionResult InvoiceReport()
+        {
+            InvoiceReportVM model = new InvoiceReportVM();
+
+            model.dates = _db.GetInvoiceReportDates();
+
+            model.dates = model.dates
+                .OrderByDescending(e => e)  
+                .Distinct()                
+                .ToList();
+
+            ViewData["Title"] = "Invoice Report";
+
+            return View("/Views/InvoiceReport/InvoiceReport.cshtml", model);
+        }
+
+
         [HttpPost]
         public IActionResult CustomerDetails()
         {
