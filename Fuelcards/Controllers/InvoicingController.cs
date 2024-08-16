@@ -46,7 +46,7 @@ namespace Fuelcards.Controllers
             try
             {
                 InvoicePreCheckModels checks = new();
-                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-11)));
+                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-15)));
                 checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);
                 checks.PlattsPrice = checks.BasePrice - 52.95;
                 checks.KeyfuelImports = _db.GetTotalEDIs(0);
@@ -195,7 +195,7 @@ namespace Fuelcards.Controllers
                 {
                     throw new InventoryItemCodeNotInDb(e.Message.Split(':')[1]);
                 }
-                //_db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList(), _db);
+                _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network.ToString() == Network).ToList(), _db);
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)
@@ -292,6 +292,7 @@ namespace Fuelcards.Controllers
                 if (customerInvoice.CustomerType != EnumHelper.CustomerType.Floating)
                 {
                     newInvoice.fixedBox = summary.GetFixDetails(customerInvoice, newInvoice.network, customerInvoice.CustomerType);
+                    newInvoice.fixedBox.TradeId = customerInvoice.fixedInformation?.CurrentTradeId;
                 }
                 
                 newInvoice.rows = summary.ProductBreakdown(customerInvoice, newInvoice.network);

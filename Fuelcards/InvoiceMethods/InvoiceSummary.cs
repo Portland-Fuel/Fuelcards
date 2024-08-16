@@ -295,7 +295,6 @@ namespace Fuelcards.InvoiceMethods
         public DateOnly paymentDate { get; set; }
         public string? InvoiceNumber { get; set; }
         public int InvoiceType { get; set; }
-
         public string? Network { get; set; }
 
         public string[] AddressArr { get; set; }
@@ -307,6 +306,8 @@ namespace Fuelcards.InvoiceMethods
         public double? FixedPriceVolumeFromPreviousPeriods { get; set; }
         public double? FixedPriceVolumeUsedOnThisinvoice { get; set; }
         public double? FixedPriceRemaining { get; set; }
+        public int? TradeId { get; set; }
+
     }
 
 }
