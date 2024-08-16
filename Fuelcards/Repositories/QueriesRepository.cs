@@ -1050,7 +1050,25 @@ namespace Fuelcards.Repositories
             EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
             foreach (var invoice in invoices)
             {
-                await PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice, _iquery);
+                //await PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice, _iquery);
+                if (invoice.fixedBox != null)
+                {
+                    var Trade = _db.FixedPriceContracts.FirstOrDefault(e => e.TradeReference == invoice.fixedBox.TradeId);
+                    double? RemainingVolumeToUpdate = invoice.fixedBox.FixedPriceRemaining;
+                    List<int> tradeIdList = new List<int> { Trade.Id };
+                    var Volumes = _db.AllocatedVolumes.Where(e => e.TradeId == Trade.Id && e.Volume > 0 && e.AllocationId <= GetCurrentAllocation(invoice.InvoiceDate,tradeIdList));
+                    double? result = (RemainingVolumeToUpdate / Trade.FixedVolume);
+                    int FullAllocations = 0;
+                    if (result.HasValue)
+                    {
+                        FullAllocations = (int)Math.Floor(result.Value);
+                    }
+                    double? PartialVolumeLeft = RemainingVolumeToUpdate - (Trade.FixedVolume * FullAllocations);
+                    
+
+
+
+                }
 
             }
             //THIS IS NOT DONE
