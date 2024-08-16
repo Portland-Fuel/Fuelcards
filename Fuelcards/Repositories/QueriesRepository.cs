@@ -1064,10 +1064,6 @@ namespace Fuelcards.Repositories
                         FullAllocations = (int)Math.Floor(result.Value);
                     }
                     double? PartialVolumeLeft = RemainingVolumeToUpdate - (Trade.FixedVolume * FullAllocations);
-                    
-
-
-
                 }
 
             }
