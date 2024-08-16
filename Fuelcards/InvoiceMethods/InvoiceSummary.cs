@@ -105,6 +105,7 @@ namespace Fuelcards.InvoiceMethods
                         bandKey = transaction.productCode.ToString() switch
                         {
                             "70" => "Retail",
+                            "77" => "Tesco",
                             _ => ""
                         };
 

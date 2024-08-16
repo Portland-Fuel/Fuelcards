@@ -21,6 +21,7 @@ using DataAccess.Tickets;
 using Site = Fuelcards.Models.Site;
 using static Fuelcards.GenericClassFiles.EnumHelper;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using MigraDoc.DocumentObjectModel.Tables;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -254,7 +255,7 @@ namespace Fuelcards.Repositories
                     model.account = item[0].customerCode;
                     model.CustomerTransactions = new();
                     model.CustomerType = await customerType((int)model.account, invoiceDate);
-                    model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-7)));
+                    model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-15)));
                     var portlandId = GetPortlandIdFromAccount((int)model.account).Result;
                     var invoiceType = _db.InvoicingOptions.FirstOrDefault(e => e.PortlandId == portlandId && e.GroupedNetwork.Contains((int)item[0].network))?.Displaygroup;
                     if (invoiceType == 1)
@@ -1053,10 +1054,11 @@ namespace Fuelcards.Repositories
                 //await PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice, _iquery);
                 if (invoice.fixedBox != null)
                 {
-                    var Trade = _db.FixedPriceContracts.FirstOrDefault(e => e.TradeReference == invoice.fixedBox.TradeId);
+                    var Trade = _db.FixedPriceContracts.FirstOrDefault(e => e.Id == invoice.fixedBox.TradeId);
                     double? RemainingVolumeToUpdate = invoice.fixedBox.FixedPriceRemaining;
                     List<int> tradeIdList = new List<int> { Trade.Id };
-                    var Volumes = _db.AllocatedVolumes.Where(e => e.TradeId == Trade.Id && e.Volume > 0 && e.AllocationId <= GetCurrentAllocation(invoice.InvoiceDate,tradeIdList));
+                    var Volumes = _db.AllocatedVolumes.Where(e => e.TradeId == Trade.Id && e.Volume > 0 && e.AllocationId <= GetCurrentAllocation(invoice.InvoiceDate, tradeIdList));
+
                     double? result = (RemainingVolumeToUpdate / Trade.FixedVolume);
                     int FullAllocations = 0;
                     if (result.HasValue)
@@ -1064,6 +1066,19 @@ namespace Fuelcards.Repositories
                         FullAllocations = (int)Math.Floor(result.Value);
                     }
                     double? PartialVolumeLeft = RemainingVolumeToUpdate - (Trade.FixedVolume * FullAllocations);
+                    var OrderedVolumes = Volumes.OrderByDescending(e => e.AllocationId).ToList();
+                    foreach (var item in OrderedVolumes)
+                    {
+                        item.Volume = 0;
+                    }
+                    int j = 0;
+                    for (int i = 0; i == FullAllocations; i++)
+                    {
+                        OrderedVolumes[i].Volume = Trade.FixedVolume;
+                        j = i;
+                    }
+                    OrderedVolumes[j].Volume = PartialVolumeLeft;
+                 
                 }
 
             }
