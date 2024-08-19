@@ -63,7 +63,7 @@ namespace Fuelcards.Controllers
         public static EDIVM LoadEdiVmModel()
         {
 
-           EDIVM model = new();
+            EDIVM model = new();
             model.EDIs = new();
             FuelcardsContext _fuelcardrepo = new();
             IEnumerable<FcControl> edis = _fuelcardrepo.FcControls.Where(e => e.Invoiced != true);
@@ -100,7 +100,7 @@ namespace Fuelcards.Controllers
 
 
             ViewData["Title"] = "Home";
-            return View();
+            return View("/Views/Home/Homepage.cshtml");
         }
         [HttpPost]
         public async Task<JsonResult> GetLink()
