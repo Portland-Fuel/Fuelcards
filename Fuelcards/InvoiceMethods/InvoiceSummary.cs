@@ -160,10 +160,10 @@ namespace Fuelcards.InvoiceMethods
             total.Total = total.Goods + total.VAT;
             return total;
         }
-        public List<TransactionsPDF> TurnsTransactionsToPdf(List<GenericTransactionFile> transactions)
+        public List<TransactionsPDF> TurnsTransactionsToPdf(EnumHelper.Network network,CustomerInvoice customerInvoice, IQueriesRepository _db)
         {
             List<TransactionsPDF> pdfList = new();
-            foreach (var item in transactions)
+            foreach (var item in customerInvoice.CustomerTransactions)
             {
                 TransactionsPDF transactionsPDF = new()
                 {
@@ -183,6 +183,11 @@ namespace Fuelcards.InvoiceMethods
 
                 };
                 if (transactionsPDF.product == "TescoDieselNewDiesel") transactionsPDF.product = "Retail Diesel";
+
+                double? addon = _db.GetAddonForSpecificTransaction(_db.GetPortlandIdFromAccount((int)customerInvoice.account).Result, item.transactionDate, network, customerInvoice.IfuelsCustomer, (int)customerInvoice.account);
+
+                transactionsPDF.Commission = IfuelCommission.CalculateCommission(network, customerInvoice, item,addon);
+
                 pdfList.Add(transactionsPDF);
             }
             return pdfList;

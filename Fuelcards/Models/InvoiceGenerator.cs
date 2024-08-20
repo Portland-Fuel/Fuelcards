@@ -1839,6 +1839,10 @@ public static class FileHelperForInvoicing
     internal static string BuildingFilePathForCSV(InvoicePDFModel newInvoice, DateOnly invoiceDate)
     {
         string StartingFilePath = BuidlingPDFFilePath(newInvoice, invoiceDate);
+        if (newInvoice.CustomerDetails.CompanyName.Contains("/"))
+        {
+            newInvoice.CustomerDetails.CompanyName = newInvoice.CustomerDetails.CompanyName.Replace("/", "");
+        }
         string FileName = BuildingFileNameForInvoicingCSV(newInvoice, newInvoice.CustomerDetails.CompanyName);
         return Path.Combine(StartingFilePath, "CSV") + "\\" + FileName;
     }

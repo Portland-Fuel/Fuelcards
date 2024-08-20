@@ -38,6 +38,8 @@ namespace Fuelcards.InvoiceMethods
                     report.Total = InvoiceSummary.Round2(invoice.totals.Total);
                     report.InvNo = invoice.CustomerDetails.InvoiceNumber;
                     report.PayDate = invoice.CustomerDetails.paymentDate;
+                    report.Commission = InvoiceSummary.Round2(invoice.transactions.Sum(e => e.Commission));
+
                     break;
                 case EnumHelper.Network.UkFuel:
                     report.RollAvailable = invoice.fixedBox?.FixedPriceRemaining ?? 0;
@@ -56,6 +58,8 @@ namespace Fuelcards.InvoiceMethods
                     report.Total = InvoiceSummary.Round2(invoice.totals.Total);
                     report.InvNo = invoice.CustomerDetails.InvoiceNumber;
                     report.PayDate = invoice.CustomerDetails.paymentDate;
+                    report.Commission = InvoiceSummary.Round2(invoice.transactions.Sum(e => e.Commission));
+
                     break;
                 case EnumHelper.Network.Texaco:
                     report.RollAvailable = invoice.fixedBox?.FixedPriceRemaining ?? 0;
@@ -74,6 +78,7 @@ namespace Fuelcards.InvoiceMethods
                     report.Total = InvoiceSummary.Round2(invoice.totals.Total);
                     report.InvNo = invoice.CustomerDetails.InvoiceNumber;
                     report.PayDate = invoice.CustomerDetails.paymentDate;
+                    report.Commission = InvoiceSummary.Round2(invoice.transactions.Sum(e => e.Commission));
                     break;
             }
         }

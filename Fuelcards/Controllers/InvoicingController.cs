@@ -287,16 +287,17 @@ namespace Fuelcards.Controllers
             {
                 InvoicePDFModel newInvoice = new();
                 newInvoice.network = _db.getNetworkFromAccount((int)customerInvoice.account);
-
+                
                 newInvoice.InvoiceDate = customerInvoice.invoiceDate;
                 if (customerInvoice.CustomerType != EnumHelper.CustomerType.Floating)
                 {
                     newInvoice.fixedBox = summary.GetFixDetails(customerInvoice, newInvoice.network, customerInvoice.CustomerType);
                     newInvoice.fixedBox.TradeId = customerInvoice.fixedInformation?.CurrentTradeId;
                 }
-                
                 newInvoice.rows = summary.ProductBreakdown(customerInvoice, newInvoice.network);
-                newInvoice.transactions = summary.TurnsTransactionsToPdf(customerInvoice.CustomerTransactions);
+
+                newInvoice.transactions = summary.TurnsTransactionsToPdf(newInvoice.network,customerInvoice,_db);
+
                 newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
                 if (customerInvoice.name != "The Fuel Trading Company")
                 {

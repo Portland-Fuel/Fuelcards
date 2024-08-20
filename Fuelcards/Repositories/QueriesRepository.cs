@@ -22,6 +22,7 @@ using Site = Fuelcards.Models.Site;
 using static Fuelcards.GenericClassFiles.EnumHelper;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc;
+using System.Xml;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -1048,17 +1049,21 @@ namespace Fuelcards.Repositories
         }
         public async Task ConfirmChanges(string network, List<InvoiceReport> reports, List<InvoicePDFModel> invoices, IQueriesRepository _iquery)
         {
+            try
+            {
+
             EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
             foreach (var invoice in invoices)
             {
-                //await PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice, _iquery);
+                await PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice, _iquery);
                 if (invoice.fixedBox != null)
                 {
+                    if (invoice.fixedBox.TradeId is null) invoice.fixedBox.TradeId = await EstablishTradeIdOfHistoric(invoice);
                     var Trade = _db.FixedPriceContracts.FirstOrDefault(e => e.Id == invoice.fixedBox.TradeId);
                     double? RemainingVolumeToUpdate = invoice.fixedBox.FixedPriceRemaining;
                     List<int> tradeIdList = new List<int> { Trade.Id };
                     var Volumes = _db.AllocatedVolumes.Where(e => e.TradeId == Trade.Id && e.Volume > 0 && e.AllocationId <= GetCurrentAllocation(invoice.InvoiceDate, tradeIdList));
-
+                    if(Volumes.Count() == 0) Volumes = _db.AllocatedVolumes.Where(e => e.TradeId == Trade.Id && e.Volume > 0);
                     double? result = (RemainingVolumeToUpdate / Trade.FixedVolume);
                     int FullAllocations = 0;
                     if (result.HasValue)
@@ -1072,18 +1077,40 @@ namespace Fuelcards.Repositories
                         item.Volume = 0;
                     }
                     int j = 0;
-                    for (int i = 0; i == FullAllocations; i++)
+                    for (int i = 0; i < FullAllocations; i++)
                     {
                         OrderedVolumes[i].Volume = Trade.FixedVolume;
                         j = i;
                     }
-                    OrderedVolumes[j].Volume = PartialVolumeLeft;
-                 
+                    OrderedVolumes[j].Volume = Convert.ToDouble(Math.Round(Convert.ToDecimal(PartialVolumeLeft),2));
+                    foreach (var item in OrderedVolumes)
+                    {
+                        _db.AllocatedVolumes.Update(item);
+                    }
+                    _db.SaveChanges();
                 }
-
+                
             }
-            //THIS IS NOT DONE
+                //THIS IS NOT DONE
+            }
+            catch (Exception e )
+            {
+                throw new ArgumentException(e.Message);
+            }
         }
+
+        private async Task<int> EstablishTradeIdOfHistoric(InvoicePDFModel invoice)
+        {
+            int usedId = 0;
+            var PotentialTradeIds = _db.FixedPriceContracts.Where(e => e.FcAccount == invoice.CustomerDetails.account && e.EndDate < invoice.InvoiceDate).ToListAsync();
+            foreach (var item in PotentialTradeIds.Result)
+            {
+                AllocatedVolume? exists = _db.AllocatedVolumes.FirstOrDefault(e => e.TradeId == item.Id && e.Volume > 0);
+                if (exists is not null) return usedId = (int)exists.TradeId;
+            }
+            return usedId;
+        }
+
         public async Task UpdateDatabaseTransaction(TransactionsPDF transaction, string invoiceNumber, EnumHelper.Network network)
         {
             switch (network)
@@ -1092,12 +1119,25 @@ namespace Fuelcards.Repositories
                     try
                     {
                         var dbTransaction = _db.KfE1E3Transactions.FirstOrDefaultAsync(e => e.TransactionNumber.ToString() == transaction.TransactionNumber).Result;
-                        dbTransaction.Invoiced = true;
-                        dbTransaction.InvoicePrice = transaction.Value;
-                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber);
-                        dbTransaction.Commission = transaction.Commission;
-                        _db.KfE1E3Transactions.Update(dbTransaction);
-                        _db.SaveChanges();
+                        if (dbTransaction is null)
+                        {
+                            var Alternatetransaction = _db.KfE4SundrySales.FirstOrDefaultAsync(e => e.TransactionNumber.ToString() == transaction.TransactionNumber).Result;
+
+                            Alternatetransaction.Invoiced = true;
+                            _db.KfE4SundrySales.Update(Alternatetransaction);
+                            _db.SaveChanges();
+                        }
+                        else
+                        {
+
+
+                            dbTransaction.Invoiced = true;
+                            dbTransaction.InvoicePrice = transaction.Value;
+                            dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber);
+                            dbTransaction.Commission = transaction.Commission;
+                            _db.KfE1E3Transactions.Update(dbTransaction);
+                            _db.SaveChanges();
+                        }
                     }
                     catch (Exception e)
                     {
@@ -1110,7 +1150,7 @@ namespace Fuelcards.Repositories
                         var dbTransaction = _db.UkfTransactions.FirstOrDefaultAsync(e => e.TranNoItem.ToString() == transaction.TransactionNumber).Result;
                         dbTransaction.Invoiced = true;
                         dbTransaction.InvoicePrice = transaction.Value;
-                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber);
+                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber.Replace("PF",""));
                         dbTransaction.Commission = transaction.Commission;
                         _db.UkfTransactions.Update(dbTransaction);
                         _db.SaveChanges();
@@ -1126,7 +1166,7 @@ namespace Fuelcards.Repositories
                         var dbTransaction = _db.TexacoTransactions.FirstOrDefaultAsync(e => e.TranNoItem.ToString() == transaction.TransactionNumber).Result;
                         dbTransaction.Invoiced = true;
                         dbTransaction.InvoicePrice = transaction.Value;
-                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber);
+                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber.Replace("TX",""));
                         dbTransaction.Commission = transaction.Commission;
                         _db.TexacoTransactions.Update(dbTransaction);
                         _db.SaveChanges();
@@ -1148,7 +1188,7 @@ namespace Fuelcards.Repositories
         {
             try
             {
-                return _db.InvoiceReports.Where(e=>e.InvoiceDate > DateOnly.MinValue).Select(e => e.InvoiceDate).ToList();
+                return _db.InvoiceReports.Where(e => e.InvoiceDate > DateOnly.MinValue).Select(e => e.InvoiceDate).ToList();
 
             }
             catch (Exception)
@@ -1159,7 +1199,7 @@ namespace Fuelcards.Repositories
         }
         public List<InvoiceReport> getInvoiceReport(DateOnly date)
         {
-            return  _db.InvoiceReports.Where(e => e.InvoiceDate == date).ToList();
+            return _db.InvoiceReports.Where(e => e.InvoiceDate == date).ToList();
         }
     }
 
