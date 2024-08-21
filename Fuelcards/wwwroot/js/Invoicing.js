@@ -518,7 +518,7 @@ async function InvoiceCustomer(Customer) {
 }
 
 async function ConfirmInvoicing(network) {
-    
+    startInvoicingLoader();
     try {
         const result = await Swal.fire({
             title: 'Confirm Invoicing',
@@ -550,6 +550,7 @@ async function ConfirmInvoicing(network) {
     catch {
         console.error("Error Confirming Invoicing");
     }
+    stopInvoicingLoader();
 }
 async function PauseCurrentProcess(btn) {
     const elements = document.querySelectorAll('.s, .bigcon, .big');
