@@ -18,7 +18,6 @@ namespace Fuelcards.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IQueriesRepository _db;
         public HomeController(ILogger<HomeController> logger, IQueriesRepository db)
-
         {
             _logger = logger;
             _db = db;
