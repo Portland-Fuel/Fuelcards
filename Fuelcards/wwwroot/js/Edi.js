@@ -35,6 +35,7 @@ $(document).ready(function() {
     });
 });
 document.addEventListener('DOMContentLoaded', function () {
+    ShowBackButton();
     const networkCells = document.querySelectorAll('td[data-network]');
 
     networkCells.forEach(cell => {

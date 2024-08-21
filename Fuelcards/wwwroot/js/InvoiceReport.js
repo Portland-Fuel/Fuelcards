@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+    ShowBackButton();
     var DateSelect = document.getElementById("DateSelect");
 
     var availableDates = m.dates.map(function(date) {

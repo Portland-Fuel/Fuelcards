@@ -12,6 +12,14 @@ function HideLoader() {
     Loader.hidden = true;
 }
 
+function ShowBackButton(){
+    var BackButton = document.getElementById("BackButtonDiv");
+    BackButton.hidden = false;
+}
+function HideBackButton(){
+    var BackButton = document.getElementById("BackButtonDiv");
+    BackButton.hidden = true;
+}
 async function ConnectToXero() {
     try {
         // Open a new tab with the Xero link

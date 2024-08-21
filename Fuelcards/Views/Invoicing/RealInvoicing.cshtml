@@ -25,7 +25,10 @@
 </div>
 
 <div id="ModelError" class="ModelLoadError" hidden>
-    <h1>There was an error loading the page data</h1>
+    <div>
+        <h1>There was an error loading the page data</h1>
+        <label id="ModelErrorMessage">Error:</label>
+    </div>
     <button class="ErrorOptions" onclick="history.back()">Home Page</button>
     <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
     <button class="ErrorOptions" onclick="ConnectToXero()">Reload Xero</button>

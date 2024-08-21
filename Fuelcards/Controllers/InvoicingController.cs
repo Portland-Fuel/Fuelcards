@@ -41,7 +41,7 @@ namespace Fuelcards.Controllers
             return View("/Views/Invoicing/RealInvoicing.cshtml");
         }
         [HttpGet]
-        public async Task<IActionResult> GetInvoicePreCheckModel()
+        public async Task<JsonResult> GetInvoicePreCheckModel()
         {
             try
             {
@@ -72,7 +72,8 @@ namespace Fuelcards.Controllers
             }
             catch (Exception e)
             {
-                throw;
+                Response.StatusCode = 500;
+                return Json(e.Message);
             }
         }
         [HttpPost]
