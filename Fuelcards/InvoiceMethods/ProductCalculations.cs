@@ -26,6 +26,7 @@ namespace Fuelcards.InvoiceMethods
         //    //    return DieselFloatingUnitPrice(_db,product,data,network,site,addon);
         //    //}
         //}
+
         public double? AdblueMethodology(GenericTransactionFile data, EnumHelper.Network network)
         {
             try
