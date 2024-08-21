@@ -45,7 +45,7 @@ namespace PortlandXeroLib
             //_configuration = configuration;
             //_redirectUri = "https://localhost:44312/Fuelcard/Authorization/Callback";
             //_redirectUri = "https://fueltrading.uk/FuelCard/Authorization/Callback";
-            //_redirectUri = "https://192.168.0.17:443/Fuelcard/Authorization/Callback";
+            //_redirectUri = "https://192.168.0.17:89/Fuelcard/Authorization/Callback";
             _redirectUri = GetRedirectUriFromAppSettings();
             _verifier = new VerifierCreator();
             _state = new VerifierCreator(25).Verifier;
@@ -60,11 +60,13 @@ namespace PortlandXeroLib
             string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             if (environment == "Development")
             {
-                return "https://localhost:7110/Authorization/Callback";
+                //return "https://localhost:7110/Authorization/Callback";
+                return "https://192.168.0.17:89/Authorization/Callback";
+
             }
             else
             {
-                return "https://192.168.0.17:443/Authorization/Callback";
+                return "https://192.168.0.17:89/Authorization/Callback";
             }
         }
 
