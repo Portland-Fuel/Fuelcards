@@ -67,7 +67,8 @@ namespace Fuelcards.Controllers
                 checks.KeyfuelsDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Keyfuels);
                 checks.UkFuelDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.UkFuel);
                 checks.TexacoDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Texaco);
-
+                InvoicingController.reportList = new();
+                InvoicingController.invoices = new();
                 return Json(checks);
             }
             catch (Exception e)
@@ -198,6 +199,8 @@ namespace Fuelcards.Controllers
                     throw new InventoryItemCodeNotInDb(e.Message.Split(':')[1]);
                 }
                 _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network == EnumHelper.NetworkEnumFromString(Network)).ToList(), _db);
+                InvoicingController.reportList = new();
+                InvoicingController.invoices = new();
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)
