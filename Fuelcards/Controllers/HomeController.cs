@@ -22,9 +22,6 @@ namespace Fuelcards.Controllers
             _logger = logger;
             _db = db;
         }
-
-
-
         public IActionResult InvoiceReport()
         {
             InvoiceReportVM model = new InvoiceReportVM();
