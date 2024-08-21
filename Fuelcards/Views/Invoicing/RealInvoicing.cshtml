@@ -5,6 +5,7 @@
 <link href="~/css/invoicing.css" rel="stylesheet" />
 <script src="//cdn.datatables.net/2.1.3/js/dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.3/css/dataTables.dataTables.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
 <script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
 
@@ -149,6 +150,7 @@
         <button class="button" onclick="ContinueAfterInvoiceReport()">Continue</button>
     </div>
     <div class="table-container">
+        <button id="exportTableButton" onclick="exportTableToExcel()">Export to Excel</button>
         <table id="InvoiceReportTable">
             <thead>
             </thead>
@@ -207,3 +209,19 @@
         </div>
     </div>
 </div>
+<script>
+    function exportTableToExcel() {
+        // Select the table
+        var table = document.getElementById('InvoiceReportTable');
+
+        // Create a new workbook and add a worksheet
+        var workbook = XLSX.utils.book_new();
+        var worksheet = XLSX.utils.table_to_sheet(table);
+
+        // Append the worksheet to the workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'InvoiceReport');
+
+        // Export the workbook to an Excel file
+        XLSX.writeFile(workbook, 'InvoiceReport.xlsx');
+    }
+</script>

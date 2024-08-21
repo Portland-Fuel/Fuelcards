@@ -81,11 +81,12 @@ namespace Fuelcards.Controllers
         {
             try
             {
+                var emailInfo = _db.AllEmail((int)customerInvoice.account);
                 // Define variables for to, cc, bcc, and subject
-                string to = "Hello"; // Replace with actual customer email
-                string cc = "why you reading this"; // Replace with actual cc recipients
-                string bcc = "plonkers"; // Replace with actual bcc recipients
-                string subject = "Your Portland Fuelcard Invoice"; // Replace with actual subject
+                string to = emailInfo.To; // Replace with actual customer email
+                string cc = emailInfo.Cc; // Replace with actual cc recipients
+                string bcc = emailInfo.Bcc; // Replace with actual bcc recipients
+                string subject = $"Portland Fuelcard Invoice for {customerInvoice.name}"; // Replace with actual subject
 
                 // Define the HTML email body
                 string html = $@"
