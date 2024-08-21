@@ -1052,48 +1052,54 @@ namespace Fuelcards.Repositories
             try
             {
 
-            EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
-            foreach (var invoice in invoices)
-            {
-                await PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice, _iquery);
-                if (invoice.fixedBox != null)
+                EnumHelper.Network NetworkEnum = EnumHelper.NetworkEnumFromString(network);
+                foreach (var invoice in invoices)
                 {
-                    if (invoice.fixedBox.TradeId is null) invoice.fixedBox.TradeId = await EstablishTradeIdOfHistoric(invoice);
-                    var Trade = _db.FixedPriceContracts.FirstOrDefault(e => e.Id == invoice.fixedBox.TradeId);
-                    double? RemainingVolumeToUpdate = invoice.fixedBox.FixedPriceRemaining;
-                    List<int> tradeIdList = new List<int> { Trade.Id };
-                    var Volumes = _db.AllocatedVolumes.Where(e => e.TradeId == Trade.Id && e.Volume > 0 && e.AllocationId <= GetCurrentAllocation(invoice.InvoiceDate, tradeIdList));
-                    if(Volumes.Count() == 0) Volumes = _db.AllocatedVolumes.Where(e => e.TradeId == Trade.Id && e.Volume > 0);
-                    double? result = (RemainingVolumeToUpdate / Trade.FixedVolume);
-                    int FullAllocations = 0;
-                    if (result.HasValue)
+                    await PushChangesToDatabase.SubmitFinalTransactionToDatabase(invoice, _iquery);
+                    if (invoice.fixedBox != null)
                     {
-                        FullAllocations = (int)Math.Floor(result.Value);
+                        if (invoice.fixedBox.TradeId is null) invoice.fixedBox.TradeId = await EstablishTradeIdOfHistoric(invoice);
+                        var Trade = _db.FixedPriceContracts.FirstOrDefault(e => e.Id == invoice.fixedBox.TradeId);
+                        double? RemainingVolumeToUpdate = invoice.fixedBox.FixedPriceRemaining;
+                        List<int> tradeIdList = new List<int> { Trade.Id };
+                        var Volumes = _db.AllocatedVolumes.Where(e => e.TradeId == Trade.Id && e.Volume > 0 && e.AllocationId <= GetCurrentAllocation(invoice.InvoiceDate, tradeIdList));
+                        if (Volumes.Count() == 0) Volumes = _db.AllocatedVolumes.Where(e => e.TradeId == Trade.Id && e.Volume > 0);
+                        double? result = (RemainingVolumeToUpdate / Trade.FixedVolume);
+                        int FullAllocations = 0;
+                        if (result.HasValue)
+                        {
+                            FullAllocations = (int)Math.Floor(result.Value);
+                        }
+                        double? PartialVolumeLeft = RemainingVolumeToUpdate - (Trade.FixedVolume * FullAllocations);
+                        var OrderedVolumes = Volumes.OrderByDescending(e => e.AllocationId).ToList();
+                        foreach (var item in OrderedVolumes)
+                        {
+                            item.Volume = 0;
+                        }
+                        int j = 0;
+                        for (int i = 0; i < FullAllocations; i++)
+                        {
+                            OrderedVolumes[i].Volume = Trade.FixedVolume;
+                            j = i;
+                        }
+                        OrderedVolumes[j].Volume = Convert.ToDouble(Math.Round(Convert.ToDecimal(PartialVolumeLeft), 2));
+                        foreach (var item in OrderedVolumes)
+                        {
+                            _db.AllocatedVolumes.Update(item);
+                        }
+                        _db.SaveChanges();
                     }
-                    double? PartialVolumeLeft = RemainingVolumeToUpdate - (Trade.FixedVolume * FullAllocations);
-                    var OrderedVolumes = Volumes.OrderByDescending(e => e.AllocationId).ToList();
-                    foreach (var item in OrderedVolumes)
-                    {
-                        item.Volume = 0;
-                    }
-                    int j = 0;
-                    for (int i = 0; i < FullAllocations; i++)
-                    {
-                        OrderedVolumes[i].Volume = Trade.FixedVolume;
-                        j = i;
-                    }
-                    OrderedVolumes[j].Volume = Convert.ToDouble(Math.Round(Convert.ToDecimal(PartialVolumeLeft),2));
-                    foreach (var item in OrderedVolumes)
-                    {
-                        _db.AllocatedVolumes.Update(item);
-                    }
-                    _db.SaveChanges();
+
                 }
-                
+                var fcControls = _db.FcControls.Where(e => e.Invoiced != true && e.Network == (int)NetworkEnum);
+                foreach (var item in fcControls)
+                {
+                    item.Invoiced = true;
+                    _db.FcControls.Update(item);
+                }
+                _db.SaveChanges();
             }
-                //THIS IS NOT DONE
-            }
-            catch (Exception e )
+            catch (Exception e)
             {
                 throw new ArgumentException(e.Message);
             }
@@ -1150,7 +1156,7 @@ namespace Fuelcards.Repositories
                         var dbTransaction = _db.UkfTransactions.FirstOrDefaultAsync(e => e.TranNoItem.ToString() == transaction.TransactionNumber).Result;
                         dbTransaction.Invoiced = true;
                         dbTransaction.InvoicePrice = transaction.Value;
-                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber.Replace("PF",""));
+                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber.Replace("PF", ""));
                         dbTransaction.Commission = transaction.Commission;
                         _db.UkfTransactions.Update(dbTransaction);
                         _db.SaveChanges();
@@ -1166,7 +1172,7 @@ namespace Fuelcards.Repositories
                         var dbTransaction = _db.TexacoTransactions.FirstOrDefaultAsync(e => e.TranNoItem.ToString() == transaction.TransactionNumber).Result;
                         dbTransaction.Invoiced = true;
                         dbTransaction.InvoicePrice = transaction.Value;
-                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber.Replace("TX",""));
+                        dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber.Replace("TX", ""));
                         dbTransaction.Commission = transaction.Commission;
                         _db.TexacoTransactions.Update(dbTransaction);
                         _db.SaveChanges();
