@@ -350,10 +350,9 @@ namespace Fuelcards.Controllers
                 string GeneralPath = FileHelperForInvoicing.BuidlingPDFFilePath(Invoice, sendEmailInformation.CustomerInvoice.invoiceDate);
                 string file = FileHelperForInvoicing.BuildingFileNameForInvoicing(Invoice, sendEmailInformation.CustomerInvoice.name);
                 string PDF = Path.Combine(GeneralPath, file);
-                string CSVfilePath = ""; // Chuckles will code this!
-
+                string CSVPathInfo = FileHelperForInvoicing.BuildingFilePathForCSV(Invoice, sendEmailInformation.CustomerInvoice.invoiceDate);
                 email.message.AddAttachment(PDF);
-                email.message.AddAttachment(CSVfilePath);
+                email.message.AddAttachment(CSVPathInfo);
                 email.message.SendEmail(); //DO NOT UNCOMMENT THIS UNDER ANY CIRCUMSTANCES.UNLESS THOSE CIRCUMSTANCES ARE A WORKING APP!
 
                 var jsonToReturn = new
