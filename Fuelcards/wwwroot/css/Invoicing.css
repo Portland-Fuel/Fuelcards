@@ -1,9 +1,9 @@
 html, body {
     margin: 0;
-    font-family: 'Calibri';
+    font-family: 'WeirdFont', cursive;
+
     font-size: 14px;
     color: #333;
-    /*background: linear-gradient(to bottom, #c83d3d, #b77275);*/
 }
 
 

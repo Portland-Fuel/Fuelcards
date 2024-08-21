@@ -111,11 +111,18 @@
                     <label for="customerName">Name of Customer:</label>
                     <input type="text" id="customerName" oninput="HandleCustomerNameInput(this)" list="customerOptions" name="customerName" autocomplete="off" required value="">
 
-               
+
                     <datalist id="customerOptions">
                         @{
-                            var customerDictionary = Model.CustomerLists.ToDictionary(e => e.Name, e => e.xeroId);
-                            var sortedCustomerDictionary = customerDictionary.OrderBy(e => e.Key).ToDictionary(e => e.Key, e => e.Value);
+                            // Group by customer name and take the first occurrence for each name
+                            var customerDictionary = Model.CustomerLists
+                            .GroupBy(e => e.Name)
+                            .ToDictionary(g => g.Key, g => g.First().xeroId);
+
+                            // Sort the dictionary by customer name
+                            var sortedCustomerDictionary = customerDictionary
+                            .OrderBy(e => e.Key)
+                            .ToDictionary(e => e.Key, e => e.Value);
                         }
 
                         @foreach (var customer in sortedCustomerDictionary)
@@ -123,6 +130,7 @@
                             <option value="@customer.Key" data-id="@customer.Value"></option>
                         }
                     </datalist>
+
 
            
                     <input type="hidden" id="customerId" name="customerId">
