@@ -82,4 +82,6 @@ public partial class InvoiceReport
     public DateOnly? PayDate { get; set; }
 
     public string? ComPayable { get; set; }
+
+    public string? Customer { get; set; }
 }

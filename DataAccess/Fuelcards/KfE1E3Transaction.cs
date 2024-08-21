@@ -64,4 +64,6 @@ public partial class KfE1E3Transaction
     public double? InvoicePrice { get; set; }
 
     public int? InvoiceNumber { get; set; }
+
+    public double? UnitPrice { get; set; }
 }

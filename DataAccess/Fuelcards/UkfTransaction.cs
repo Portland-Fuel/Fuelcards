@@ -54,4 +54,6 @@ public partial class UkfTransaction
     public double? InvoicePrice { get; set; }
 
     public int? InvoiceNumber { get; set; }
+
+    public double? UnitPrice { get; set; }
 }
