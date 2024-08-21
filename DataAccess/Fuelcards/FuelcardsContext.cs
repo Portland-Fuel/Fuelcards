@@ -165,8 +165,6 @@ public partial class FuelcardsContext : DbContext
 
     public virtual DbSet<XeroCustomer> XeroCustomers { get; set; }
 
-  
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseNpgsql("Server=78.32.37.42;Database=fuelcards;User Id=it;Password=nz2orJEzA5SeKqYFEG4ND88e&B8AGncV!*mq7fv^gz7%7TWZUQ;Port=59734");
@@ -902,6 +900,9 @@ public partial class FuelcardsContext : DbContext
                 .HasColumnName("com_payable");
             entity.Property(e => e.Commission).HasColumnName("commission");
             entity.Property(e => e.Current).HasColumnName("current");
+            entity.Property(e => e.Customer)
+                .HasColumnType("character varying")
+                .HasColumnName("customer");
             entity.Property(e => e.DieselLifted).HasColumnName("diesel_lifted");
             entity.Property(e => e.DieselPrice).HasColumnName("diesel_price");
             entity.Property(e => e.DieselVol).HasColumnName("diesel_vol");
@@ -1150,6 +1151,7 @@ public partial class FuelcardsContext : DbContext
             entity.Property(e => e.TransactonRegistration)
                 .HasMaxLength(12)
                 .HasColumnName("transacton_registration");
+            entity.Property(e => e.UnitPrice).HasColumnName("unit_price");
         });
 
         modelBuilder.Entity<KfE20StoppedCard>(entity =>
@@ -1745,6 +1747,7 @@ public partial class FuelcardsContext : DbContext
             entity.Property(e => e.TranDate).HasColumnName("tran_date");
             entity.Property(e => e.TranNoItem).HasColumnName("tran_no_item");
             entity.Property(e => e.TranTime).HasColumnName("tran_time");
+            entity.Property(e => e.UnitPrice).HasColumnName("unit_price");
             entity.Property(e => e.WeekNo).HasColumnName("week_no");
         });
 
@@ -1814,6 +1817,7 @@ public partial class FuelcardsContext : DbContext
             entity.Property(e => e.TranDate).HasColumnName("tran_date");
             entity.Property(e => e.TranNoItem).HasColumnName("tran_no_item");
             entity.Property(e => e.TranTime).HasColumnName("tran_time");
+            entity.Property(e => e.UnitPrice).HasColumnName("unit_price");
             entity.Property(e => e.WeekNo).HasColumnName("week_no");
         });
 
