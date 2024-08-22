@@ -1,88 +1,72 @@
-﻿@model EDIVM
-
-
-
-
-
+﻿<script src="~/js/edi.js"></script>
 <link href="~/css/edi.css" rel="stylesheet" />
-<script src="~/js/edi.js"></script>
 <div id="EdiLoader" class="loader-container" hidden>
     <div class="loader"></div>
 </div>
-@* <div class="form-container">
-    <h1>Import EDI Files</h1>
-    <form asp-action="MoveFilesToCorrectFolder" asp-controller="Edi" method="post" enctype="multipart/form-data">
-        <div>
-            <input type="file" id="ediFile1" name="Files"  />
-        </div>
-        <div>
-            <input type="file" id="ediFile2" name="Files"  />
-        </div>
-        <div>
-            <input type="file" id="ediFile3" name="Files"  />
-        </div>
-        <div>
-            <input type="file" id="ediFile4" name="Files"  />
-        </div>
-        <button type="submit">Upload Files</button>
-        @if (ViewData["EdiMessage"] != null)
-        {
-            <div class="alert alert-success">
-                @ViewData["EdiMessage"]
-                <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
+<div class="container">
+    <div class="tabs">
+        <button class="tab-button" onclick="showSection('table-section')">Latest Edi Upload</button>
+        <button class="tab-button" onclick="showSection('upload-section')">Upload EDI</button>
+    </div>
+
+
+    <div class="sections">
+        <!-- Table Section -->
+        <div id="table-section" class="section active">
+            <div class="table-container">
+                <button onclick="CheckSites()" class="CheckSitesButton">Check Sites</button>
+                <table id="FailedSitesTable">
+                    <thead>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <h3>Latest Edi Upload</h3>
+                <table id="EdiTable" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Control ID</th>
+                            <th>Day Of Week</th>
+                            <th>Creation Date</th>
+                            <th>Creation Time</th>
+                            <th>Record Count</th>
+                            <th>Total Quantity</th>
+                            <th>Network</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.EDIs)
+                        {
+                            <tr onclick="HighlightRow(this);">
+                                <td>@item.ControlId</td>
+                                <td>@item.DayOfTheWeek</td>
+                                <td>@item.CreationDate.ToString()</td>
+                                <td>@item.CreationTime.ToString()</td>
+                                <td>@item.RecordCount</td>
+                                <td>@item.TotalQuantity</td>
+                                <td data-network="@item.Network"></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-        }
-        @if (ViewData.ModelState.ErrorCount > 0)
-        {
-            <div class="alert alert-danger">
-                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    <p>@error.ErrorMessage</p>
-                }
-                <button type="button" class="close" onclick="this.parentElement.style.display='none';">&times;</button>
+        </div>
+        <div id="upload-section" class="section">
+            <div class="UploadEdi">
+                <h2>Upload EDI File</h2>
+                <form onsubmit="ProcessEdis(event)">
+                    <input type="file" id="ediFile1" name="ediFile1" accept=".txt" onchange="displayFileName(this, 'fileName1')">
+                    <div id="fileName1" class="file-name"></div>
+                    <input type="file" id="ediFile2" name="ediFile2" accept=".txt" onchange="displayFileName(this, 'fileName2')">
+                    <div id="fileName2" class="file-name"></div>
+                    <input type="file" id="ediFile3" name="ediFile3" accept=".txt" onchange="displayFileName(this, 'fileName3')">
+                    <div id="fileName3" class="file-name"></div>
+                    <input type="file" id="ediFile4" name="ediFile4" accept=".txt" onchange="displayFileName(this, 'fileName4')">
+                    <div id="fileName4" class="file-name"></div>
+                    <button type="submit">Process EDI</button>
+                </form>
             </div>
-        }
-    </form>
+        </div>
+
+    </div>
 </div>
- *@
-
-<div class="table-container">
-    <button onclick="CheckSites()" class="CheckSitesButton">Check Sites</button>
-        <table  id="FailedSitesTable">
-            <thead>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    <h3>Latest Edi Upload</h3>
-    <table id="EdiTable" class="data-table">
-        <thead>
-            <tr>
-                <th>Control ID</th>
-                <th>Day Of Week</th>
-                <th>Creation Date</th>
-                <th>Creation Time</th>
-                <th>Record Count</th>
-                <th>Total Quantity</th>
-                <th>Network</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.EDIs)
-            {
-                <tr onclick="HighlightRow(this);">
-                    <td>@item.ControlId</td>
-                    <td>@item.DayOfTheWeek</td>
-                    <td>@item.CreationDate.ToString()</td>
-                    <td>@item.CreationTime.ToString()</td>
-                    <td>@item.RecordCount</td>
-                    <td>@item.TotalQuantity</td>
-                    <td data-network="@item.Network"></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-
-

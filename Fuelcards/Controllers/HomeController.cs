@@ -87,16 +87,11 @@ namespace Fuelcards.Controllers
             }
             return View();
         }
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            if (PFLXeroCustomersData.Count != 0)
-            {
-                await ConnectingToXero.GetFuelcardCustomers(PFLXeroCustomersData, FTCXeroCustomersData, _xeroconnector);
-            }
-
 
             ViewData["Title"] = "Home";
-            return View("/Views/Home/Homepage.cshtml");
+            return View("/Views/Home/Index.cshtml");
         }
         [HttpPost]
         public async Task<JsonResult> GetLink()

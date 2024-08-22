@@ -5,7 +5,6 @@
 <link href="~/css/invoicing.css" rel="stylesheet" />
 <script src="//cdn.datatables.net/2.1.3/js/dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.3/css/dataTables.dataTables.css" />
-
 <script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
 
 <div id="InitialPageLoad">
@@ -42,13 +41,14 @@
 
     </div>
     <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
+    <button onclick="GoTOEmail()" >Go to email</button>
     <h1>Please Select a network to check</h1>
-    <select id="NetworkSelect">
+    <select id="NetworkSelect" onchange="showSelectedNetworkCheckList(this)">
         <option disabled selected value="">Please Select an option to start</option>
-        <option onclick="showSelectedNetworkCheckList(this)" value="Keyfuels">Keyfuels</option>
-        <option onclick="showSelectedNetworkCheckList(this)" value="Texaco">Texaco</option>
-        <option onclick="showSelectedNetworkCheckList(this)" value="UkFuels">UkFuels</option>
-        <option onclick="showSelectedNetworkCheckList(this)" value="FuelGenie">FuelGenie</option>
+        <option  value="Keyfuels">Keyfuels</option>
+        <option  value="Texaco">Texaco</option>
+        <option value="UkFuels">UkFuels</option>
+        <option  value="FuelGenie">FuelGenie</option>
     </select>
 
     <div class="NavOptions">

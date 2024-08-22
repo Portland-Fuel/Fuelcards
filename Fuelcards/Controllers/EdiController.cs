@@ -13,45 +13,31 @@ namespace Fuelcards.Controllers
         {
             _db = queriesRepository;
         }
-
         [HttpPost]
-        public async Task<IActionResult> MoveFilesToCorrectFolder(FileUploadViewModel model)
+        [Route("EdiController/process")]
+        public async Task<IActionResult> Process(IFormFile ediFile1, IFormFile ediFile2, IFormFile ediFile3, IFormFile ediFile4)
         {
-            var EdiModel = HomeController.LoadEdiVmModel();
+            var files = new[] { ediFile1, ediFile2, ediFile3, ediFile4 };
+            var fileNames = new List<string>();
 
-            if (model.Files == null || model.Files.Count != 4)
+            foreach (var file in files)
             {
-                ModelState.AddModelError(string.Empty, "Four files are required.");
-                return View("/Views/Edi/Edi.cshtml", EdiModel);
+                if (file != null && file.Length > 0)
+                {
+                    // Here we can save the file to a directory
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", file.FileName);
 
-            }
-
-            var uploadPath = @"C:\Portland\Fuel Trading Company\Fuelcards - Fuelcards\EDIFilesUpload";
-            if (!Directory.Exists(uploadPath))
-            {
-                Directory.CreateDirectory(uploadPath);
-            }
-
-            foreach (var file in model.Files)
-            {
-                    try
+                    using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        var filePath = Path.Combine(uploadPath, file.FileName);
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
+                        await file.CopyToAsync(stream);
                     }
-                    catch (Exception ex)
-                    {
-                        ModelState.AddModelError(string.Empty, $"Internal server error: {ex.Message}");
-                        return View("UploadFiles", model);
-                    }
+
+                    fileNames.Add(file.FileName);
+                }
             }
 
-            ViewData["EdiMessage"]= "Files have been uploaded successfully!";
-            return View("/Views/Edi/Edi.cshtml", EdiModel);
-
+            // Return a JSON response with the processed file names
+            return Json(new { message = "Files processed successfully", files = fileNames });
         }
 
         [HttpPost]
@@ -94,9 +80,4 @@ namespace Fuelcards.Controllers
         }   
     }
 
-
-    public class FileUploadViewModel
-    {
-        public List<IFormFile> Files { get; set; }
-    }
 }

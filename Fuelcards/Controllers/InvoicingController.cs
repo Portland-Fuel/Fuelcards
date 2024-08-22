@@ -97,7 +97,7 @@ namespace Fuelcards.Controllers
                         <style>
                             body {{
                                 font-family: Arial, sans-serif;
-                                color: #333;
+                                color: #333 !important;
                             }}
       
                             .header {{
@@ -271,10 +271,17 @@ namespace Fuelcards.Controllers
 
         public string GetNetworkName(string Network)
         {
-            switch (Network)
+            switch (Network.ToLower())
             {
-                case "Texaco":
+                case "texaco":
                     return "FastFuel";
+
+                case "ukfuel":
+                    return "UK Fuels";
+                case "keyfuels":
+                    return "Keyfuels";
+                case "keyfuel":
+                    return "Keyfuels";
                 default:
                     return Network;
             }

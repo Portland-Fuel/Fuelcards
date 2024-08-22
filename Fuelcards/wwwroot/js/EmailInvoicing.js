@@ -1,8 +1,7 @@
-async function StartEmailing(Btn) {
+ async function StartEmailing(Btn) {
     Btn.hidden = true;
     startInvoicingLoader();
 
-    selectedNetwork = "Texaco";
     var Customers = getCustomerListFromNetwork(selectedNetwork);    
     var FirstCustomer = Customers[0];
     await loadDetailsForNextCustomer(FirstCustomer);
@@ -164,17 +163,17 @@ async function getCustomerInvoicePng(Customer) {
             contentType: 'application/json',
             statusCode: {
                 400: async function() {
-                    const errorMessage = 'Invalid input data.';
+                    var errorMessage = 'Invalid input data.';
                     console.error(errorMessage);
                     await showErrorBox(errorMessage);
                 },
                 404: async function() {
-                    const errorMessage = 'Invoice not found.';
+                    var errorMessage = 'Invoice not found.';
                     console.error(errorMessage);
                     await showErrorBox(errorMessage);
                 },
                 500:  async function() {
-                    const errorMessage = 'Server error occurred.';
+                    var errorMessage = 'Server error occurred.';
                     console.error(errorMessage);
                     await showErrorBox(errorMessage);
                 }

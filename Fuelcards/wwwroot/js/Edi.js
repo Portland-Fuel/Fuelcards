@@ -1,39 +1,22 @@
-$(document).ready(function() {
-    $('#importButton').click(async function() {
-        var files = [];
-        files.push($('#ediFile1')[0].files[0]);
-        files.push($('#ediFile2')[0].files[0]);
-        files.push($('#ediFile3')[0].files[0]);
-        files.push($('#ediFile4')[0].files[0]);
+function showSection(sectionId) {
+    const sections = document.querySelectorAll('.section');
+    const currentSection = document.querySelector('.section.active');
 
-        var formData = new FormData();
-        for (var i = 0; i < files.length; i++) {
-            if (!files[i]) {
-                alert('Please select all four files.');
-                return;
-            }
-            formData.append('files', files[i]);
-        }
+    // Remove active class from current section and add slide-out animation
+    currentSection.classList.add('slide-out');
+    currentSection.classList.remove('active');
 
-        await $.ajax({
-            url: '/api/EdiController/MoveFilesToCorrectFolder',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                Toast.fire({
-                    icon: "success",
-                    title: "Files have been moved!",
-                    text: "Files have been moved to the correct folder. Please wait for the system to import the files."
-                });
-            },
-            error: function() {
-                alert('Error uploading files.');
-            }
+    // Wait for the slide-out animation to finish before showing the new section
+    setTimeout(() => {
+        sections.forEach(section => {
+            section.classList.remove('active', 'slide-out', 'slide-in');
         });
-    });
-});
+
+        // Show the clicked section with slide-in animation
+        const newSection = document.getElementById(sectionId);
+        newSection.classList.add('active', 'slide-in');
+    }, 300); // Duration matches the CSS animation time
+}
 document.addEventListener('DOMContentLoaded', function () {
     ShowBackButton();
     const networkCells = document.querySelectorAll('td[data-network]');
@@ -62,6 +45,42 @@ document.addEventListener('DOMContentLoaded', function () {
         cell.textContent = networkName;
     });
 });
+
+function ProcessEdis(event) {
+    event.preventDefault();
+
+    // Create a FormData object to hold the files
+    const formData = new FormData();
+    for (let i = 1; i <= 4; i++) {
+        const fileInput = document.getElementById(`ediFile${i}`);
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append(`ediFile${i}`, fileInput.files[0]);
+        }
+    }
+
+    $.ajax({
+        url: '/EdiController/process',
+        type: 'POST',
+        data: formData,
+        processData: false,  // Don't process the files (needed for FormData)
+        contentType: false,  // Don't set contentType (needed for FormData)
+        dataType: 'json',
+        success: function (data) {
+            alert('Files processed successfully: ' + JSON.stringify(data));
+        },
+        error: function (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                backdrop: false,
+                icon: "error",
+                title: "Sorry, there was an error processing the files",
+                text: 'Error uploading files: ' + error.responseText,
+                footer: '<a href="https://your-error-reporting-link.com" target="_blank">Report it here!</a>'
+            });
+        }
+    });
+}
+
 
 
 function HighlightRow(RowElement){
@@ -111,6 +130,15 @@ async function CheckSites() {
         }
     });
 }
+function displayFileName(inputElement, displayElementId) {
+    const file = inputElement.files[0]; // Get the first selected file
+    if (file) {
+        document.getElementById(displayElementId).textContent = `Selected file: ${file.name}`;
+    } else {
+        document.getElementById(displayElementId).textContent = '';
+    }
+}
+
 async function GetListOfRecentControlIDs(){
     var Table = document.getElementById('EdiTable');
     var tbody = Table.getElementsByTagName('tbody')[0];
@@ -232,8 +260,6 @@ async function ShowFailedSites(SiteResponse){
         })(siteData); 
         tbody.appendChild(Row);
     }
-    
-   
 }
 async function RunThroughFailedSites(sitecode){
     var Table = document.getElementById('FailedSitesTable');
