@@ -175,29 +175,6 @@ button {
     cursor: pointer;
 }
 
-
-
-.loader {
-    width: 50px;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    border: 8px solid rgb(224, 237, 241);
-    border-right-color: rgb(214, 92, 102);
-    animation: l2 1s infinite linear;
-  }
-  @keyframes l2 {to{transform: rotate(1turn)}}
-.loader-container {
-    display: flex;
-    justify-content: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 40%;
-    z-index: 1000;
-    align-items: center;
-}
-
 .UploadEdi {
     display: flex;
     flex-direction: column;
@@ -282,3 +259,194 @@ button {
     transform: translateY(-2px);
 }
 
+.dots::after {
+    content: "";
+    animation: dots 1.5s infinite steps(4);
+}
+
+@keyframes fade {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+@keyframes dots {
+    0%, 20% {
+        content: "";
+    }
+    40% {
+        content: ".";
+    }
+    60% {
+        content: "..";
+    }
+    80%, 100% {
+        content: "...";
+    }
+}
+
+
+* {
+    box-sizing: border-box;
+}
+
+.s2 {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    background-color: transparent;
+    top: 50vh;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.s1 {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    top: 50vh;
+    left: 50%;
+    transform-origin: center;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background-color: transparent;
+}
+
+.bigcon {
+    position: absolute;
+    height: 95px;
+    width: 95px;
+    top: 50vh;
+    left: 50%;
+    transform-origin: center;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    background-color: transparent;
+    animation: bigcon 2s infinite linear;
+    animation-delay: 0.25s;
+}
+
+.b {
+    border-radius: 50%;
+    position: absolute;
+}
+
+.s {
+    width: 25px;
+    height: 25px;
+    animation: small 2s infinite ease;
+    box-shadow: 0px 2px rgba(0,0,0,0.3);
+}
+
+.s:nth-child(1) {
+    top: 0%;
+    left: 0%;
+}
+
+.s:nth-child(2) {
+    top: 0%;
+    right: 0%;
+}
+
+.s:nth-child(3) {
+    right: 0%;
+    bottom: 0%;
+}
+
+.s:nth-child(4) {
+    bottom: 0%;
+    left: 0%;
+}
+
+.big {
+    width: 20px;
+    height: 20px;
+    border-radius: 15px;
+    box-shadow:0px 0px 10px #f85454, 0px 0px 20px #f85454, 0px 0px 30px #f85454, 0px 0px 50px #f85454, 0px 0px 60px #f85454 ;
+    z-index: 1;
+    background-color: #912222;
+    animation: bigball 1s infinite linear;
+}
+
+.sb1 {
+    animation-delay: -1.75s;
+}
+
+.sb6 {
+    animation-delay: -1.5s;
+}
+
+.sb2 {
+    animation-delay: -1.25s;
+}
+
+.sb7 {
+    animation-delay: -1s;
+}
+
+.sb3 {
+    animation-delay: -0.75s;
+}
+
+.sb8 {
+    animation-delay: -0.5s;
+}
+
+.sb4 {
+    animation-delay: -0.25s;
+}
+
+.sb5 {
+    animation-delay: 0s;
+}
+
+.loader--control-button {
+    position: absolute;
+    top: 70vh;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+@keyframes bigcon {
+    0% {
+        transform-origin: center;
+        transform: translate(-50%, -50%) rotate(45deg);
+    }
+    100% {
+        transform-origin: center;
+        transform: translate(-50%, -50%) rotate(405deg);
+    }
+}
+
+@keyframes small {
+    0% {
+        transform: scale(1);
+        background-color: #f85454;
+    }
+    10% {
+        transform: scale(1.3);
+        background-color: #912222;
+    }
+    15% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1);
+        background-color: #f85454;
+    }
+    100% {
+        transform: scale(1);
+        background-color: #f85454;
+    }
+}

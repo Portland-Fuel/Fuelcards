@@ -1,51 +1,91 @@
-﻿using Fuelcards.Models;
+﻿
+
+using DataAccess.Repositorys.IRepositorys;
+using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fuelcards.Controllers
 {
     [Route("EdiController/[action]")]
-    public class EdiController : Controller
+    public class EdiController(IFuelcardUnitOfWork fuelcardUnitOfWork, IQueriesRepository queriesRepository) : Controller
     {
-        private readonly IQueriesRepository _db;
-
-        public EdiController(IQueriesRepository queriesRepository)
-        {
-            _db = queriesRepository;
-        }
+        private readonly IFuelcardUnitOfWork _fuelcardRepo = fuelcardUnitOfWork;
+        private readonly IQueriesRepository _db = queriesRepository;
         [HttpPost]
-        [Route("EdiController/process")]
-        public async Task<IActionResult> Process(IFormFile ediFile1, IFormFile ediFile2, IFormFile ediFile3, IFormFile ediFile4)
+        public JsonResult MoveFilesToCorrectFolder(FileUploadViewModel model)
         {
-            var files = new[] { ediFile1, ediFile2, ediFile3, ediFile4 };
-            var fileNames = new List<string>();
-
-            foreach (var file in files)
+            try
             {
-                if (file != null && file.Length > 0)
+                if (model == null || model.Files == null || !model.Files.Any())
                 {
-                    // Here we can save the file to a directory
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", file.FileName);
+                    throw new Exception("No files uploaded");
+                }
 
+                string uploadPath = @"C:\Portland\Fuel Trading Company\Fuelcards - Fuelcards\EDIFilesUpload";
+                string archivePath = @"C:\Portland\Fuel Trading Company\Fuelcards - Fuelcards\EDIFilesArchive";
+
+                // Ensure the upload and archive directories exist
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                if (!Directory.Exists(archivePath))
+                {
+                    Directory.CreateDirectory(archivePath);
+                }
+
+                foreach (var file in model.Files)
+                {
+                    string filePath = Path.Combine(uploadPath, file.FileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        await file.CopyToAsync(stream);
+                        file.CopyTo(stream);
                     }
-
-                    fileNames.Add(file.FileName);
                 }
-            }
 
-            // Return a JSON response with the processed file names
-            return Json(new { message = "Files processed successfully", files = fileNames });
+                // Perform EDI import operations here (uncomment when ready)
+                // EDIs.ImportAllEdi(_fuelcardRepo, uploadPath);
+
+                var filesInUpload = Directory.GetFiles(uploadPath);
+                foreach (var filePath in filesInUpload)
+                {
+                    string fileName = Path.GetFileName(filePath);
+                    if (model.Files.Any(f => f.FileName == fileName))
+                    {
+                        string archiveFilePath = Path.Combine(archivePath, fileName);
+                        if (System.IO.File.Exists(archiveFilePath))
+                        {
+                            System.IO.File.Delete(archiveFilePath); // Optional: Delete existing file before moving, if necessary
+                        }
+                        System.IO.File.Move(filePath, archiveFilePath);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"File {fileName} not handled.");
+                    }
+                }
+
+                return Json("Files processed successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you could use a logging library like NLog, Serilog, etc.)
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                Response.StatusCode = 500;
+                return Json(new { error = ex.Message });
+            }
         }
 
+
+
         [HttpPost]
-        public JsonResult FindAnyFailedSites([FromBody]string[] ControlIDs)
+        public JsonResult FindAnyFailedSites([FromBody] string[] ControlIDs)
         {
             List<Site> FailedSites = new();
 
-            List<Site> AllSites = _db.GetAllTransactions(ControlIDs.Select(e=> Convert.ToInt32(e)).ToList());
+            List<Site> AllSites = _db.GetAllTransactions(ControlIDs.Select(e => Convert.ToInt32(e)).ToList());
             foreach (var item in AllSites)
             {
                 if (!_db.CheckSite(item))
@@ -59,8 +99,8 @@ namespace Fuelcards.Controllers
                 }
             }
 
-          
-            
+
+
             return Json(FailedSites);
         }
 
@@ -77,7 +117,10 @@ namespace Fuelcards.Controllers
                 Response.StatusCode = 500;
                 return Json("Error:" + e.Message);
             }
-        }   
+        }
     }
-
+    public class FileUploadViewModel
+    {
+        public List<IFormFile> Files { get; set; }
+    }
 }

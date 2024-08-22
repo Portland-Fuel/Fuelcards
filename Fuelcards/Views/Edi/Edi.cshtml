@@ -1,9 +1,25 @@
 ﻿<script src="~/js/edi.js"></script>
 <link href="~/css/edi.css" rel="stylesheet" />
-<div id="EdiLoader" class="loader-container" hidden>
-    <div class="loader"></div>
-</div>
+<link rel="shortcut icon" href="https://cdn.icon-icons.com/icons2/3455/PNG/96/download_folder_file_icon_219503.png" type="image/x-icon" />
 <div class="container">
+
+    <div hidden class="InvoicingLoaderContainer" id="EdiLoader">
+        <div class="s1">
+            <div class="s b sb1"></div>
+            <div class="s b sb2"></div>
+            <div class="s b sb3"></div>
+            <div class="s b sb4"></div>
+        </div>
+        <div class="s2">
+            <div class="s b sb5"></div>
+            <div class="s b sb6"></div>
+            <div class="s b sb7"></div>
+            <div class="s b sb8"></div>
+        </div>
+        <div class="bigcon">
+            <div class="big b"></div>
+        </div>
+    </div>
     <div class="tabs">
         <button class="tab-button" onclick="showSection('table-section')">Latest Edi Upload</button>
         <button class="tab-button" onclick="showSection('upload-section')">Upload EDI</button>
@@ -64,6 +80,7 @@
                     <input type="file" id="ediFile4" name="ediFile4" accept=".txt" onchange="displayFileName(this, 'fileName4')">
                     <div id="fileName4" class="file-name"></div>
                     <button type="submit">Process EDI</button>
+                  
                 </form>
             </div>
         </div>

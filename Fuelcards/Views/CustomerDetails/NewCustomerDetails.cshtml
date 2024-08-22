@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_CustDetailsLayout.cshtml";
     var jsonModel = Newtonsoft.Json.JsonConvert.SerializeObject(Model);
 }
+<link rel="shortcut icon" href="https://cdn.icon-icons.com/icons2/1368/PNG/512/-customer-service-agent_89777.png" type="image/x-icon" />
 
 <script>
     var model = JSON.parse('@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(jsonModel))');

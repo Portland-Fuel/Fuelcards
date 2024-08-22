@@ -60,7 +60,9 @@ namespace PortlandXeroLib
             string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             if (environment == "Development")
             {
-                return "https://localhost:7110/Authorization/Callback";
+                //return "https://localhost:44337/Authorization/Callback";
+                 return "https://localhost:7110/Authorization/Callback";
+
                 //return "https://192.168.0.17:89/Authorization/Callback";
 
             }

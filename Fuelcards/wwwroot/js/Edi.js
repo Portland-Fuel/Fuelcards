@@ -46,39 +46,61 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-function ProcessEdis(event) {
+function startEdiLoader(){
+    document.getElementById('EdiLoader').hidden = false;
+}
+function stopEdiLoader(){
+    document.getElementById('EdiLoader').hidden = true;
+}
+
+async function ProcessEdis(event) {
+    startEdiLoader();
     event.preventDefault();
 
-    // Create a FormData object to hold the files
-    const formData = new FormData();
-    for (let i = 1; i <= 4; i++) {
-        const fileInput = document.getElementById(`ediFile${i}`);
-        if (fileInput && fileInput.files.length > 0) {
-            formData.append(`ediFile${i}`, fileInput.files[0]);
+    var files = [];
+    files.push($('#ediFile1')[0].files[0]);
+    files.push($('#ediFile2')[0].files[0]);
+    files.push($('#ediFile3')[0].files[0]);
+    files.push($('#ediFile4')[0].files[0]);
+
+    var formData = new FormData();
+    for (var i = 0; i < files.length; i++) {
+        if (files[i]) {  // Check if file exists before adding it
+            formData.append('files', files[i]);
         }
     }
 
-    $.ajax({
-        url: '/EdiController/process',
-        type: 'POST',
-        data: formData,
-        processData: false,  // Don't process the files (needed for FormData)
-        contentType: false,  // Don't set contentType (needed for FormData)
-        dataType: 'json',
-        success: function (data) {
-            alert('Files processed successfully: ' + JSON.stringify(data));
-        },
-        error: function (error) {
-            console.error('Error:', error);
-            Swal.fire({
-                backdrop: false,
-                icon: "error",
-                title: "Sorry, there was an error processing the files",
-                text: 'Error uploading files: ' + error.responseText,
-                footer: '<a href="https://your-error-reporting-link.com" target="_blank">Report it here!</a>'
-            });
-        }
-    });
+    try {
+        await $.ajax({
+            url: '/EdiController/MoveFilesToCorrectFolder',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                Toast.fire({
+                    icon: "success",
+                    title: "Files have been processed",
+                    text: "All the files should be processed successfully and will be archived in the path C:\\Portland\\Fuel Trading Company\\Fuelcards - Fuelcards\\EDIFilesArchive."
+                });
+            },
+            error: function (jqXHR) {
+                var errorMessage = jqXHR.responseText || 'An unknown error occurred.';
+                Toast.fire({
+                    icon: "error",
+                    text: errorMessage,
+                });
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        Toast.fire({
+            icon: "error",
+            title: error.responseText,
+        });
+    } finally {
+        stopEdiLoader();
+    }
 }
 
 

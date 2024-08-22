@@ -1,5 +1,7 @@
 ﻿using DataAccess.Cdata;
 using DataAccess.Fuelcards;
+using DataAccess.Repositorys.IRepositorys;
+using DataAccess.Repositorys.UnitOfWork;
 using DataAccess.Tickets;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -24,6 +26,7 @@ namespace Fuelcards
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSignalR();
+            services.AddScoped<IFuelcardUnitOfWork, FuelcardUnitOfWork>();
             services.AddAuthentication(Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"));
             services.AddDbContext<CDataContext>(options => options.UseNpgsql(

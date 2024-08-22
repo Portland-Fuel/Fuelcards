@@ -6,6 +6,7 @@
 <script src="//cdn.datatables.net/2.1.3/js/dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.3/css/dataTables.dataTables.css" />
 <script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
+<link rel="shortcut icon" href="https://cdn.icon-icons.com/icons2/574/PNG/96/Invoicing_icon-icons.com_54813.png" type="image/x-icon" />
 
 <div id="InitialPageLoad">
     <div class="container">
@@ -137,20 +138,18 @@
             <div class="pausing-text">Pausing<span class="dots"></span></div>
         </div>
     </div>
-   
-
-
 </div>
 
 
 <div hidden class="LargeTableDiv" id="InvoiceReportSection">
     <div class="Grouping">
         <button class="button" onclick="LoadInvoiceReport()">Load Invoice Report</button>
+        <button id="exportTableButton" onclick="exportTableToExcel()">Export to Excel</button>
         <button class="button" onclick="ContinueAfterInvoiceReport()">Continue</button>
     </div>
     <div class="table-container">
-        <button id="exportTableButton" onclick="exportTableToExcel()">Export to Excel</button>
         <table id="InvoiceReportTable">
+
             <thead>
             </thead>
             <tbody>
@@ -208,19 +207,3 @@
         </div>
     </div>
 </div>
-<script>
-    function exportTableToExcel() {
-        // Select the table
-        var table = document.getElementById('InvoiceReportTable');
-
-        // Create a new workbook and add a worksheet
-        var workbook = XLSX.utils.book_new();
-        var worksheet = XLSX.utils.table_to_sheet(table);
-
-        // Append the worksheet to the workbook
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'InvoiceReport');
-
-        // Export the workbook to an Excel file
-        XLSX.writeFile(workbook, 'InvoiceReport.xlsx');
-    }
-</script>

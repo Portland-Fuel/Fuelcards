@@ -6,7 +6,20 @@ window.onload = function () {
 
     ShowBackButton();
 }
+function exportTableToExcel(tableID) {
+    // Select the table
+    var table = document.getElementById(tableID);
 
+    // Create a new workbook and add a worksheet
+    var workbook = XLSX.utils.book_new();
+    var worksheet = XLSX.utils.table_to_sheet(table);
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'InvoiceReport');
+
+    // Export the workbook to an Excel file
+    XLSX.writeFile(workbook, 'InvoiceReport.xlsx');
+}
 function GoTOEmail(){
     document.getElementById("EmailOutSection").hidden = false;
     document.getElementById("InvoiceSection").hidden = true;
