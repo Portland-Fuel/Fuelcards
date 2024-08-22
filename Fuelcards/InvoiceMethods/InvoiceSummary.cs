@@ -110,7 +110,17 @@ namespace Fuelcards.InvoiceMethods
                         };
 
                     }
-                    
+                    if (network == EnumHelper.Network.Texaco)
+                    {
+                        bandKey = transaction.band.ToString() switch
+                        {
+                            "8" => "Sainsburys",
+                            "9" => "Tesco",
+                            _ => ""
+                        };
+
+                    }
+
                     if (!dieselTransactionsByBand.ContainsKey(bandKey))
                     {
                         dieselTransactionsByBand[bandKey] = new List<GenericTransactionFile>();

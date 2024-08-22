@@ -63,6 +63,18 @@ html, body {
 .button.active {
     animation: flash 1s infinite;
 }
+#exportTableButton {
+    background-color: #4b7baa;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+    #exportTableButton:hover {
+        background-color: #194979;
+        color: #f8f9fa;
+    }
 .CheckListContainer .FailedSitesButton {
     background-color: #c83d3d;
     color: white;
@@ -71,7 +83,6 @@ html, body {
     border: none;
     cursor: pointer;
     margin: 10px;
-
 }
 .CheckListContainer .FailedSitesButton:hover {
     background-color: #a31e1e;

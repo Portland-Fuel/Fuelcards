@@ -84,6 +84,8 @@ namespace Fuelcards.Controllers
             if (PFLXeroCustomersData.Count == 0)
             {
                 await ConnectingToXero.GetFuelcardCustomers(PFLXeroCustomersData, FTCXeroCustomersData, _xeroconnector);
+                InvoicingController.reportList = new();
+                InvoicingController.invoices = new();
             }
             return View();
         }

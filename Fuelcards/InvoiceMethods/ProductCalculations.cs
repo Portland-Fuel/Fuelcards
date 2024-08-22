@@ -174,8 +174,8 @@ namespace Fuelcards.InvoiceMethods
                         //return NewValue2 * 100;
                         return UnitPrice;
                     case EnumHelper.Network.Texaco:
-                        if (data.cost > 500) data.cost = data.cost / 100;
-                        double? NewValue3 = 1.2 * (data.cost) / 100;
+                         data.cost = data.cost / 100;
+                        double? NewValue3 = 1.2 * (data.cost*100) / 100;
                         var price2 =  NewValue3/data.quantity;
                         return price2;
                     case EnumHelper.Network.Fuelgenie:

@@ -67,7 +67,8 @@ namespace Fuelcards.Controllers
                 checks.KeyfuelsDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Keyfuels);
                 checks.UkFuelDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.UkFuel);
                 checks.TexacoDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Texaco);
-
+                InvoicingController.reportList = new();
+                InvoicingController.invoices = new();
                 return Json(checks);
             }
             catch (Exception e)
@@ -81,11 +82,12 @@ namespace Fuelcards.Controllers
         {
             try
             {
+                var emailInfo = _db.AllEmail((int)customerInvoice.account);
                 // Define variables for to, cc, bcc, and subject
-                string to = "Hello"; // Replace with actual customer email
-                string cc = "why you reading this"; // Replace with actual cc recipients
-                string bcc = "plonkers"; // Replace with actual bcc recipients
-                string subject = "Your Portland Fuelcard Invoice"; // Replace with actual subject
+                string to = emailInfo.To; // Replace with actual customer email
+                string cc = emailInfo.Cc; // Replace with actual cc recipients
+                string bcc = emailInfo.Bcc; // Replace with actual bcc recipients
+                string subject = $"Portland Fuelcard Invoice for {customerInvoice.name}"; // Replace with actual subject
 
                 // Define the HTML email body
                 string html = $@"
@@ -197,6 +199,8 @@ namespace Fuelcards.Controllers
                     throw new InventoryItemCodeNotInDb(e.Message.Split(':')[1]);
                 }
                 _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network == EnumHelper.NetworkEnumFromString(Network)).ToList(), _db);
+                InvoicingController.reportList = new();
+                InvoicingController.invoices = new();
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)
@@ -356,10 +360,9 @@ namespace Fuelcards.Controllers
                 string GeneralPath = FileHelperForInvoicing.BuidlingPDFFilePath(Invoice, sendEmailInformation.CustomerInvoice.invoiceDate);
                 string file = FileHelperForInvoicing.BuildingFileNameForInvoicing(Invoice, sendEmailInformation.CustomerInvoice.name);
                 string PDF = Path.Combine(GeneralPath, file);
-                string CSVfilePath = ""; // Chuckles will code this!
-
+                string CSVPathInfo = FileHelperForInvoicing.BuildingFilePathForCSV(Invoice, sendEmailInformation.CustomerInvoice.invoiceDate);
                 email.message.AddAttachment(PDF);
-                email.message.AddAttachment(CSVfilePath);
+                email.message.AddAttachment(CSVPathInfo);
                 email.message.SendEmail(); //DO NOT UNCOMMENT THIS UNDER ANY CIRCUMSTANCES.UNLESS THOSE CIRCUMSTANCES ARE A WORKING APP!
 
                 var jsonToReturn = new
