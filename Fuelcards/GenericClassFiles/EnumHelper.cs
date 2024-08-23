@@ -36,7 +36,6 @@ namespace Fuelcards.GenericClassFiles
             Sainsburys,
             All,
             None
-
         }
         public enum Network
         {
