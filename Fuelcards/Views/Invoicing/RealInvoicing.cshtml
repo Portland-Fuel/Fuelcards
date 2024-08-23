@@ -7,7 +7,9 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.3/css/dataTables.dataTables.css" />
 <script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
 <link rel="shortcut icon" href="https://cdn.icon-icons.com/icons2/574/PNG/96/Invoicing_icon-icons.com_54813.png" type="image/x-icon" />
-
+<div class="TopRight">
+    <div onclick="DevMode()" class="square"></div>
+</div>
 <div id="InitialPageLoad">
     <div class="container">
         <div class="loader">
@@ -38,11 +40,11 @@
 
 </div>
 <div hidden class="NetworkToInvoice" id="NetworkToInvoice">
-    <div class="TopLeft">
-
-    </div>
+    
     <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
-    <button onclick="GoTOEmail()" >Go to email</button>
+    <button hidden class="DevMode" onclick="GoTOEmail()">Go to email</button>
+    <button hidden class="DevMode" onclick="GoToInvoice()">Go to Invoice</button>
+
     <h1>Please Select a network to check</h1>
     <select id="NetworkSelect" onchange="showSelectedNetworkCheckList(this)">
         <option disabled selected value="">Please Select an option to start</option>

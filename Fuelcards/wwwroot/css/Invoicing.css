@@ -46,6 +46,8 @@ html, body {
 .CheckListContainer {
     margin: auto;
     text-align: center;
+    position: relative;
+    z-index: 1;
 }
 .button{
     background-color: #4b7baa;
@@ -181,6 +183,8 @@ html, body {
     height: 100vh;
     flex-direction: column;
     width: 100%;
+    position: relative;
+    z-index: 1;
 }
 .CustomerDetails{
     display: flex;
@@ -388,6 +392,8 @@ html, body {
     width: 100%;
     height: 100vh;
     box-sizing: border-box;
+    position: relative;
+    z-index: 1;
 }
 .EmailOutSection button{
     background-color: #194979;
@@ -417,13 +423,37 @@ html, body {
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
-TopLeft{
+.TopRight{
     display: flex;
-    position: sticky;
+    justify-content: flex-end;
     width: 100%;
-    margin-bottom: 10px;
+    position: absolute;
+    height: 25%;
+    z-index: 0;
 }
 
+
+.square {
+    width: 50px;  
+    height: 50px;
+    background-color: transparent; 
+}
+
+
+.DevMode{
+    background-color: #c83d3d;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+}
+
+.DevMode:hover{
+    background-color: #a31e1e;
+    color: white;
+}
 .EmailOutSection .CustomerDetails-item {
     background-color: transparent;
     width: 100%;

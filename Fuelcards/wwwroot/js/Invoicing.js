@@ -6,6 +6,28 @@ window.onload = function () {
 
     ShowBackButton();
 }
+
+
+let DevModeCount = 0;
+function DevMode() {
+    DevModeCount++;
+    if (DevModeCount == 5) {
+        Swal.fire({
+            title: 'Dev Mode',
+            text: 'Dev Mode Activated',
+            icon: 'info',
+            confirmButtonText: 'Cool'
+        })
+
+        var DevButtons = document.getElementsByClassName("DevMode");
+        for (var i = 0; i < DevButtons.length; i++) {
+            DevButtons[i].hidden = false;
+        }
+    }
+
+
+}
+
 function exportTableToExcel(tableID) {
     // Select the table
     var table = document.getElementById(tableID);
@@ -23,6 +45,13 @@ function exportTableToExcel(tableID) {
 function GoTOEmail(){
     document.getElementById("EmailOutSection").hidden = false;
     document.getElementById("InvoiceSection").hidden = true;
+    document.getElementById("CheckListContainer").hidden = true;
+    document.getElementById("NetworkToInvoice").hidden = true;
+}
+
+function GoToInvoice(){
+    document.getElementById("EmailOutSection").hidden = true;
+    document.getElementById("InvoiceSection").hidden = false;
     document.getElementById("CheckListContainer").hidden = true;
     document.getElementById("NetworkToInvoice").hidden = true;
 }
@@ -153,6 +182,7 @@ function goBackFromNetworkCheck(buttonEle) {
 
 }
 async function showSelectedNetworkCheckList(selectElement) {
+    HideBackButton();
     const selectedValue = selectElement.value;
     selectedNetwork = selectedValue;
     setModelAsGlobalJson();
@@ -420,6 +450,7 @@ async function selectAllCheckBoxes() {
 //InvoiceSectionFunctions
 
 async function ApproveButtonClick() {
+    ShowBackButton();
     document.getElementById("ApproveButton").hidden = true;
     document.getElementById("InvoiceSection").hidden = false;
     document.getElementById("CheckListContainer").hidden = true;
@@ -440,13 +471,24 @@ async function stopInvoicingLoader() {
   
 }
 async function StartInvoicing(btn) {
-    startInvoicingLoader(true);
-    document.getElementById("StartInvoicingBTN").hidden = true;
-    document.getElementById("ResumeInvoicingBTN").hidden = true;
-    Invoicing = true;
-    var CustList = await getCustomerListFromNetwork(selectedNetwork);
+    try{
+        startInvoicingLoader(true);
+        document.getElementById("StartInvoicingBTN").hidden = true;
+        document.getElementById("ResumeInvoicingBTN").hidden = true;
+        Invoicing = true;
+        var CustList = await getCustomerListFromNetwork(selectedNetwork);
+        if(CustList.length == 0){
+            throw new Error("No Customers to Invoice");
+        }
+        await InvoiceCustomers(CustList);
+    }
+    catch(error){
+        showErrorBox("Error Starting Invoicing: " + error);
+    }
+    finally{
+        stopInvoicingLoader();
+    }
 
-    await InvoiceCustomers(CustList);
 }
 let currentCustomerIndex = 0;
 async function InvoiceCustomers(CustList, startIndex = 0) {

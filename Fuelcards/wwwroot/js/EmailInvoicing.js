@@ -1,13 +1,23 @@
  async function StartEmailing(Btn) {
-    Btn.hidden = true;
-    startInvoicingLoader();
-
-    var Customers = getCustomerListFromNetwork(selectedNetwork);    
-    var FirstCustomer = Customers[0];
-    await loadDetailsForNextCustomer(FirstCustomer);
-    var Count = document.getElementById('CountOfCustomersToBeEmailed');
-    Count.textContent = Customers.length;
-    stopInvoicingLoader();
+    try {
+        Btn.hidden = true;
+        startInvoicingLoader();
+    
+        var Customers = getCustomerListFromNetwork(selectedNetwork);    
+        var FirstCustomer = Customers[0];
+        await loadDetailsForNextCustomer(FirstCustomer);
+        var Count = document.getElementById('CountOfCustomersToBeEmailed');
+        Count.textContent = Customers.length;
+        stopInvoicingLoader();
+    }
+    catch(err){
+        showErrorBox(err);
+        Btn.hidden = false;
+    }
+    finally{
+        stopInvoicingLoader();
+    }
+   
 
 }
 

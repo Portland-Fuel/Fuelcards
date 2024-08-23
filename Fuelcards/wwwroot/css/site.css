@@ -39,6 +39,7 @@ body {
   position: absolute;
   top: 10px;
   left: 10px;
+  z-index: 1000;
 }
 
 .layoutBackButtonContainer button {
@@ -48,6 +49,12 @@ body {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  z-index: 1000;
+}
+
+
+.layoutBackButtonContainer button:hover {
+  background-color: #0d6efd;
 }
 
 
