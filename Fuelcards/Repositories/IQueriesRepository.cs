@@ -58,5 +58,10 @@ namespace Fuelcards.Repositories
         Task UpdateDatabaseTransaction(TransactionsPDF transaction,string invoiceNumber, EnumHelper.Network network);
         List<DateOnly>? GetInvoiceReportDates();
         List<InvoiceReport> getInvoiceReport(DateOnly date);
+        Task GetTransactionsWithoutPortlandId();
+        EnumHelper.InvoiceFrequency? getFixFrequency(int? currentTradeId);
+        int GetAllocationAtTimeOfTransaction(DateOnly? transactionDate, int? tradeId);
+        double? GetRolledVolumeAsOfAllocation(int currentAllocation, int? currentTradeId);
+        CustomerInvoice OrderTransactions(CustomerInvoice customerInvoice);
     }
 }

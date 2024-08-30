@@ -349,6 +349,11 @@ namespace Fuelcards.GenericClassFiles
             Default,
             Pan,
         }
+        public enum InvoiceFrequency
+        {
+            Weekly,
+            Monthly
+        };
 
     }
 }

@@ -145,6 +145,5 @@ namespace Fuelcards.InvoiceMethods
 
             return TotalTransactions;
         }
-
     }
 }

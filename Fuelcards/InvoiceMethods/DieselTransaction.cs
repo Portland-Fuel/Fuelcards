@@ -22,6 +22,8 @@ namespace Fuelcards.InvoiceMethods
         public static double? FixedVolumeRemainingForCurrent = null;
         public static double? FixRate { get; set; }
         public static double? FloatingRate { get; set; }
+        public static int? CurrentAllocation { get; set; }
+
         //private static void CheckIfStaticVariablesNeedUpdating(int? currentAccount, double? StartingRoll, double? newFixPrice, double? FixedVolumeCurrent)
         //{
         //    if (account is null || currentAccount != account)
@@ -53,14 +55,33 @@ namespace Fuelcards.InvoiceMethods
                 {
                     if (data.customerType == EnumHelper.CustomerType.Fix)
                     {
-
-                        var FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation(data.fixedInformation.CurrentAllocation);
-                        UpdateStaticVariablesIfNeeded(
-                    (int?)data.account,
-                    data.fixedInformation.RolledVolume,
-                    data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
-                    FixedVolumeRemainingForCurrent
-                );
+                        EnumHelper.InvoiceFrequency? fixFrequency = _db.getFixFrequency(data.fixedInformation.CurrentTradeId);
+                        double? FixedVolumeRemainingForCurrent = 0;
+                        if (fixFrequency == EnumHelper.InvoiceFrequency.Monthly)
+                        {
+                            
+                            if(MonthlyFix.CheckIfRolloverWeek(data.invoiceDate) == true)
+                            {
+                                data.fixedInformation.CurrentAllocation = _db.GetAllocationAtTimeOfTransaction(data.transaction.transactionDate, data.fixedInformation.CurrentTradeId);
+                                data.fixedInformation.RolledVolume = _db.GetRolledVolumeAsOfAllocation(data.fixedInformation.CurrentAllocation, data.fixedInformation.CurrentTradeId);
+                                UpdateStaticVariablesIfNeeded(
+                            (int?)data.account,
+                            data.fixedInformation.RolledVolume,
+                            data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
+                            FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation,_db
+                        );
+                            }
+                        }
+                        else if (fixFrequency == EnumHelper.InvoiceFrequency.Weekly)
+                        {
+                            FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation(data.fixedInformation.CurrentAllocation);
+                            UpdateStaticVariablesIfNeeded(
+                            (int?)data.account,
+                            data.fixedInformation.RolledVolume,
+                            data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
+                            FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation,_db
+                        );
+                        }
                     }
                     else if (data.customerType == EnumHelper.CustomerType.ExpiredFixWithVolume)
                     {
@@ -68,7 +89,7 @@ namespace Fuelcards.InvoiceMethods
                         (int?)data.account,
                         data.fixedInformation.RolledVolume,
                         null,
-                        null);
+                        null,null,_db);
                     }
                     ProcessRolloverVolumes(data, network, SiteInfo);
                 }
@@ -82,8 +103,14 @@ namespace Fuelcards.InvoiceMethods
             }
         }
 
-        private static void UpdateStaticVariablesIfNeeded(int? currentAccount, double? StartingRoll, double? newFixPrice, double? FixedVolumeCurrent)
+        private static void UpdateStaticVariablesIfNeeded(int? currentAccount, double? StartingRoll, double? newFixPrice, double? FixedVolumeCurrent, int? currentAllocation, IQueriesRepository _db)
         {
+            if(CurrentAllocation != currentAllocation)
+            {
+                CurrentAllocation = currentAllocation;
+                FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
+                //FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
+            }
             if (account == null || currentAccount != account)
             {
                 account = currentAccount;
@@ -94,6 +121,7 @@ namespace Fuelcards.InvoiceMethods
                 FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
                 TotalDieselUsed = 0;
                 FixedPrice = null;
+                CurrentAllocation = currentAllocation; 
             }
         }
 
@@ -118,7 +146,7 @@ namespace Fuelcards.InvoiceMethods
                             FloatingRate = ((cost / 100) / quantity) + 0.03 - (TescoTexacoHandlingCharge / 100);
                             return true;
                         }
-                        
+
                         FloatingRate = ((cost + 100) / 100) / quantity;
                         return true;
                     }

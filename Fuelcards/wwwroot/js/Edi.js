@@ -46,10 +46,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-function startEdiLoader(){
+function startEdiLoader() {
     document.getElementById('EdiLoader').hidden = false;
 }
-function stopEdiLoader(){
+function stopEdiLoader() {
     document.getElementById('EdiLoader').hidden = true;
 }
 
@@ -105,11 +105,11 @@ async function ProcessEdis(event) {
 
 
 
-function HighlightRow(RowElement){
-    if(RowElement.style.backgroundColor == 'rgb(158, 52, 52)'){
+function HighlightRow(RowElement) {
+    if (RowElement.style.backgroundColor == 'rgb(158, 52, 52)') {
         RowElement.style.backgroundColor = '';
     }
-    else{
+    else {
         RowElement.style.backgroundColor = '#9e3434';
     }
 }
@@ -118,7 +118,7 @@ async function CheckSites() {
     ShowEdiLoader();
     var ListOfRecentControlIDs = await GetListOfRecentControlIDs();
     $.ajax({
-        url: "/EdiController/FindAnyFailedSites", 
+        url: "/EdiController/FindAnyFailedSites",
         type: "POST",
         dataType: 'json',
         data: JSON.stringify(ListOfRecentControlIDs),
@@ -126,20 +126,20 @@ async function CheckSites() {
         success: function (SiteResponse) {
             HideEdiLoader();
             console.log("Success:", SiteResponse);
-            if(SiteResponse.length == 0){
+            if (SiteResponse.length == 0) {
                 Toast.fire({
                     icon: "success",
                     title: "No failed sites!",
                     text: "All sites are working correctly."
                 });
             }
-            else{
+            else {
                 Toast.fire({
                     icon: "error",
                     title: "Failed sites found!",
                     text: "Failed sites have been found. Please check the table below."
                 });
-               ShowFailedSites(SiteResponse)
+                ShowFailedSites(SiteResponse)
 
             }
 
@@ -152,6 +152,20 @@ async function CheckSites() {
         }
     });
 }
+async function MaskedCardCheck() {
+    await $.ajax({
+        url: "/EdiController/MaskedCards",
+        type: "POST",
+        dataType: 'json',
+        /*data: JSON.stringify(ListOfRecentControlIDs),*/
+        contentType: "application/json;charset=utf-8",
+        success: function (MaskedCardResponse) {
+        },
+        error: function (error) {
+            alert("Error");
+        }
+    });
+}
 function displayFileName(inputElement, displayElementId) {
     const file = inputElement.files[0]; // Get the first selected file
     if (file) {
@@ -161,7 +175,7 @@ function displayFileName(inputElement, displayElementId) {
     }
 }
 
-async function GetListOfRecentControlIDs(){
+async function GetListOfRecentControlIDs() {
     var Table = document.getElementById('EdiTable');
     var tbody = Table.getElementsByTagName('tbody')[0];
     var TableRows = tbody.getElementsByTagName('tr');
@@ -174,7 +188,7 @@ async function GetListOfRecentControlIDs(){
 
     return ListOfRecentControlIDs;
 }
-async function ShowFailedSites(SiteResponse){
+async function ShowFailedSites(SiteResponse) {
     var Table = document.getElementById('FailedSitesTable');
     var thead = Table.getElementsByTagName('thead')[0];
     thead.innerHTML = '';
@@ -192,23 +206,23 @@ async function ShowFailedSites(SiteResponse){
         var Network = document.createElement('td');
         var Status = document.createElement('td');
         var siteData = SiteResponse[i];
-        
+
         Site.innerHTML = siteData.code;
         Network.innerHTML = siteData.network;
         Status.innerHTML = "Failed";
-        
+
         Row.appendChild(Site);
         Row.appendChild(Network);
         Row.appendChild(Status);
-    
-        (function(siteData) {
-            Row.addEventListener('mouseover', function() {
+
+        (function (siteData) {
+            Row.addEventListener('mouseover', function () {
                 Toast.fire({
                     icon: "success",
                     title: "Click to fix site: " + siteData.code,
                 });
             });
-            Row.addEventListener('click', async function() {
+            Row.addEventListener('click', async function () {
                 await Swal.fire({
                     title: 'Fix Site',
                     html: `
@@ -235,12 +249,12 @@ async function ShowFailedSites(SiteResponse){
                         const siteCodeInput = document.getElementById('siteCodeInput').value;
                         const bandInput = document.getElementById('bandInput').value;
                         const siteNameInput = document.getElementById('SiteNameInput').value;
-    
+
                         if (!networkInput || !siteCodeInput || !bandInput || !siteNameInput) {
                             Swal.showValidationMessage('Please fill in all fields.');
                             return false; // Prevent the modal from closing
                         }
-    
+
                         return {
                             network: networkInput,
                             code: siteCodeInput,
@@ -251,8 +265,8 @@ async function ShowFailedSites(SiteResponse){
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        console.log(result.value); 
-                       
+                        console.log(result.value);
+
                         $.ajax({
                             url: "/EdiController/UploadNewFixedSite",
                             type: "POST",
@@ -279,28 +293,28 @@ async function ShowFailedSites(SiteResponse){
                     }
                 });
             });
-        })(siteData); 
+        })(siteData);
         tbody.appendChild(Row);
     }
 }
-async function RunThroughFailedSites(sitecode){
+async function RunThroughFailedSites(sitecode) {
     var Table = document.getElementById('FailedSitesTable');
     var tbody = Table.getElementsByTagName('tbody')[0];
     var TableRows = tbody.getElementsByTagName('tr');
     for (var i = 0; i < TableRows.length; i++) {
         var Row = TableRows[i];
         var Site = Row.cells[0].innerText;
-        if(Site == sitecode){
+        if (Site == sitecode) {
             Row.style.backgroundColor = 'darkgreen';
             Row.cells[Row.cells.length - 1].innerText = "Fixed";
         }
     }
 }
 
-async function ShowEdiLoader(){
+async function ShowEdiLoader() {
     document.getElementById('EdiLoader').hidden = false;
 }
-async function HideEdiLoader(){
+async function HideEdiLoader() {
     document.getElementById('EdiLoader').hidden = true;
 }
 
@@ -311,7 +325,7 @@ const Toast = Swal.mixin({
     timer: 3000,
     timerProgressBar: true,
     didOpen: (toast) => {
-      toast.onmouseenter = Swal.stopTimer;
-      toast.onmouseleave = Swal.resumeTimer;
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
     }
-  });
+});

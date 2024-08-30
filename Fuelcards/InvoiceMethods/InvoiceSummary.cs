@@ -49,7 +49,7 @@ namespace Fuelcards.InvoiceMethods
                 if (dieselRow.productName == "Diesel - " && invoice.CustomerType == EnumHelper.CustomerType.ExpiredFixWithVolume)
                 {
                     dieselRow.productName = "Diesel";
-                    dieselRow.Quantity = dieselRow.Quantity - DieselTransaction.RolledVolumeUsedOnThisInvoice;
+                    dieselRow.Quantity = dieselRow.Quantity - InvoiceSummary.Round2(DieselTransaction.RolledVolumeUsedOnThisInvoice);
                 }
                 // Check for specific business rules related to diesel (if applicable)
                 if (invoice.CustomerType == EnumHelper.CustomerType.Fix)
@@ -142,32 +142,39 @@ namespace Fuelcards.InvoiceMethods
 
         private SummaryRow AppendRowForFix(SummaryRow newRow, CustomerInvoice invoice)
         {
-            double? FixVolume = invoice.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == invoice.fixedInformation.CurrentTradeId)?.FixedVolume;
-            double? FixPrice = invoice.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == invoice.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty;
-            double? RemainingToCharge = Round2(DieselTransaction.FixedVolumeRemainingForCurrent);
-            var total = invoice.CustomerTransactions.Where(e=>e.product == "Diesel").Sum(e => e.invoicePrice);
-            double? PriceOfRemainingVolume = RemainingToCharge * 1.2302;
-
-
-            if (RemainingToCharge > 0)
+            if (invoice.fixedInformation.AllFixes.Where(e => e.Id == invoice.fixedInformation.CurrentTradeId).Select(e => e.FrequencyId).Any(frequencyId => frequencyId != 3))
             {
-                newRow.Quantity = FixVolume;
-                double? RemainingVolumeCharge = RemainingToCharge * (FixPrice / 100);
-                newRow.NetTotal = Round2(total + RemainingVolumeCharge);
-                newRow.VAT = Round2(newRow.NetTotal * 0.2);
+
+
+
+                double? FixVolume = invoice.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == invoice.fixedInformation.CurrentTradeId)?.FixedVolume;
+                double? FixPrice = invoice.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == invoice.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty;
+                double? RemainingToCharge = Round2(DieselTransaction.FixedVolumeRemainingForCurrent);
+                var total = invoice.CustomerTransactions.Where(e => e.product == "Diesel").Sum(e => e.invoicePrice);
+                double? PriceOfRemainingVolume = RemainingToCharge * 1.2302;
+
+
+                if (RemainingToCharge > 0)
+                {
+                    newRow.Quantity = FixVolume;
+                    double? RemainingVolumeCharge = RemainingToCharge * (FixPrice / 100);
+                    newRow.NetTotal = Round2(total + RemainingVolumeCharge);
+                    newRow.VAT = Round2(newRow.NetTotal * 0.2);
+                }
+                return newRow;
             }
             return newRow;
-
         }
 
         public InvoiceTotals GetInvoiceTotal(List<SummaryRow> rows)
         {
             InvoiceTotals total = new InvoiceTotals()
             {
-                Goods = rows.Sum(e => e.NetTotal),
-                VAT = rows.Sum(e => e.VAT),
+                Goods = InvoiceSummary.Round2(rows.Sum(e => e.NetTotal)),
+                VAT = InvoiceSummary.Round2(rows.Sum(e => e.VAT)),
             };
-            total.Total = total.Goods + total.VAT;
+            total.Total = InvoiceSummary.Round2(total.Goods + total.VAT);
+            Console.WriteLine(total.Total);
             return total;
         }
         public List<TransactionsPDF> TurnsTransactionsToPdf(EnumHelper.Network network,CustomerInvoice customerInvoice, IQueriesRepository _db)

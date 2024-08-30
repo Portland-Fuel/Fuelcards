@@ -103,6 +103,21 @@ namespace Fuelcards.Controllers
 
             return Json(FailedSites);
         }
+        [HttpPost]
+        public async Task<JsonResult> MaskedCards()
+        {
+            try
+            {
+                await _db.GetTransactionsWithoutPortlandId();
+                return Json("Success");
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
+        }
 
         [HttpPost]
         public JsonResult UploadNewFixedSite([FromBody] Site site)

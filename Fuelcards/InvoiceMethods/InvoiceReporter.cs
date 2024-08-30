@@ -102,7 +102,7 @@ namespace Fuelcards.InvoiceMethods
                     report.PetrolPrice = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.ULSP.ToString())?.NetTotal;
                     report.LubesPrice = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Lube.ToString())?.NetTotal;
                     report.GasoilPrice = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Gasoil.ToString())?.NetTotal;
-                    report.AdbluePrice = invoice.rows.Where(e => e.productName == EnumHelper.Products.Adblue.ToString() || e.productName == EnumHelper.Products.AdblueCan.ToString() || e.productName == EnumHelper.Products.PackagedAdblue.ToString())?.Sum(e => e.NetTotal);
+                    report.AdbluePrice = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == EnumHelper.Products.Adblue.ToString() || e.productName == EnumHelper.Products.AdblueCan.ToString() || e.productName == EnumHelper.Products.PackagedAdblue.ToString())?.Sum(e => e.NetTotal));
                     report.PremDieselPrice = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.PremiumDiesel.ToString())?.NetTotal;
                     report.SuperUnleadedPrice = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.SuperUnleaded.ToString())?.NetTotal;
                     report.TescoPrice = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == "Diesel - Tesco").Sum(e => e.NetTotal));
@@ -159,6 +159,7 @@ namespace Fuelcards.InvoiceMethods
                     report.PremDieselVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.PremiumDiesel.ToString())?.Quantity;
                     report.SuperUnleadedVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.SuperUnleaded.ToString())?.Quantity;
                     report.TescoVol = invoice.rows.Where(e => e.productName == "Diesel - Tesco").Sum(e => e.Quantity);
+                    report.SainsburysVol = invoice.rows.Where(e => e.productName == "Diesel - Sainsburys").Sum(e => e.Quantity);
                     report.Customer = invoice.CustomerDetails.CompanyName;
 
                     break;

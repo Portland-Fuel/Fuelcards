@@ -23,6 +23,7 @@ using static Fuelcards.GenericClassFiles.EnumHelper;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml;
+using Xero.NetStandard.OAuth2.Model.Accounting;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -256,17 +257,9 @@ namespace Fuelcards.Repositories
                     model.account = item[0].customerCode;
                     model.CustomerTransactions = new();
                     model.CustomerType = await customerType((int)model.account, invoiceDate);
-                    model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-15)));
+                    model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-20)));
                     var portlandId = GetPortlandIdFromAccount((int)model.account).Result;
-                    var invoiceType = _db.InvoicingOptions.FirstOrDefault(e => e.PortlandId == portlandId && e.GroupedNetwork.Contains((int)item[0].network))?.Displaygroup;
-                    if (invoiceType == 1)
-                    {
-                        model.CustomerTransactions = item.OrderBy(e => e.cardNumber).ThenBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
-                    }
-                    else
-                    {
-                        model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
-                    }
+                        model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();                    
                     model.IfuelsCustomer = IfuelsCustomer((int)model.account);
                     if (model.CustomerType != EnumHelper.CustomerType.Floating)
                     {
@@ -367,6 +360,34 @@ namespace Fuelcards.Repositories
                 .Select(e => e.Id)
                 .FirstOrDefault();
             return id;
+        }
+        public int GetAllocationAtTimeOfTransaction(DateOnly? transactionDate, int? tradeID)
+        {
+            if (transactionDate == null || tradeID == null)
+            {
+                throw new ArgumentException("Somehow you we have managed to get all the way to this point and transaction date is still null. I would of imagined this would of broke a long time ago! Nevertheless, enjoy this exception that I never imagined would be hit! The method inside QueriesRepository called GetAllocationAtTimeOfTransaction which is usually hit by a customer with a monthly fix (To check for roll over months has bust due to either the trade id or the transaction date being null.");
+            }
+
+            var allocationId = _db.FixAllocationDates
+                .Where(e => e.TradeId == tradeID
+                            && e.Allocated == true
+                            && e.NewAllocationDate <= transactionDate &&
+                             e.AllocationEnd > transactionDate)
+                .OrderByDescending(e => e.NewAllocationDate) // Sort by new_allocation_date descending
+                .Select(e => e.Id)
+                .FirstOrDefault();
+
+            return allocationId; // Return allocation ID or 0 if null
+        }
+        public CustomerInvoice OrderTransactions(CustomerInvoice customerInvoice)
+        {
+            var portlandId = GetPortlandIdFromAccount((int)customerInvoice.account).Result;
+            var invoiceType = _db.InvoicingOptions.FirstOrDefault(e => e.PortlandId == portlandId && e.GroupedNetwork.Contains((int)customerInvoice.CustomerTransactions[0].network))?.Displaygroup;
+            if (invoiceType == 1)
+            {
+                customerInvoice.CustomerTransactions = customerInvoice.CustomerTransactions.OrderBy(e => e.cardNumber).ThenBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
+            }
+            return customerInvoice;
         }
 
 
@@ -1206,6 +1227,38 @@ namespace Fuelcards.Repositories
         public List<InvoiceReport> getInvoiceReport(DateOnly date)
         {
             return _db.InvoiceReports.Where(e => e.InvoiceDate == date).ToList();
+        }
+        public async Task GetTransactionsWithoutPortlandId()
+        {
+            var UkMaskedCards = await _db.UkfTransactions.Where(e => e.Invoiced != true && e.PortlandId == null).ToListAsync();
+            var AllMasked = await _db.FcHiddenCards.Where(e => e.Id > -1).ToListAsync();
+            foreach (var transaction in UkMaskedCards)
+            {
+                var result = AllMasked.FirstOrDefault(e => transaction.PanNumber.Value.ToString().Contains(e.CardNo));
+                if(result is not null)
+                {
+                    transaction.PortlandId = result.PortlandId;
+                    _db.UkfTransactions.Update(transaction);
+                    _db.SaveChanges();
+                }
+                else{
+                    throw new ArgumentException($"There is a missing masked card. {transaction.PanNumber}");
+                }
+            }
+            
+            
+        }
+        public EnumHelper.InvoiceFrequency? getFixFrequency(int? currentTradeId)
+        {
+            int? id = _db.FixedPriceContracts.FirstOrDefault(e=>e.Id == currentTradeId)?.FrequencyId;
+            if (id == null) throw new ArgumentException("Fix Frequency is showing as null. This is not possible. Something has gone badly wrong!");
+            else if (id == 1) return EnumHelper.InvoiceFrequency.Weekly;
+            else if (id == 3) return EnumHelper.InvoiceFrequency.Monthly;
+            return null;
+        }
+        public double? GetRolledVolumeAsOfAllocation(int currentAllocation, int? currentTradeId)
+        {
+            return _db.AllocatedVolumes.Where(e => e.Volume > 0 && e.TradeId == currentTradeId && e.AllocationId < currentAllocation).Sum(e => e.Volume);
         }
     }
 
