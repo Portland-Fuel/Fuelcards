@@ -192,7 +192,7 @@ namespace Fuelcards.InvoiceMethods
                     TranTime = item.transactionTime,
                     product = item.product,
                     UnitPrice = item.unitPrice,
-                    Volume = item.quantity,
+                    Volume =  TransactionBuilder.ConvertToLitresBasedOnNetwork(item.quantity, network),
                     Value = item.invoicePrice,
                     Mileage = item.mileage.ToString(),
                     Band = item.band,
@@ -277,6 +277,7 @@ namespace Fuelcards.InvoiceMethods
         public double? Quantity { get; set; }
         public double? NetTotal { get; set; }
         public double? VAT { get; set; }
+        public string VATRate = "20%";
     }
     public class InvoiceTotals
     {

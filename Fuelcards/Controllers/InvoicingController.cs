@@ -352,7 +352,7 @@ namespace Fuelcards.Controllers
             {
                 var Invoice = invoices.FirstOrDefault(e => e.CustomerDetails.account == sendEmailInformation.CustomerInvoice.account);
                 Fuelcards.InvoiceMethods.Email.SendEmail email = new("prices@portland-fuel.co.uk", "fuJeXU5BgLAM69Tqch3&#mQ%4");
-                email.message.AddTo("ollies@portland-fuel.co.uk");
+                email.message.AddTo("connor@portland-fuel.co.uk");
 
                 //email.message.AddTo(sendEmailInformation.EmailDetails.emailTo);
                 //email.message.AddCC(sendEmailInformation.EmailDetails.emailCc);
