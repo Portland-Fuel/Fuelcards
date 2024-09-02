@@ -146,7 +146,7 @@
 <div hidden class="LargeTableDiv" id="InvoiceReportSection">
     <div class="Grouping">
         <button class="button" onclick="LoadInvoiceReport()">Load Invoice Report</button>
-        <button id="exportTableButton" onclick="exportTableToExcel()">Export to Excel</button>
+        <button id="exportTableButton" onclick="exportTableToExcel('InvoiceReportTable', 'invoice_report.xlsx')">Export to Excel</button>
         <button class="button" onclick="ContinueAfterInvoiceReport()">Continue</button>
     </div>
     <div class="table-container">
@@ -160,41 +160,36 @@
     </div>
 </div>
 
-
 <script>
-    function exportTableToCSV() {
-        var downloadLink;
-        var dataType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        var tableSelect = document.getElementById('InvoiceReportTable');
-        var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+    function exportTableToCSV(filename) {
+        var csv = [];
+        var rows = document.querySelectorAll("#InvoiceReportTable tr");
 
-        // Specify file name
-        filename = filename ? filename : 'excel_data.xlsx';
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols = rows[i].querySelectorAll("td, th");
 
-        // Create download link element
-        downloadLink = document.createElement("a");
+            for (var j = 0; j < cols.length; j++)
+                row.push(cols[j].innerText.replace(/,/g, "")); // Avoids breaking CSV format
 
-        document.body.appendChild(downloadLink);
-
-        if (navigator.msSaveOrOpenBlob) {
-            var blob = new Blob(['\ufeff', tableHTML], {
-                type: dataType
-            });
-            navigator.msSaveOrOpenBlob(blob, filename);
-        } else {
-            // Create a link to the file
-            downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
-
-            // Setting the file name
-            downloadLink.download = filename;
-
-            // Triggering the function
-            downloadLink.click();
+            csv.push(row.join(","));
         }
+
+        // Create a download link and trigger the download
+        var csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+        var downloadLink = document.createElement("a");
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
     }
 
+    // Attach this function to the button click event
+    document.getElementById("exportTableButton").addEventListener("click", function () {
+        exportTableToCSV('invoice_report.csv');
+    });
 </script>
-
 
 <div hidden id="EmailOutSection" class="EmailOutSection">
     <div hidden id="ResumeEmailing" class="Topleft">
