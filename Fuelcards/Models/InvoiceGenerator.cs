@@ -40,6 +40,7 @@ using DataAccess.Fuelcards;
 using System.Text;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System.Transactions;
+using FuelcardModels.ConsoleApp;
 namespace Fuelcards.Models
 {
     public class InvoiceGenerator
@@ -62,7 +63,7 @@ namespace Fuelcards.Models
         readonly static Color TableGreen = new(99, 171, 113);
         readonly static Color Black = new(0, 0, 0, 0);
         readonly static Color Blue = new(30, 144, 255);
-        public static  IQueriesRepository _db;
+        public static IQueriesRepository _db;
 
 
 
@@ -179,10 +180,10 @@ namespace Fuelcards.Models
             }
             else
             {
-                PrintForUkFuels(invoiceModelCustomerDetails, dateFormatted);
+                PrintForRestOfNetworks(invoiceModelCustomerDetails, dateFormatted);
             }
         }
-        private void PrintForUkFuels(InvoicePDFModel invoiceModelCustomerDetails, string dateFormatted)
+        private void PrintForRestOfNetworks(InvoicePDFModel invoiceModelCustomerDetails, string dateFormatted)
         {
             var table = section.AddTable();
             table.Style = "InvoiceDetailsStyle";
@@ -235,7 +236,7 @@ namespace Fuelcards.Models
 
             if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 1)
             {
-                List<TransactionsPDF> edis = invoiceModelCustomerDetails.transactions;    
+                List<TransactionsPDF> edis = invoiceModelCustomerDetails.transactions;
                 string previousPanNumber = null;
                 double VolumeTotalForEachTransactionGroup = 0;
                 double TotalValueForEachTransactionGroup = 0;
@@ -246,7 +247,7 @@ namespace Fuelcards.Models
 
                     string currentPanNumber = edi.CardNumber;
 
-                    if(previousPanNumber != null && previousPanNumber != currentPanNumber)
+                    if (previousPanNumber != null && previousPanNumber != currentPanNumber)
                     {
                         int countForPreviousPan = edis.Count(e => e.CardNumber == previousPanNumber);
                         var breakRow = table.AddRow();
@@ -283,7 +284,8 @@ namespace Fuelcards.Models
                     _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
                     VolumeTotalForEachTransactionGroup += (double)edi.Volume;
-                    _row.Cells[8].AddParagraph("£" + edi.Volume.ToString());
+                    edi.Value = ediValueConversion(edi.Value);
+                    _row.Cells[8].AddParagraph("£" + edi.Value.ToString());
                     TotalValueForEachTransactionGroup += (double)edi.Value;
 
 
@@ -396,6 +398,7 @@ namespace Fuelcards.Models
                     _row.Cells[5].Format.Font.Size = 6.5;
                     _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
+                    edi.Value = ediValueConversion(edi.Value);
                     _row.Cells[8].AddParagraph(edi.Value.ToString());
                 }
             }
@@ -507,7 +510,8 @@ namespace Fuelcards.Models
                     _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
                     VolumeTotalForEachTransactionGroup += (double)edi.Volume;
-                    _row.Cells[8].AddParagraph("£" + edi.Volume.ToString());
+                    edi.Value = ediValueConversion(edi.Value);
+                    _row.Cells[8].AddParagraph("£" + edi.Value.ToString());
                     TotalValueForEachTransactionGroup += (double)edi.Value;
 
 
@@ -620,11 +624,22 @@ namespace Fuelcards.Models
                     _row.Cells[5].AddParagraph(edi.product);
                     _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
+                     edi.Value = ediValueConversion(edi.Value);
                     _row.Cells[8].AddParagraph("£" + edi.Value.ToString());
 
                 }
             }
 
+        }
+
+        private double ediValueConversion(double? Value)
+        {
+            if (Value == null)
+            {
+                return 0.00;
+            }
+            var Val = Math.Round(Convert.ToDecimal(Value), 2);
+            return Convert.ToDouble(Val);
         }
         private void printVAT(InvoicePDFModel invoiceModelCustomerDetails)
         {
@@ -1698,7 +1713,7 @@ namespace Fuelcards.Models
                     }
                     else
                     {
-                        PrintForUkFuels(newInvoice, dateFormatted, streamWriter);
+                        PrintForRestOfNetworks(newInvoice, dateFormatted, streamWriter);
                     }
                 }
 
@@ -1750,7 +1765,7 @@ namespace Fuelcards.Models
               }
           }
   */
-        /*    private static void PrintForUkFuels(InvoicePDFModel invoiceModel, string dateFormatted, StreamWriter streamWriter)
+        /*    private static void PrintForRestOfNetworks(InvoicePDFModel invoiceModel, string dateFormatted, StreamWriter streamWriter)
             {
                 streamWriter.WriteLine("Card No/Cd,Reg No,Mileage,Site Details,Date/Time,Product,Unit Price,Volume,Value");
 
