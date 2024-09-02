@@ -60,8 +60,8 @@ namespace Fuelcards.InvoiceMethods
                         if (fixFrequency == EnumHelper.InvoiceFrequency.Monthly)
                         {
                             
-                            if(MonthlyFix.CheckIfRolloverWeek(data.invoiceDate) == true)
-                            {
+                            //if(MonthlyFix.CheckIfRolloverWeek(data.invoiceDate) == true)
+                            //{
                                 data.fixedInformation.CurrentAllocation = _db.GetAllocationAtTimeOfTransaction(data.transaction.transactionDate, data.fixedInformation.CurrentTradeId);
                                 data.fixedInformation.RolledVolume = _db.GetRolledVolumeAsOfAllocation(data.fixedInformation.CurrentAllocation, data.fixedInformation.CurrentTradeId);
                                 UpdateStaticVariablesIfNeeded(
@@ -70,7 +70,7 @@ namespace Fuelcards.InvoiceMethods
                             data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
                             FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation,_db
                         );
-                            }
+                            //}
                         }
                         else if (fixFrequency == EnumHelper.InvoiceFrequency.Weekly)
                         {
