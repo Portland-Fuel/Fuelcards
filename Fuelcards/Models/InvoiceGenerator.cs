@@ -284,95 +284,15 @@ namespace Fuelcards.Models
                     _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
                     VolumeTotalForEachTransactionGroup += (double)edi.Volume;
-                    edi.Value = ediValueConversion(edi.Value);
-                    _row.Cells[8].AddParagraph("£" + edi.Value.ToString());
+                   string val = ediValueConversion(edi.Value);
+                    _row.Cells[8].AddParagraph("£" + val);
                     TotalValueForEachTransactionGroup += (double)edi.Value;
 
 
 
 
                 }
-
-                /*var edis = invoiceModelCustomerDetails.transactions;
-                string previousPanNumber = null;
-                double VolumeTotalForEachTransactionGroup = 0;
-                double TotalValueForEachTransactionGroup = 0;
-                foreach (var edi in edis)
-                {
-                    string currentPanNumber = edi.TransactionNumber;
-
-                    if (previousPanNumber != null && previousPanNumber != currentPanNumber)
-                    {
-                        int countForPreviousPan = edis.Count(e => e.TransactionNumber == previousPanNumber);
-                        var breakRow = table.AddRow();
-                        breakRow.Cells[0].MergeRight = 3;
-                        breakRow.Cells[0].AddParagraph($"Sub Total for Card No {previousPanNumber}");
-                        breakRow.Cells[0].Format.Alignment = ParagraphAlignment.Center;
-                        breakRow.Cells[0].Format.Font.Bold = true;
-                        breakRow.Cells[4].MergeRight = 2;
-                        breakRow.Cells[4].AddParagraph($"No of Drawings: {countForPreviousPan}");
-                        breakRow.Cells[4].Format.Alignment = ParagraphAlignment.Center;
-                        breakRow.Cells[4].Format.Font.Bold = true;
-                        breakRow.Cells[7].Format.Font.Bold = true;
-                        VolumeTotalForEachTransactionGroup = Math.Round(VolumeTotalForEachTransactionGroup, 2);
-                        breakRow.Cells[7].AddParagraph(VolumeTotalForEachTransactionGroup.ToString());
-                        breakRow.Cells[8].Format.Font.Bold = true;
-                        TotalValueForEachTransactionGroup = Math.Round(TotalValueForEachTransactionGroup, 2);
-                        breakRow.Cells[8].AddParagraph(TotalValueForEachTransactionGroup.ToString());
-
-                        VolumeTotalForEachTransactionGroup = 0;
-
-                        TotalValueForEachTransactionGroup = 0;
-
-                    }
-                    if (edi.Value == 0 || edi.Value == 0.0)
-                    {
-                        edi.Value = 0.00;
-                    }
-                    previousPanNumber = currentPanNumber;
-                    var _row = table.AddRow();
-                    _row.Borders.Visible = false;
-                    _row.Cells[0].AddParagraph(currentPanNumber);
-                    _row.Cells[1].AddParagraph(edi.RegNo);
-                    _row.Cells[2].AddParagraph(edi.Mileage.ToString());
-                    _row.Cells[3].AddParagraph(edi.SiteName);
-                    _row.Cells[3].Format.Font.Size = 5;
-                    _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);
-                    _row.Cells[5].AddParagraph(edi.product);
-                    _row.Cells[5].Format.Font.Size = 6.5;
-                    _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
-                    _row.Cells[7].AddParagraph(edi.Volume.ToString());
-                    VolumeTotalForEachTransactionGroup += (double)edi.Volume;
-                    _row.Cells[8].AddParagraph("£" + edi.Volume.ToString());
-                    TotalValueForEachTransactionGroup += (double)edi.Value;
-
-
-                }
-                if (!string.IsNullOrEmpty(previousPanNumber))
-                {
-                    int countForPreviousPan = edis.Count(e => e.TransactionNumber == previousPanNumber);
-                    var FinalRow = table.AddRow();
-                    FinalRow.Cells[0].MergeRight = 3;
-                    FinalRow.Cells[0].AddParagraph($"Sub Total for Card No {previousPanNumber}");
-                    FinalRow.Cells[0].Format.Alignment = ParagraphAlignment.Center;
-                    FinalRow.Cells[0].Format.Font.Bold = true;
-                    FinalRow.Cells[4].MergeRight = 2;
-                    FinalRow.Cells[4].AddParagraph($"No of Drawings: {countForPreviousPan}");
-                    FinalRow.Cells[4].Format.Alignment = ParagraphAlignment.Center;
-                    FinalRow.Cells[4].Format.Font.Bold = true;
-                    FinalRow.Cells[7].Format.Font.Bold = true;
-                    VolumeTotalForEachTransactionGroup = Math.Round(VolumeTotalForEachTransactionGroup, 2);
-                    FinalRow.Cells[7].AddParagraph(VolumeTotalForEachTransactionGroup.ToString());
-                    FinalRow.Cells[8].Format.Font.Bold = true;
-                    TotalValueForEachTransactionGroup = Math.Round(TotalValueForEachTransactionGroup, 2);
-                    FinalRow.Cells[8].AddParagraph(TotalValueForEachTransactionGroup.ToString());
-
-                    VolumeTotalForEachTransactionGroup = 0;
-
-                    TotalValueForEachTransactionGroup = 0;
-
-
-                }*/
+               
             }
             if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 0)
             {
@@ -398,8 +318,8 @@ namespace Fuelcards.Models
                     _row.Cells[5].Format.Font.Size = 6.5;
                     _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
-                    edi.Value = ediValueConversion(edi.Value);
-                    _row.Cells[8].AddParagraph(edi.Value.ToString());
+                    var edivalue = ediValueConversion(edi.Value);
+                    _row.Cells[8].AddParagraph(edivalue);
                 }
             }
 
@@ -510,95 +430,14 @@ namespace Fuelcards.Models
                     _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
                     VolumeTotalForEachTransactionGroup += (double)edi.Volume;
-                    edi.Value = ediValueConversion(edi.Value);
-                    _row.Cells[8].AddParagraph("£" + edi.Value.ToString());
+                    string val  = ediValueConversion(edi.Value);
+                    _row.Cells[8].AddParagraph("£" + val);
                     TotalValueForEachTransactionGroup += (double)edi.Value;
 
 
 
 
                 }
-
-                /*var edis = invoiceModelCustomerDetails.transactions;
-                string previousPanNumber = null;
-                double VolumeTotalForEachTransactionGroup = 0;
-                double TotalValueForEachTransactionGroup = 0;
-                foreach (var edi in edis)
-                {
-                    string currentPanNumber = edi.TransactionNumber;
-
-                    if (previousPanNumber != null && previousPanNumber != currentPanNumber)
-                    {
-                        int countForPreviousPan = edis.Count(e => e.TransactionNumber == previousPanNumber);
-                        var breakRow = table.AddRow();
-                        breakRow.Cells[0].MergeRight = 3;
-                        breakRow.Cells[0].AddParagraph($"Sub Total for Card No {previousPanNumber}");
-                        breakRow.Cells[0].Format.Alignment = ParagraphAlignment.Center;
-                        breakRow.Cells[0].Format.Font.Bold = true;
-                        breakRow.Cells[4].MergeRight = 2;
-                        breakRow.Cells[4].AddParagraph($"No of Drawings: {countForPreviousPan}");
-                        breakRow.Cells[4].Format.Alignment = ParagraphAlignment.Center;
-                        breakRow.Cells[4].Format.Font.Bold = true;
-                        breakRow.Cells[7].Format.Font.Bold = true;
-                        VolumeTotalForEachTransactionGroup = Math.Round(VolumeTotalForEachTransactionGroup, 2);
-                        breakRow.Cells[7].AddParagraph(VolumeTotalForEachTransactionGroup.ToString());
-                        breakRow.Cells[8].Format.Font.Bold = true;
-                        TotalValueForEachTransactionGroup = Math.Round(TotalValueForEachTransactionGroup, 2);
-                        breakRow.Cells[8].AddParagraph(TotalValueForEachTransactionGroup.ToString());
-
-                        VolumeTotalForEachTransactionGroup = 0;
-
-                        TotalValueForEachTransactionGroup = 0;
-
-                    }
-                    if (edi.Value == 0 || edi.Value == 0.0)
-                    {
-                        edi.Value = 0.00;
-                    }
-                    previousPanNumber = currentPanNumber;
-                    var _row = table.AddRow();
-                    _row.Borders.Visible = false;
-                    _row.Cells[0].AddParagraph(currentPanNumber);
-                    _row.Cells[1].AddParagraph(edi.RegNo);
-                    _row.Cells[2].AddParagraph(edi.Mileage.ToString());
-                    _row.Cells[3].AddParagraph(edi.SiteName);
-                    _row.Cells[3].Format.Font.Size = 5;
-                    _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);
-                    _row.Cells[5].AddParagraph(edi.product);
-                    _row.Cells[5].Format.Font.Size = 6.5;
-                    _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
-                    _row.Cells[7].AddParagraph(edi.Volume.ToString());
-                    VolumeTotalForEachTransactionGroup += (double)edi.Volume;
-                    _row.Cells[8].AddParagraph("£" + edi.Volume.ToString());
-                    TotalValueForEachTransactionGroup += (double)edi.Value;
-
-
-                }
-                if (!string.IsNullOrEmpty(previousPanNumber))
-                {
-                    int countForPreviousPan = edis.Count(e => e.TransactionNumber == previousPanNumber);
-                    var FinalRow = table.AddRow();
-                    FinalRow.Cells[0].MergeRight = 3;
-                    FinalRow.Cells[0].AddParagraph($"Sub Total for Card No {previousPanNumber}");
-                    FinalRow.Cells[0].Format.Alignment = ParagraphAlignment.Center;
-                    FinalRow.Cells[0].Format.Font.Bold = true;
-                    FinalRow.Cells[4].MergeRight = 2;
-                    FinalRow.Cells[4].AddParagraph($"No of Drawings: {countForPreviousPan}");
-                    FinalRow.Cells[4].Format.Alignment = ParagraphAlignment.Center;
-                    FinalRow.Cells[4].Format.Font.Bold = true;
-                    FinalRow.Cells[7].Format.Font.Bold = true;
-                    VolumeTotalForEachTransactionGroup = Math.Round(VolumeTotalForEachTransactionGroup, 2);
-                    FinalRow.Cells[7].AddParagraph(VolumeTotalForEachTransactionGroup.ToString());
-                    FinalRow.Cells[8].Format.Font.Bold = true;
-                    TotalValueForEachTransactionGroup = Math.Round(TotalValueForEachTransactionGroup, 2);
-                    FinalRow.Cells[8].AddParagraph(TotalValueForEachTransactionGroup.ToString());
-
-                    VolumeTotalForEachTransactionGroup = 0;
-
-                    TotalValueForEachTransactionGroup = 0;
-
-
-                }*/
             }
             if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 0)
             {
@@ -624,23 +463,25 @@ namespace Fuelcards.Models
                     _row.Cells[5].AddParagraph(edi.product);
                     _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
-                     edi.Value = ediValueConversion(edi.Value);
-                    _row.Cells[8].AddParagraph("£" + edi.Value.ToString());
+                    string val  = ediValueConversion(edi.Value);
+                    _row.Cells[8].AddParagraph("£" + val);
 
                 }
             }
 
         }
 
-        private double ediValueConversion(double? Value)
+        private string ediValueConversion(double? Value)
         {
-            if (Value == null)
+            if (Value == null || Value == 0)
             {
-                return 0.00;
+                return "0.00";
             }
+
             var Val = Math.Round(Convert.ToDecimal(Value), 2);
-            return Convert.ToDouble(Val);
+            return Val.ToString("0.00");
         }
+
         private void printVAT(InvoicePDFModel invoiceModelCustomerDetails)
         {
             table = section.AddTable();
