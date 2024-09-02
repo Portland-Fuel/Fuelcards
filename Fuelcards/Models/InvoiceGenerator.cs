@@ -1186,7 +1186,7 @@ namespace Fuelcards.Models
                 NewSumRow.Cells[3].AddParagraph(sumrow.Quantity.ToString());
                 NewSumRow.Cells[4].AddParagraph(formattedCurrency);
                 NewSumRow.Cells[5].AddParagraph(NetVatFormatted);
-                NewSumRow.Cells[6].AddParagraph(sumrow.VAT.ToString() + "%");
+                NewSumRow.Cells[6].AddParagraph(sumrow.VATRate);
 
 
 
