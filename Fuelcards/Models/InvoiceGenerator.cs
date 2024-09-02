@@ -281,10 +281,11 @@ namespace Fuelcards.Models
                     _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);
                     _row.Cells[5].AddParagraph(edi.product);
                     _row.Cells[5].Format.Font.Size = 6.5;
-                    _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
+                    string unitPrice = edi.UnitPrice.HasValue ? "£" + edi.UnitPrice.Value.ToString("F4", CultureInfo.InvariantCulture) : "£0.0000";
+                    _row.Cells[6].AddParagraph(unitPrice);
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
                     VolumeTotalForEachTransactionGroup += (double)edi.Volume;
-                   string val = ediValueConversion(edi.Value);
+                    string val = ediValueConversion(edi.Value);
                     _row.Cells[8].AddParagraph("£" + val);
                     TotalValueForEachTransactionGroup += (double)edi.Value;
 
@@ -292,7 +293,7 @@ namespace Fuelcards.Models
 
 
                 }
-               
+
             }
             if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 0)
             {
@@ -316,10 +317,11 @@ namespace Fuelcards.Models
                     _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);
                     _row.Cells[5].AddParagraph(edi.product);
                     _row.Cells[5].Format.Font.Size = 6.5;
-                    _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
+                    string unitPrice = edi.UnitPrice.HasValue ? "£" + edi.UnitPrice.Value.ToString("F4", CultureInfo.InvariantCulture) : "£0.0000";
+                    _row.Cells[6].AddParagraph(unitPrice);
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
                     var edivalue = ediValueConversion(edi.Value);
-                    _row.Cells[8].AddParagraph(edivalue);
+                    _row.Cells[8].AddParagraph("£" + edivalue);
                 }
             }
 
@@ -427,10 +429,13 @@ namespace Fuelcards.Models
                     _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);
                     _row.Cells[5].AddParagraph(edi.product);
                     _row.Cells[5].Format.Font.Size = 6.5;
-                    _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
+                    string unitPrice = edi.UnitPrice.HasValue ? "£" + edi.UnitPrice.Value.ToString("F4", CultureInfo.InvariantCulture) : "£0.0000";
+
+
+                    _row.Cells[6].AddParagraph(unitPrice);
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
                     VolumeTotalForEachTransactionGroup += (double)edi.Volume;
-                    string val  = ediValueConversion(edi.Value);
+                    string val = ediValueConversion(edi.Value);
                     _row.Cells[8].AddParagraph("£" + val);
                     TotalValueForEachTransactionGroup += (double)edi.Value;
 
@@ -461,9 +466,11 @@ namespace Fuelcards.Models
                     _row.Cells[3].Format.Font.Size = 5;
                     _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);
                     _row.Cells[5].AddParagraph(edi.product);
-                    _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
+                    string unitPrice = edi.UnitPrice.HasValue ? "£" + edi.UnitPrice.Value.ToString("F4", CultureInfo.InvariantCulture) : "£0.0000";
+
+                    _row.Cells[6].AddParagraph(unitPrice);
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
-                    string val  = ediValueConversion(edi.Value);
+                    string val = ediValueConversion(edi.Value);
                     _row.Cells[8].AddParagraph("£" + val);
 
                 }
@@ -1160,7 +1167,7 @@ namespace Fuelcards.Models
         public static void GenerateXeroCSV(List<InvoicePDFModel> listInvoicePDFModel, List<Dictionary<string, string>> listofProducts)
         {
             try
-            {   
+            {
                 //List<Dictionary<string, string>> listOfProducts = new List<Dictionary<string, string>>();
 
                 List<FileHelperForInvoicing.XeroCsv> ListOfDataToGoOnTheCSV = new List<FileHelperForInvoicing.XeroCsv>();
@@ -1180,7 +1187,7 @@ namespace Fuelcards.Models
 
             catch (Exception e)
             {
-                
+
                 throw;
             }
         }
@@ -1254,7 +1261,7 @@ namespace Fuelcards.Models
                     xeroCsv.InvoiceDate = invoicePDFModel.InvoiceDate.ToString();
                     xeroCsv.DueDate = invoicePDFModel.CustomerDetails.paymentDate.ToString();
                     xeroCsv.Total = item.NetTotal.ToString();
-                    xeroCsv.InventoryItemCode = GetInventoryItemCode(listOfProducts,item.productName);
+                    xeroCsv.InventoryItemCode = GetInventoryItemCode(listOfProducts, item.productName);
                     xeroCsv.Description = item.productName;
                     xeroCsv.Quantity = item.Quantity.ToString();
                     xeroCsv.UnitAmount = (item.NetTotal / item.Quantity).ToString();
@@ -1273,7 +1280,7 @@ namespace Fuelcards.Models
 
                 return ListOfDataToGoOnTheCSV;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 throw;
             }
@@ -1286,7 +1293,7 @@ namespace Fuelcards.Models
             {
                 var productItem = listOfProducts.FirstOrDefault(p => p.ContainsKey(productName));
 
-                 if (productItem != null && productItem.TryGetValue(productName, out string itemCode))
+                if (productItem != null && productItem.TryGetValue(productName, out string itemCode))
                 {
                     return itemCode;
                 }
@@ -1405,7 +1412,7 @@ namespace Fuelcards.Models
 
                 streamWriter.WriteLine();
 
-                if(newInvoice.fixedBox != null)
+                if (newInvoice.fixedBox != null)
                 {
                     streamWriter.WriteLine($"Total diesel volume lifted on this invoice,,,,,,,," +
                   $"\"{newInvoice.fixedBox.TotalDieselVolumeLiftedOnThisInvoice?.ToString("N2")}\"");
@@ -1418,7 +1425,7 @@ namespace Fuelcards.Models
                     streamWriter.WriteLine($"Fixed price litres remaining,,,,,,,," +
                         $"\"{newInvoice.fixedBox.FixedPriceRemaining?.ToString("N2")}\"");
                 }
-              
+
 
                 streamWriter.WriteLine();
 
