@@ -56,6 +56,12 @@ function GoToInvoice(){
     document.getElementById("NetworkToInvoice").hidden = true;
 }
 
+
+function GoToInvoiceReport() {
+    document.getElementById("NetworkToInvoice").hidden = true;
+    document.getElementById("InvoiceReportSection").hidden = false;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
 
     var modelKey = 'invoicePreCheckModel';
@@ -207,7 +213,7 @@ function createCheckListHeaders(table, network) {
     const thead = table.querySelector("thead");
     thead.innerHTML = ""; // Clear existing headers
 
-    const headers = ["Check List", network];
+    const headers = ["Check List", network,"Status"];
     headers.forEach(headerText => {
         const th = document.createElement("th");
         th.innerHTML = headerText;

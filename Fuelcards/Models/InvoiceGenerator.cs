@@ -39,6 +39,7 @@ using PdfSharp.Pdf.AcroForms;
 using DataAccess.Fuelcards;
 using System.Text;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using System.Transactions;
 namespace Fuelcards.Models
 {
     public class InvoiceGenerator
@@ -234,15 +235,68 @@ namespace Fuelcards.Models
 
             if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 1)
             {
-                var edis = invoiceModelCustomerDetails.transactions;
+                List<TransactionsPDF> edis = invoiceModelCustomerDetails.transactions;    
+                string previousPanNumber = null;
+                double VolumeTotalForEachTransactionGroup = 0;
+                double TotalValueForEachTransactionGroup = 0;
+
+                foreach (var edi in edis)
+                {
+                    edi.CardNumber = edi.CardNumber.Substring(edi.CardNumber.Length - 5);
+
+                    string currentPanNumber = edi.CardNumber;
+
+                    if(previousPanNumber != null && previousPanNumber != currentPanNumber)
+                    {
+                        int countForPreviousPan = edis.Count(e => e.CardNumber == previousPanNumber);
+                        var breakRow = table.AddRow();
+                        breakRow.Cells[0].MergeRight = 3;
+                        breakRow.Cells[0].AddParagraph($"Sub Total for Card No {previousPanNumber}");
+                        breakRow.Cells[0].Format.Alignment = ParagraphAlignment.Center;
+                        breakRow.Cells[0].Format.Font.Bold = true;
+                        breakRow.Cells[4].MergeRight = 2;
+                        breakRow.Cells[4].AddParagraph($"No of Drawings: {countForPreviousPan}");
+                        breakRow.Cells[4].Format.Alignment = ParagraphAlignment.Center;
+                        breakRow.Cells[4].Format.Font.Bold = true;
+                        breakRow.Cells[7].Format.Font.Bold = true;
+                        VolumeTotalForEachTransactionGroup = Math.Round(VolumeTotalForEachTransactionGroup, 2);
+                        breakRow.Cells[7].AddParagraph(VolumeTotalForEachTransactionGroup.ToString());
+                        breakRow.Cells[8].Format.Font.Bold = true;
+                        TotalValueForEachTransactionGroup = Math.Round(TotalValueForEachTransactionGroup, 2);
+                        breakRow.Cells[8].AddParagraph(TotalValueForEachTransactionGroup.ToString());
+
+                        VolumeTotalForEachTransactionGroup = 0;
+
+                        TotalValueForEachTransactionGroup = 0;
+                    }
+                    previousPanNumber = currentPanNumber;
+                    var _row = table.AddRow();
+                    _row.Borders.Visible = false;
+                    _row.Cells[0].AddParagraph(currentPanNumber);
+                    _row.Cells[1].AddParagraph(edi.RegNo);
+                    _row.Cells[2].AddParagraph(edi.Mileage.ToString());
+                    _row.Cells[3].AddParagraph(edi.SiteName);
+                    _row.Cells[3].Format.Font.Size = 5;
+                    _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);
+                    _row.Cells[5].AddParagraph(edi.product);
+                    _row.Cells[5].Format.Font.Size = 6.5;
+                    _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
+                    _row.Cells[7].AddParagraph(edi.Volume.ToString());
+                    VolumeTotalForEachTransactionGroup += (double)edi.Volume;
+                    _row.Cells[8].AddParagraph("£" + edi.Volume.ToString());
+                    TotalValueForEachTransactionGroup += (double)edi.Value;
+
+
+
+
+                }
+
+                /*var edis = invoiceModelCustomerDetails.transactions;
                 string previousPanNumber = null;
                 double VolumeTotalForEachTransactionGroup = 0;
                 double TotalValueForEachTransactionGroup = 0;
                 foreach (var edi in edis)
                 {
-                    //if (!string.IsNullOrEmpty(edi.Pan) && edi.Pan.Length >= 19)
-                    //{
-
                     string currentPanNumber = edi.TransactionNumber;
 
                     if (previousPanNumber != null && previousPanNumber != currentPanNumber)
@@ -316,7 +370,7 @@ namespace Fuelcards.Models
                     TotalValueForEachTransactionGroup = 0;
 
 
-                }
+                }*/
             }
             if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 0)
             {
@@ -329,8 +383,10 @@ namespace Fuelcards.Models
                     {
                         edi.Value = 0.00;
                     }
+                    edi.CardNumber = edi.CardNumber.Substring(edi.CardNumber.Length - 5);
+
                     var _row = table.AddRow();
-                    _row.Cells[0].AddParagraph(edi.TransactionNumber);
+                    _row.Cells[0].AddParagraph(edi.CardNumber);
                     _row.Cells[1].AddParagraph(edi.RegNo);
                     _row.Cells[2].AddParagraph(edi.Mileage.ToString());
                     _row.Cells[3].AddParagraph(edi.SiteName);
@@ -400,14 +456,71 @@ namespace Fuelcards.Models
 
             if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 1)
             {
-                var edis = invoiceModelCustomerDetails.transactions;
-                string previousPanNumber = null; // Initialize with null or empty string
+                List<TransactionsPDF> edis = invoiceModelCustomerDetails.transactions;
+                string previousPanNumber = null;
+                double VolumeTotalForEachTransactionGroup = 0;
+                double TotalValueForEachTransactionGroup = 0;
+
+
+
+                foreach (var edi in edis)
+                {
+                    edi.CardNumber = edi.CardNumber.Substring(edi.CardNumber.Length - 5);
+
+
+                    string currentPanNumber = edi.CardNumber;
+
+                    if (previousPanNumber != null && previousPanNumber != currentPanNumber)
+                    {
+                        int countForPreviousPan = edis.Count(e => e.CardNumber == previousPanNumber);
+                        var breakRow = table.AddRow();
+                        breakRow.Cells[0].MergeRight = 3;
+                        breakRow.Cells[0].AddParagraph($"Sub Total for Card No {previousPanNumber}");
+                        breakRow.Cells[0].Format.Alignment = ParagraphAlignment.Center;
+                        breakRow.Cells[0].Format.Font.Bold = true;
+                        breakRow.Cells[4].MergeRight = 2;
+                        breakRow.Cells[4].AddParagraph($"No of Drawings: {countForPreviousPan}");
+                        breakRow.Cells[4].Format.Alignment = ParagraphAlignment.Center;
+                        breakRow.Cells[4].Format.Font.Bold = true;
+                        breakRow.Cells[7].Format.Font.Bold = true;
+                        VolumeTotalForEachTransactionGroup = Math.Round(VolumeTotalForEachTransactionGroup, 2);
+                        breakRow.Cells[7].AddParagraph(VolumeTotalForEachTransactionGroup.ToString());
+                        breakRow.Cells[8].Format.Font.Bold = true;
+                        TotalValueForEachTransactionGroup = Math.Round(TotalValueForEachTransactionGroup, 2);
+                        breakRow.Cells[8].AddParagraph(TotalValueForEachTransactionGroup.ToString());
+
+                        VolumeTotalForEachTransactionGroup = 0;
+
+                        TotalValueForEachTransactionGroup = 0;
+                    }
+                    previousPanNumber = currentPanNumber;
+                    var _row = table.AddRow();
+                    _row.Borders.Visible = false;
+                    _row.Cells[0].AddParagraph(currentPanNumber);
+                    _row.Cells[1].AddParagraph(edi.RegNo);
+                    _row.Cells[2].AddParagraph(edi.Mileage.ToString());
+                    _row.Cells[3].AddParagraph(edi.SiteName);
+                    _row.Cells[3].Format.Font.Size = 5;
+                    _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);
+                    _row.Cells[5].AddParagraph(edi.product);
+                    _row.Cells[5].Format.Font.Size = 6.5;
+                    _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
+                    _row.Cells[7].AddParagraph(edi.Volume.ToString());
+                    VolumeTotalForEachTransactionGroup += (double)edi.Volume;
+                    _row.Cells[8].AddParagraph("£" + edi.Volume.ToString());
+                    TotalValueForEachTransactionGroup += (double)edi.Value;
+
+
+
+
+                }
+
+                /*var edis = invoiceModelCustomerDetails.transactions;
+                string previousPanNumber = null;
                 double VolumeTotalForEachTransactionGroup = 0;
                 double TotalValueForEachTransactionGroup = 0;
                 foreach (var edi in edis)
                 {
-                    //if (!string.IsNullOrEmpty(edi.Pan) && edi.Pan.Length >= 19)
-                    //{
                     string currentPanNumber = edi.TransactionNumber;
 
                     if (previousPanNumber != null && previousPanNumber != currentPanNumber)
@@ -434,7 +547,7 @@ namespace Fuelcards.Models
                         TotalValueForEachTransactionGroup = 0;
 
                     }
-                    if (edi.Value == 0)
+                    if (edi.Value == 0 || edi.Value == 0.0)
                     {
                         edi.Value = 0.00;
                     }
@@ -442,8 +555,8 @@ namespace Fuelcards.Models
                     var _row = table.AddRow();
                     _row.Borders.Visible = false;
                     _row.Cells[0].AddParagraph(currentPanNumber);
-                    _row.Cells[1].AddParagraph(edi.TransactionNumber.ToString());
-                    _row.Cells[2].AddParagraph(edi.RegNo);
+                    _row.Cells[1].AddParagraph(edi.RegNo);
+                    _row.Cells[2].AddParagraph(edi.Mileage.ToString());
                     _row.Cells[3].AddParagraph(edi.SiteName);
                     _row.Cells[3].Format.Font.Size = 5;
                     _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);
@@ -451,34 +564,37 @@ namespace Fuelcards.Models
                     _row.Cells[5].Format.Font.Size = 6.5;
                     _row.Cells[6].AddParagraph(edi.UnitPrice.ToString());
                     _row.Cells[7].AddParagraph(edi.Volume.ToString());
-                    _row.Cells[8].AddParagraph("£" + edi.Value.ToString());
+                    VolumeTotalForEachTransactionGroup += (double)edi.Volume;
+                    _row.Cells[8].AddParagraph("£" + edi.Volume.ToString());
+                    TotalValueForEachTransactionGroup += (double)edi.Value;
 
 
                 }
-
                 if (!string.IsNullOrEmpty(previousPanNumber))
                 {
                     int countForPreviousPan = edis.Count(e => e.TransactionNumber == previousPanNumber);
-                    var FinalBreakRow = table.AddRow();
-                    FinalBreakRow.Cells[0].MergeRight = 3;
-                    FinalBreakRow.Cells[0].AddParagraph($"Sub Total for Card No {previousPanNumber}");
-                    FinalBreakRow.Cells[0].Format.Alignment = ParagraphAlignment.Center;
-                    FinalBreakRow.Cells[0].Format.Font.Bold = true;
-                    FinalBreakRow.Cells[4].MergeRight = 2;
-                    FinalBreakRow.Cells[4].AddParagraph($"No of Drawings: {countForPreviousPan}");
-                    FinalBreakRow.Cells[4].Format.Alignment = ParagraphAlignment.Center;
-                    FinalBreakRow.Cells[4].Format.Font.Bold = true;
-                    FinalBreakRow.Cells[7].Format.Font.Bold = true;
+                    var FinalRow = table.AddRow();
+                    FinalRow.Cells[0].MergeRight = 3;
+                    FinalRow.Cells[0].AddParagraph($"Sub Total for Card No {previousPanNumber}");
+                    FinalRow.Cells[0].Format.Alignment = ParagraphAlignment.Center;
+                    FinalRow.Cells[0].Format.Font.Bold = true;
+                    FinalRow.Cells[4].MergeRight = 2;
+                    FinalRow.Cells[4].AddParagraph($"No of Drawings: {countForPreviousPan}");
+                    FinalRow.Cells[4].Format.Alignment = ParagraphAlignment.Center;
+                    FinalRow.Cells[4].Format.Font.Bold = true;
+                    FinalRow.Cells[7].Format.Font.Bold = true;
                     VolumeTotalForEachTransactionGroup = Math.Round(VolumeTotalForEachTransactionGroup, 2);
-                    FinalBreakRow.Cells[7].AddParagraph(VolumeTotalForEachTransactionGroup.ToString());
-                    FinalBreakRow.Cells[8].Format.Font.Bold = true;
+                    FinalRow.Cells[7].AddParagraph(VolumeTotalForEachTransactionGroup.ToString());
+                    FinalRow.Cells[8].Format.Font.Bold = true;
                     TotalValueForEachTransactionGroup = Math.Round(TotalValueForEachTransactionGroup, 2);
-                    FinalBreakRow.Cells[8].AddParagraph(TotalValueForEachTransactionGroup.ToString());
+                    FinalRow.Cells[8].AddParagraph(TotalValueForEachTransactionGroup.ToString());
 
                     VolumeTotalForEachTransactionGroup = 0;
 
                     TotalValueForEachTransactionGroup = 0;
-                }
+
+
+                }*/
             }
             if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 0)
             {
@@ -491,9 +607,11 @@ namespace Fuelcards.Models
                     {
                         edi.Value = 0.00;
                     }
+                    edi.CardNumber = edi.CardNumber.Substring(edi.CardNumber.Length - 5);
+
                     var _row = table.AddRow();
                     _row.Borders.Visible = false;
-                    _row.Cells[0].AddParagraph(edi.TransactionNumber.ToString());
+                    _row.Cells[0].AddParagraph(edi.CardNumber.ToString());
                     _row.Cells[1].AddParagraph(edi.TransactionNumber.ToString());
                     _row.Cells[2].AddParagraph(edi.RegNo);
                     _row.Cells[3].AddParagraph(edi.SiteName);
@@ -1457,8 +1575,8 @@ namespace Fuelcards.Models
                 foreach (var transaction in newInvoice.transactions)
                 {
                     string tranDateTime = $"{transaction.TranDate?.ToString("dd/MM/yyyy")} {transaction.TranTime?.ToString("HH:mm")}";
-                    string formattedUnitPrice = transaction.UnitPrice?.ToString("N4");
-                    string formattedVolume = transaction.Volume?.ToString("N2");
+                    string formattedUnitPrice = transaction.UnitPrice?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-GB"));
+                    string formattedVolume = transaction.Volume?.ToString();
                     string formattedValue = transaction.Value?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-GB"));
 
                     streamWriter.WriteLine($"{transaction.CardNumber},{transaction.RegNo},{transaction.Mileage},{transaction.SiteName},{tranDateTime},{transaction.product},{formattedUnitPrice},{formattedVolume},{formattedValue}");

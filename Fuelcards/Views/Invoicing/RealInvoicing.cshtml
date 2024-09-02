@@ -6,6 +6,7 @@
 <script src="//cdn.datatables.net/2.1.3/js/dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/2.1.3/css/dataTables.dataTables.css" />
 <script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.0/dist/xlsx.full.min.js"></script>
 <link rel="shortcut icon" href="https://cdn.icon-icons.com/icons2/574/PNG/96/Invoicing_icon-icons.com_54813.png" type="image/x-icon" />
 <div class="TopRight">
     <div onclick="DevMode()" class="square"></div>
@@ -43,6 +44,8 @@
     
     <button class="ErrorOptions" onclick="RefreshPage()">Refresh Page</button>
     <button hidden class="DevMode" onclick="GoTOEmail()">Go to email</button>
+    <button hidden class="DevMode" onclick="GoToInvoiceReport()">Go to Invoice Report</button>
+
     <button hidden class="DevMode" onclick="GoToInvoice()">Go to Invoice</button>
 
     <h1>Please Select a network to check</h1>
@@ -64,6 +67,7 @@
 
     <button class="button" onclick="goBackFromNetworkCheck(this)">Back</button>
     <button class="button" onclick="selectAllCheckBoxes(this)">Select All</button>
+   
 
     <table id="CheckListTable" class="CheckListTable">
         <thead>
@@ -146,7 +150,7 @@
 <div hidden class="LargeTableDiv" id="InvoiceReportSection">
     <div class="Grouping">
         <button class="button" onclick="LoadInvoiceReport()">Load Invoice Report</button>
-        <button id="exportTableButton" onclick="exportTableToExcel()">Export to Excel</button>
+        <button id="exportTableButton" onclick="exportTableToExcel('InvoiceReportTable')">Export to Excel</button>
         <button class="button" onclick="ContinueAfterInvoiceReport()">Continue</button>
     </div>
     <div class="table-container">
@@ -162,36 +166,7 @@
 
 
 <script>
-    function exportTableToCSV() {
-        var downloadLink;
-        var dataType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        var tableSelect = document.getElementById('InvoiceReportTable');
-        var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
-
-        // Specify file name
-        filename = filename ? filename : 'excel_data.xlsx';
-
-        // Create download link element
-        downloadLink = document.createElement("a");
-
-        document.body.appendChild(downloadLink);
-
-        if (navigator.msSaveOrOpenBlob) {
-            var blob = new Blob(['\ufeff', tableHTML], {
-                type: dataType
-            });
-            navigator.msSaveOrOpenBlob(blob, filename);
-        } else {
-            // Create a link to the file
-            downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
-
-            // Setting the file name
-            downloadLink.download = filename;
-
-            // Triggering the function
-            downloadLink.click();
-        }
-    }
+   
 
 </script>
 

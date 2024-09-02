@@ -43,111 +43,159 @@ html, body {
 }
 
 
+/* Container */
 .CheckListContainer {
-    margin: auto;
-    text-align: center;
     position: relative;
+    background-color: rgba(160, 66, 66, 0.1); /* Semi-transparent background */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     z-index: 1;
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
 }
-.button{
+
+/* General Button Styles */
+.button {
     background-color: #4b7baa;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 25px;
     border-radius: 5px;
     border: none;
     cursor: pointer;
-
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+    font-size: 16px; /* Slightly larger text */
+    margin: 5px;
 }
-.button:hover{
+
+.button:hover {
     background-color: #194979;
     color: #f8f9fa;
+    transform: translateY(-2px); /* Lift button on hover */
 }
+
 .button.active {
     animation: flash 1s infinite;
 }
+
+/* Specific Button Styles */
 #exportTableButton {
     background-color: #4b7baa;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 25px;
     border-radius: 5px;
     border: none;
     cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-size: 16px;
+    margin: 5px;
 }
-    #exportTableButton:hover {
-        background-color: #194979;
-        color: #f8f9fa;
-    }
+
+#exportTableButton:hover {
+    background-color: #194979;
+    color: #f8f9fa;
+    transform: translateY(-2px);
+}
+
 .CheckListContainer .FailedSitesButton {
     background-color: #c83d3d;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 25px;
     border-radius: 5px;
     border: none;
     cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
     margin: 10px;
+    font-size: 16px;
 }
+
 .CheckListContainer .FailedSitesButton:hover {
     background-color: #a31e1e;
-    color: white;
+    color: #f8f9fa;
+    transform: translateY(-2px);
 }
-.CheckListContainer .CustomerListSelect{
+
+/* Dropdown Select */
+.CheckListContainer .CustomerListSelect {
     width: 100%;
-    height: 100%;
+    height: 40px;
     padding: 10px;
     border-radius: 5px;
-    background-color: transparent;
+    background-color: #4b7baa;
     text-align: left;
-    border: 0px;
+    border: 1px solid #f8f9fa;
     color: white;
     margin-bottom: 10px;
     cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
-.CheckListContainer .CustomerListSelect option{
+
+.CheckListContainer .CustomerListSelect:hover {
+    background-color: #194979;
+    border-color: #f8f9fa;
+}
+
+.CheckListContainer .CustomerListSelect option {
     cursor: pointer !important;
     background-color: #511212;
     color: white;
-
 }
 
-
+/* Table */
 .CheckListTable {
     border-collapse: collapse;
-    background-color: transparent;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     margin-bottom: 20px; 
+    overflow: hidden; /* Ensures rounded corners */
+    z-index: 100;
 }
 
 .CheckListTable thead {
-    background-color: transparent;
+    background-color: #333;
+    display: table-header-group;
+    color: white;
+}
+
+.CheckListTable th, .CheckListTable td {
+    padding: 12px 15px;
+    text-align: left;
+    color: white;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .CheckListTable th {
-    color: white;
-}
-
-.CheckListTable th,
-.CheckListTable td {
-    padding: 10px;
-    text-align: left;
-    color: white;
-    border: 3px solid #f8f9fa;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+    background-color: transparent;
 }
 
 .CheckListTable tbody tr:hover {
     cursor: pointer;
-    background-color: #511212;
+    background-color: #3b3b3b;
+    transition: background-color 0.3s ease;
 }
 
 .CheckListCheckBox {
     width: 20px;
     height: 20px;
-    border-radius: 5px;
+    border-radius: 3px;
     background-color: #f8f9fa;
     cursor: pointer;
+    display: flex;
     align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
 }
+
+.CheckListCheckBox:hover {
+    background-color: #c8c8c8;
+}
+
 
 .ButtonContainer {
     display: flex;
@@ -583,6 +631,10 @@ html, body {
     }
 }
 
+
+.InvoicingLoaderContainer{
+    width: 100%;
+}
 
 * {
     box-sizing: border-box;
