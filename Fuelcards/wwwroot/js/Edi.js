@@ -57,11 +57,7 @@ async function ProcessEdis(event) {
     startEdiLoader();
     event.preventDefault();
 
-    var files = [];
-    files.push($('#ediFile1')[0].files[0]);
-    files.push($('#ediFile2')[0].files[0]);
-    files.push($('#ediFile3')[0].files[0]);
-    files.push($('#ediFile4')[0].files[0]);
+    var files = document.getElementById('ediFiles').files;
 
     var formData = new FormData();
     for (var i = 0; i < files.length; i++) {
@@ -96,13 +92,13 @@ async function ProcessEdis(event) {
         console.log(error);
         Toast.fire({
             icon: "error",
-            title: error.responseText,
+            title: "An error occurred",
+            text: error.message || "An unknown error occurred."
         });
     } finally {
         stopEdiLoader();
     }
 }
-
 
 
 function HighlightRow(RowElement) {
@@ -160,20 +156,17 @@ async function MaskedCardCheck() {
         /*data: JSON.stringify(ListOfRecentControlIDs),*/
         contentType: "application/json;charset=utf-8",
         success: function (MaskedCardResponse) {
+            Toast.fire({
+                icon: "success",
+                title: "No masked cards found!",
+            });
         },
         error: function (error) {
             alert("Error");
         }
     });
 }
-function displayFileName(inputElement, displayElementId) {
-    const file = inputElement.files[0]; // Get the first selected file
-    if (file) {
-        document.getElementById(displayElementId).textContent = `Selected file: ${file.name}`;
-    } else {
-        document.getElementById(displayElementId).textContent = '';
-    }
-}
+
 
 async function GetListOfRecentControlIDs() {
     var Table = document.getElementById('EdiTable');

@@ -57,7 +57,7 @@ namespace Fuelcards.Controllers
                         string archiveFilePath = Path.Combine(archivePath, fileName);
                         if (System.IO.File.Exists(archiveFilePath))
                         {
-                            System.IO.File.Delete(archiveFilePath); // Optional: Delete existing file before moving, if necessary
+                            System.IO.File.Delete(archiveFilePath); 
                         }
                         System.IO.File.Move(filePath, archiveFilePath);
                     }

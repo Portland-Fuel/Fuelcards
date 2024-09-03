@@ -72,16 +72,8 @@
             <div class="UploadEdi">
                 <h2>Upload EDI File</h2>
                 <form onsubmit="ProcessEdis(event)">
-                    <input type="file" id="ediFile1" name="ediFile1" accept=".txt" onchange="displayFileName(this, 'fileName1')">
-                    <div id="fileName1" class="file-name"></div>
-                    <input type="file" id="ediFile2" name="ediFile2" accept=".txt" onchange="displayFileName(this, 'fileName2')">
-                    <div id="fileName2" class="file-name"></div>
-                    <input type="file" id="ediFile3" name="ediFile3" accept=".txt" onchange="displayFileName(this, 'fileName3')">
-                    <div id="fileName3" class="file-name"></div>
-                    <input type="file" id="ediFile4" name="ediFile4" accept=".txt" onchange="displayFileName(this, 'fileName4')">
-                    <div id="fileName4" class="file-name"></div>
+                    <input multiple type="file" id="ediFiles" name="ediFile1" accept=".txt" onchange="displayFileName(this, 'fileName1')">
                     <button type="submit">Process EDI</button>
-                  
                 </form>
             </div>
         </div>
