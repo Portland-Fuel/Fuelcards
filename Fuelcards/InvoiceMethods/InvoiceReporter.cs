@@ -139,40 +139,40 @@ namespace Fuelcards.InvoiceMethods
             switch (reportType)
             {
                 case EnumHelper.Network.Keyfuels:
-                    report.DieselVol = invoice.rows.Where(e => e.productName == "Diesel - ").Sum(e => e.Quantity);
-                    report.PetrolVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.ULSP.ToString())?.Quantity;
-                    report.LubesVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Lube.ToString())?.Quantity;
-                    report.GasoilVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Gasoil.ToString())?.Quantity;
-                    report.AdblueVol = invoice.rows.Where(e => e.productName == EnumHelper.Products.Adblue.ToString() || e.productName == EnumHelper.Products.AdblueCan.ToString() || e.productName == EnumHelper.Products.PackagedAdblue.ToString())?.Sum(e => e.Quantity);
-                    report.PremDieselVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.PremiumDiesel.ToString())?.Quantity;
-                    report.SuperUnleadedVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.SuperUnleaded.ToString())?.Quantity;
-                    report.TescoVol = invoice.transactions.Where(e => e.productCode == 77 && e.Band == "1").Sum(e => e.Volume);
+                    report.DieselVol = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == "Diesel - ").Sum(e => e.Quantity));
+                    report.PetrolVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.ULSP.ToString())?.Quantity);
+                    report.LubesVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Lube.ToString())?.Quantity);
+                    report.GasoilVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Gasoil.ToString())?.Quantity);
+                    report.AdblueVol = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == EnumHelper.Products.Adblue.ToString() || e.productName == EnumHelper.Products.AdblueCan.ToString() || e.productName == EnumHelper.Products.PackagedAdblue.ToString())?.Sum(e => e.Quantity));
+                    report.PremDieselVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.PremiumDiesel.ToString())?.Quantity);
+                    report.SuperUnleadedVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.SuperUnleaded.ToString())?.Quantity);
+                    report.TescoVol = InvoiceSummary.Round2(invoice.transactions.Where(e => e.productCode == 77 && e.Band == "1").Sum(e => e.Volume));
                     report.Customer = invoice.CustomerDetails.CompanyName;
 
                     break;
                 case EnumHelper.Network.UkFuel:
-                    report.DieselVol = invoice.rows.Where(e => e.productName == "Diesel - " || e.productName == "Diesel").Sum(e => e.Quantity);
-                    report.PetrolVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.ULSP.ToString())?.Quantity;
-                    report.LubesVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Lube.ToString())?.Quantity;
-                    report.GasoilVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Gasoil.ToString())?.Quantity;
-                    report.AdblueVol = invoice.rows.Where(e => e.productName == EnumHelper.Products.Adblue.ToString() || e.productName == EnumHelper.Products.AdblueCan.ToString() || e.productName == EnumHelper.Products.PackagedAdblue.ToString())?.Sum(e => e.Quantity);
-                    report.PremDieselVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.PremiumDiesel.ToString())?.Quantity;
-                    report.SuperUnleadedVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.SuperUnleaded.ToString())?.Quantity;
-                    report.TescoVol = invoice.rows.Where(e => e.productName == "Diesel - Tesco").Sum(e => e.Quantity);
-                    report.SainsburysVol = invoice.rows.Where(e => e.productName == "Diesel - Sainsburys").Sum(e => e.Quantity);
+                    report.DieselVol = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == "Diesel - " || e.productName == "Diesel").Sum(e => e.Quantity));
+                    report.PetrolVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.ULSP.ToString())?.Quantity);
+                    report.LubesVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Lube.ToString())?.Quantity);
+                    report.GasoilVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Gasoil.ToString())?.Quantity);
+                    report.AdblueVol = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == EnumHelper.Products.Adblue.ToString() || e.productName == EnumHelper.Products.AdblueCan.ToString() || e.productName == EnumHelper.Products.PackagedAdblue.ToString())?.Sum(e => e.Quantity));
+                    report.PremDieselVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.PremiumDiesel.ToString())?.Quantity);
+                    report.SuperUnleadedVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.SuperUnleaded.ToString())?.Quantity);
+                    report.TescoVol = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == "Diesel - Tesco").Sum(e => e.Quantity));
+                    report.SainsburysVol = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == "Diesel - Sainsburys").Sum(e => e.Quantity));
                     report.Customer = invoice.CustomerDetails.CompanyName;
 
                     break;
                 case EnumHelper.Network.Texaco:
-                    report.DieselVol = invoice.rows.Where(e => e.productName == "Diesel - " || e.productName == "Diesel").Sum(e => e.Quantity);
-                    report.PetrolVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.ULSP.ToString())?.Quantity;
-                    report.LubesVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Lube.ToString())?.Quantity;
-                    report.GasoilVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Gasoil.ToString())?.Quantity;
-                    report.AdblueVol = invoice.rows.Where(e => e.productName == EnumHelper.Products.Adblue.ToString() || e.productName == EnumHelper.Products.AdblueCan.ToString() || e.productName == EnumHelper.Products.PackagedAdblue.ToString())?.Sum(e => e.Quantity);
-                    report.PremDieselVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.PremiumDiesel.ToString())?.Quantity;
-                    report.SuperUnleadedVol = invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.SuperUnleaded.ToString())?.Quantity;
+                    report.DieselVol = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == "Diesel - " || e.productName == "Diesel").Sum(e => e.Quantity));
+                    report.PetrolVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.ULSP.ToString())?.Quantity);
+                    report.LubesVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Lube.ToString())?.Quantity);
+                    report.GasoilVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.Gasoil.ToString())?.Quantity);
+                    report.AdblueVol = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == EnumHelper.Products.Adblue.ToString() || e.productName == EnumHelper.Products.AdblueCan.ToString() || e.productName == EnumHelper.Products.PackagedAdblue.ToString())?.Sum(e => e.Quantity));
+                    report.PremDieselVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.PremiumDiesel.ToString())?.Quantity);
+                    report.SuperUnleadedVol = InvoiceSummary.Round2(invoice.rows.FirstOrDefault(e => e.productName == EnumHelper.Products.SuperUnleaded.ToString())?.Quantity);
                     report.Customer = invoice.CustomerDetails.CompanyName;
-                    report.TescoVol = invoice.rows.Where(e => e.productName == "Diesel - Tesco").Sum(e => e.Quantity);
+                    report.TescoVol = InvoiceSummary.Round2(invoice.rows.Where(e => e.productName == "Diesel - Tesco").Sum(e => e.Quantity));
                     break;
                 case EnumHelper.Network.Fuelgenie:
                     break;
