@@ -1,6 +1,7 @@
 ﻿
 
 using DataAccess.Repositorys.IRepositorys;
+using FuelcardModels.ConsoleApp;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -46,7 +47,7 @@ namespace Fuelcards.Controllers
                 }
 
                 // Perform EDI import operations here (uncomment when ready)
-                // EDIs.ImportAllEdi(_fuelcardRepo, uploadPath);
+                 EDIs.ImportAllEdi(_fuelcardRepo, uploadPath);
 
                 var filesInUpload = Directory.GetFiles(uploadPath);
                 foreach (var filePath in filesInUpload)
