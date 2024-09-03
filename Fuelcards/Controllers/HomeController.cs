@@ -91,9 +91,8 @@ namespace Fuelcards.Controllers
         }
         public IActionResult Index()
         {
-
             ViewData["Title"] = "Home";
-            return View("/Views/Home/Index.cshtml");
+            return View();
         }
         [HttpPost]
         public async Task<JsonResult> GetLink()
