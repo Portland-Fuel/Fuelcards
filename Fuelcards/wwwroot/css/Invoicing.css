@@ -960,6 +960,8 @@ html, body {
     margin: 10px;
     justify-content: center;
     align-items: center;
+    position: absolute;
+    z-index: 1000;
 }
 
 .ErrorOptions{
