@@ -121,7 +121,8 @@ namespace Fuelcards.InvoiceMethods
                 FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
                 TotalDieselUsed = 0;
                 FixedPrice = null;
-                CurrentAllocation = currentAllocation; 
+                CurrentAllocation = currentAllocation;
+                FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
             }
         }
 
