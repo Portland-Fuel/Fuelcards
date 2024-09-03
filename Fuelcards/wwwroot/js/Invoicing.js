@@ -79,19 +79,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 initializePage(model);
             },
             error: async function (error) {
-                document.getElementById("InitialPageLoad").hidden = true;
-                document.getElementById("ModelError").hidden = false;
-                HideBackButton();
-                var ParsedError = JSON.stringify(error.responseText);
-                document.getElementById("ModelErrorMessage").textContent = "Error: " + ParsedError;
-                Swal.fire({
-                    backdrop: false,
-                    icon: "error",
-                    title: "Sorry there has been a big error",
-                    text: 'error loading model from server:' + ParsedError,
-                    footer: '<a href="https://192.168.0.17:666/" target="_blank">Report it here!</a>'
-                });
-                console.error('Error fetching model from server:', error);
+                HandleInvoicingModelLoadErrors(error);
+                
             }
         });
     } else {

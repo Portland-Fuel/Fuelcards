@@ -78,10 +78,21 @@ namespace Fuelcards.Controllers
                 InvoicingController.invoices = new();
                 return Json(checks);
             }
+            catch (SiteErrorException e)
+            {
+                var res = new
+                {
+                    exceptionType = "SiteErrorException",
+                    message = "Site Error",
+                    description = e.Message
+                };
+                Response.StatusCode = 500;
+                return Json(res);
+            }
             catch (Exception e)
             {
                 Response.StatusCode = 500;
-                return Json(e);
+                return Json("Error:" + e.Message);
             }
         }
         [HttpPost]
@@ -207,7 +218,6 @@ namespace Fuelcards.Controllers
                 }
                 _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network == EnumHelper.NetworkEnumFromString(Network)).ToList(), _db);
                 InvoicingController.reportList = new();
-                InvoicingController.invoices = new();
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)

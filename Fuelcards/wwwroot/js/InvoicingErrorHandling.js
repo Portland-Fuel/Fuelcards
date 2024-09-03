@@ -4,6 +4,25 @@
     stopInvoicingLoader();
     showErrorBox(xhr.statusText + ': ' + xhr.responseText);
 }
+async function HandleInvoicingModelLoadErrors(data) {
+    document.getElementById("InitialPageLoad").hidden = true;
+    document.getElementById("ModelError").hidden = false;
+    var response = JSON.parse(data);
+    HideBackButton();
+    var ParsedError = JSON.stringify(response.message);
+    document.getElementById("ModelErrorMessage").textContent = "Error: " + ParsedError;
+    switch (response.exceptionType) {
+        case "SiteErrorException":
+            console.log("Inventory Item Code Not Found in Database");
+            showErrorBox(response.description);
+        default:
+            console.error("Unhandled error: ", response.message);
+            showErrorBox(response.message);
+            break;
+    }
+
+}
+
 function HandleConfirmInvoicingError(responseText) {
     var response = JSON.parse(responseText);
     switch (response.exceptionType) {
