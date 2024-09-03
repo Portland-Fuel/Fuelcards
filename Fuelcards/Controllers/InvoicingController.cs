@@ -52,9 +52,16 @@ namespace Fuelcards.Controllers
                 checks.KeyfuelImports = _db.GetTotalEDIs(0);
                 checks.UkfuelImports = _db.GetTotalEDIs(1);
                 checks.TexacoImports = _db.GetTotalEDIs(2);
-                checks.KeyfuelsInvoiceList = await _db.GetCustomersToInvoice(0, checks.InvoiceDate, checks.BasePrice);
-                checks.UkFuelInvoiceList = await _db.GetCustomersToInvoice(1, checks.InvoiceDate, checks.BasePrice);
-                checks.TexacoInvoiceList = await _db.GetCustomersToInvoice(2, checks.InvoiceDate, checks.BasePrice);
+                try
+                {
+                    checks.KeyfuelsInvoiceList = await _db.GetCustomersToInvoice(0, checks.InvoiceDate, checks.BasePrice);
+                    checks.UkFuelInvoiceList = await _db.GetCustomersToInvoice(1, checks.InvoiceDate, checks.BasePrice);
+                    checks.TexacoInvoiceList = await _db.GetCustomersToInvoice(2, checks.InvoiceDate, checks.BasePrice);
+                }
+                catch (Exception e )
+                {
+                    throw new SiteErrorException($"There was a issue getting the network invoice list. Possibly due to a site error The issue was - {e}");
+                }
                 checks.FailedKeyfuelsSites = await _db.GetFailedSiteBanding(0);
                 checks.FailedUkfuelSites = await _db.GetFailedSiteBanding(1);
                 checks.FailedTexacoSites = await _db.GetFailedSiteBanding(2);
@@ -74,7 +81,7 @@ namespace Fuelcards.Controllers
             catch (Exception e)
             {
                 Response.StatusCode = 500;
-                return Json(e.Message);
+                return Json(e);
             }
         }
         [HttpPost]
@@ -300,7 +307,7 @@ namespace Fuelcards.Controllers
                 InvoicePDFModel newInvoice = new();
                 customerInvoice = _db.OrderTransactions(customerInvoice);
                 newInvoice.network = _db.getNetworkFromAccount((int)customerInvoice.account);
-                
+
                 newInvoice.InvoiceDate = customerInvoice.invoiceDate;
                 if (customerInvoice.CustomerType != EnumHelper.CustomerType.Floating)
                 {
@@ -309,14 +316,14 @@ namespace Fuelcards.Controllers
                 }
                 newInvoice.rows = summary.ProductBreakdown(customerInvoice, newInvoice.network);
 
-                newInvoice.transactions = summary.TurnsTransactionsToPdf(newInvoice.network,customerInvoice,_db);
+                newInvoice.transactions = summary.TurnsTransactionsToPdf(newInvoice.network, customerInvoice, _db);
 
                 newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
                 if (customerInvoice.name != "The Fuel Trading Company")
                 {
                     newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice, _db, HomeController.PFLXeroCustomersData.Where(e => e.Name == customerInvoice.name).FirstOrDefault().ContactID.ToString(), (int)customerInvoice.CustomerTransactions[0].network);
                 }
-                
+
                 else
                 {
                     newInvoice.CustomerDetails = summary.GetCustomerDetails(customerInvoice, _db, "FTC", (int)customerInvoice.CustomerTransactions[0].network);
@@ -396,7 +403,7 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
-     
+
         [HttpPost]
         public JsonResult ProcessTransactionFromPage([FromBody] TransactionDataFromView transactionDataFromView)
         {
