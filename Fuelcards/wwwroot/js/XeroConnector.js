@@ -1,13 +1,5 @@
 window.onload = async function () {
-    if(await CheckIfXeroConnected()){
-     return;   
-    }
-    else{
-        ConnectToXero();
-
-    }
-    
-
+    ConnectToXero();
 }
 
 
