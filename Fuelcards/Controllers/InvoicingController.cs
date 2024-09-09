@@ -217,7 +217,7 @@ namespace Fuelcards.Controllers
                     throw new InventoryItemCodeNotInDb(e.Message.Split(':')[1]);
                 }
                 _db.ConfirmChanges(Network, reportList.Where(e => e.Network == (int)EnumHelper.NetworkEnumFromString(Network)).ToList(), invoices.Where(e => e.network == EnumHelper.NetworkEnumFromString(Network)).ToList(), _db);
-                InvoicingController.reportList = new();
+                //InvoicingController.reportList = new();
                 return Json("Success");
             }
             catch (InventoryItemCodeNotInDb e)
