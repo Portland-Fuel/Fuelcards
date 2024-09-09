@@ -259,7 +259,7 @@ namespace Fuelcards.Repositories
                     model.CustomerType = await customerType((int)model.account, invoiceDate);
                     model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-15)));
                     var portlandId = GetPortlandIdFromAccount((int)model.account).Result;
-                        model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();                    
+                    model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
                     model.IfuelsCustomer = IfuelsCustomer((int)model.account);
                     if (model.CustomerType != EnumHelper.CustomerType.Floating)
                     {
@@ -1092,25 +1092,46 @@ namespace Fuelcards.Repositories
                             FullAllocations = (int)Math.Floor(result.Value);
                         }
                         double? PartialVolumeLeft = RemainingVolumeToUpdate - (Trade.FixedVolume * FullAllocations);
-                        var OrderedVolumes = Volumes.OrderByDescending(e => e.AllocationId).ToList();
-                        foreach (var item in OrderedVolumes)
+                        int VolumeAllocationsRemaining;
+                        if (PartialVolumeLeft > 0)
+                        {
+                            VolumeAllocationsRemaining = FullAllocations + 1;
+                        }
+                        else
+                        {
+                            VolumeAllocationsRemaining = FullAllocations;
+                        }
+                        foreach (var item in Volumes)
                         {
                             item.Volume = 0;
                         }
-                        int j = 0;
-                        for (int i = 0; i < FullAllocations; i++)
+                        var OrderedVolumes = Volumes.OrderByDescending(e => e.AllocationId).Take(VolumeAllocationsRemaining).ToList();
+                        for (int i = 0; i < OrderedVolumes.Count(); i++)
                         {
-                            OrderedVolumes[i].Volume = Trade.FixedVolume;
-                            j = i;
+                            if (i == OrderedVolumes.Count() - 1)
+                            {
+                                OrderedVolumes[i].Volume = PartialVolumeLeft;
+
+                            }
+                            else
+                            {
+                                OrderedVolumes[i].Volume = Trade.FixedVolume;
+                            }
                         }
-                        OrderedVolumes[j].Volume = Convert.ToDouble(Math.Round(Convert.ToDecimal(PartialVolumeLeft), 2));
-                        foreach (var item in OrderedVolumes)
+                        foreach (var item in Volumes)
+                        {
+                            item.Volume = OrderedVolumes
+                           .Where(e => e.AllocationId == item.AllocationId)
+                           .Select(e => e.Volume)
+                           .FirstOrDefault() ?? 0.0;
+
+                        }
+                        foreach (var item in Volumes)
                         {
                             _db.AllocatedVolumes.Update(item);
                         }
                         _db.SaveChanges();
                     }
-
                 }
                 var fcControls = _db.FcControls.Where(e => e.Invoiced != true && e.Network == (int)NetworkEnum);
                 foreach (var item in fcControls)
@@ -1179,6 +1200,7 @@ namespace Fuelcards.Repositories
                         dbTransaction.InvoicePrice = transaction.Value;
                         dbTransaction.InvoiceNumber = Convert.ToInt32(invoiceNumber.Replace("PF", ""));
                         dbTransaction.Commission = transaction.Commission;
+                        dbTransaction.UnitPrice = transaction.UnitPrice;
                         _db.UkfTransactions.Update(dbTransaction);
                         _db.SaveChanges();
                     }
@@ -1235,22 +1257,23 @@ namespace Fuelcards.Repositories
             foreach (var transaction in UkMaskedCards)
             {
                 var result = AllMasked.FirstOrDefault(e => transaction.PanNumber.Value.ToString().Contains(e.CardNo));
-                if(result is not null)
+                if (result is not null)
                 {
                     transaction.PortlandId = result.PortlandId;
                     _db.UkfTransactions.Update(transaction);
                     _db.SaveChanges();
                 }
-                else{
+                else
+                {
                     throw new ArgumentException($"There is a missing masked card. {transaction.PanNumber}");
                 }
             }
-            
-            
+
+
         }
         public EnumHelper.InvoiceFrequency? getFixFrequency(int? currentTradeId)
         {
-            int? id = _db.FixedPriceContracts.FirstOrDefault(e=>e.Id == currentTradeId)?.FrequencyId;
+            int? id = _db.FixedPriceContracts.FirstOrDefault(e => e.Id == currentTradeId)?.FrequencyId;
             if (id == null) throw new ArgumentException("Fix Frequency is showing as null. This is not possible. Something has gone badly wrong!");
             else if (id == 1) return EnumHelper.InvoiceFrequency.Weekly;
             else if (id == 3) return EnumHelper.InvoiceFrequency.Monthly;

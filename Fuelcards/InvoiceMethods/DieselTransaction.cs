@@ -23,7 +23,7 @@ namespace Fuelcards.InvoiceMethods
         public static double? FixRate { get; set; }
         public static double? FloatingRate { get; set; }
         public static int? CurrentAllocation { get; set; }
-
+        public static double? RolledRate { get; set; }  
         //private static void CheckIfStaticVariablesNeedUpdating(int? currentAccount, double? StartingRoll, double? newFixPrice, double? FixedVolumeCurrent)
         //{
         //    if (account is null || currentAccount != account)
@@ -135,6 +135,7 @@ namespace Fuelcards.InvoiceMethods
             VolumeChargedAtFloating = 0;
             VolumeChargedAtRolled = 0;
             FloatingRate = basePrice + addon + siteInfo.Surcharge + siteInfo.transactionalSiteSurcharge;
+            RolledRate = siteInfo.Surcharge + siteInfo.transactionalSiteSurcharge;
             if (network == EnumHelper.Network.UkFuel || network == EnumHelper.Network.Texaco)
             {
                 if (siteInfo.band == "9" || siteInfo.band == "8")
@@ -220,7 +221,9 @@ namespace Fuelcards.InvoiceMethods
             }
             else if (data.customerType == EnumHelper.CustomerType.Fix)
             {
+                var RolledFixPrice = (VolumeChargedAtRolled * RolledRate) / 100;
                 FixPrice = (VolumeChargedAtFix * FixRate) / 100;
+                FixPrice = FixPrice + RolledFixPrice;
             }
             if (VolumeChargedAtFix == 0 && VolumeChargedAtRolled == 0) FixPrice = 0;
             //FixedVolumeUsedOnThisInvoice += VolumeChargedAtFix;
@@ -256,6 +259,7 @@ namespace Fuelcards.InvoiceMethods
             {
                 FixedVolumeUsedOnThisInvoice += originalVolume;
                 AvailableRolledVolume = 0;
+                VolumeChargedAtRolled = originalVolume;
             }
             return newVolume;
         }
