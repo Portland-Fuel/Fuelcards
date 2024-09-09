@@ -425,7 +425,7 @@ namespace Fuelcards.Repositories
             }
             return Customers;
         }
-        public void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network)
+        public async Task UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network)
         {
             if (newAddon == null) return;
             try
@@ -795,7 +795,7 @@ namespace Fuelcards.Repositories
                 default: return null;
             }
         }
-        public async void UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network)
+        public async Task UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network)
         {
             FcEmail? ExistingEmail = _db.FcEmails.FirstOrDefault(e => e.Account == Convert.ToInt32(updatedAccount.account));
             ExistingEmail.To = updatedAccount.toEmail;
@@ -850,7 +850,7 @@ namespace Fuelcards.Repositories
             model.Network = GetNetworkArrayFromAccountNumber(Convert.ToInt32(item.account)).ToList();
             model.PortlandId = await GetPortlandIdFromAccount(Convert.ToInt32(item.account));
             await FixedPriceContractUpdateAsync(model);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
         private int[]? GetNetworkArrayFromAccountNumber(int? account)

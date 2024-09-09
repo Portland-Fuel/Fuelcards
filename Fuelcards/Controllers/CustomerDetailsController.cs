@@ -50,15 +50,15 @@ namespace Fuelcards.Controllers
 
 
         [HttpPost]
-        public JsonResult SubmitAddOrEdit([FromBody] NewCustomerDetailsModel.AddEditCustomerFormData AddEditCustomerFormData)
+        public async Task<JsonResult> SubmitAddOrEdit([FromBody] NewCustomerDetailsModel.AddEditCustomerFormData AddEditCustomerFormData)
         {
             try
             {
                 if(AddEditCustomerFormData.isUpdateCustomer == true)
                 {
-                    SortChanges(AddEditCustomerFormData.keyFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Keyfuels);
-                    SortChanges(AddEditCustomerFormData.uKFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.UkFuel);
-                    SortChanges(AddEditCustomerFormData.texacoInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Texaco);
+                    await SortChanges(AddEditCustomerFormData.keyFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Keyfuels);
+                    await SortChanges(AddEditCustomerFormData.uKFuelsInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.UkFuel);
+                    await SortChanges(AddEditCustomerFormData.texacoInfo, AddEditCustomerFormData.customerName, EnumHelper.Network.Texaco);
                 }
                 else
                 {
@@ -73,19 +73,19 @@ namespace Fuelcards.Controllers
             }
         }
 
-        private void SortChanges(NewCustomerDetailsModel.NetworkInfo? networkInfo, string CustomerName, EnumHelper.Network network)
+        private async Task SortChanges(NewCustomerDetailsModel.NetworkInfo? networkInfo, string CustomerName, EnumHelper.Network network)
         {
             foreach (var NewAddon in networkInfo.newAddons)
             {
-                _db.UpdateAddon(NewAddon, CustomerName, network);
+                await _db.UpdateAddon(NewAddon, CustomerName, network);
             }
             foreach (var UpdatedAccount in networkInfo.newAccountInfo)
             {
-                _db.UpdateAccount(UpdatedAccount,CustomerName, network);
+                await _db.UpdateAccount(UpdatedAccount,CustomerName, network);
             }
             foreach (var newFix in networkInfo.newFixesForCustomer)
             {
-                _db.NewFix(newFix, CustomerName, network);
+                await _db.NewFix(newFix, CustomerName, network);
             }
         }
     }

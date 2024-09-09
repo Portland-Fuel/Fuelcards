@@ -31,9 +31,9 @@ namespace Fuelcards.Repositories
         List<List<GenericTransactionFile>> GroupTransactionsByCustomer(List<GenericTransactionFile> transactions);
         EnumHelper.InvoiceFormatType? GetInvoiceFormatType(string networkName, int portlandId);
         Task<List<PortlandIdToXeroId>?> GetXeroIdFromPortlandId();
-        void UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network);
+        Task UpdateAddon(NewCustomerDetailsModel.AddonData newAddon, string CustomerName, EnumHelper.Network network);
         List<int?>? CheckForDuplicateTransactions(EnumHelper.Network network);
-        void UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network);
+        Task UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network);
 
         Task FcEmailUpdateAsync(FcEmail source);
         Task NewFix(NewCustomerDetailsModel.Fix newFixesForCustomer, string customerName, EnumHelper.Network network);
