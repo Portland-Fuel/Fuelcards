@@ -6,6 +6,7 @@ using Fuelcards.Repositories;
 using Microsoft.Graph;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Xero.NetStandard.OAuth2.Model.Accounting;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 namespace Fuelcards.InvoiceMethods
 {
     public class DieselTransaction
@@ -280,10 +281,14 @@ namespace Fuelcards.InvoiceMethods
             else
             {
                 VolumeChargedAtFix = FixedVolumeRemainingForCurrent;
+                if (FixedVolumeRemainingForCurrent is null) FixedVolumeRemainingForCurrent = 0;
                 FixedVolumeUsedOnThisInvoice += FixedVolumeRemainingForCurrent;
                 newVolume = newVolume - FixedVolumeRemainingForCurrent;
                 FixedVolumeRemainingForCurrent = 0;
                 return newVolume;
+                //VolumeChargedAtFix = 0;
+                //VolumeChargedAtFloating = newVolume;
+                //return 0;
             }
         }
     }
