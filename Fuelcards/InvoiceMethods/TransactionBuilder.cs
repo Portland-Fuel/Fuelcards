@@ -74,6 +74,7 @@ namespace Fuelcards.InvoiceMethods
                     case EnumHelper.Products.CardStopManagementFee: return 0;
                     case EnumHelper.Products.EDISTDSignle: return 0;
                     case EnumHelper.Products.StockNotification: return 0;
+                    case EnumHelper.Products.Brush: return methodology.Brush(data.transaction,network);
                 }
                 return null;
 

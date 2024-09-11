@@ -45,6 +45,9 @@ namespace Fuelcards.Controllers
         {
             try
             {
+                InvoicingController.invoices = new();
+                InvoicingController.reportList = new();
+                InvoicingController._report = new();
                 InvoicePreCheckModels checks = new();
                 checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-11)));
                 checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);

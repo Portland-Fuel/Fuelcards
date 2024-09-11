@@ -27,7 +27,8 @@ namespace Fuelcards.GenericClassFiles
             CardStopManagementFee,
             EDISTDSignle,
             StockNotification,
-            EmailPinCharge
+            EmailPinCharge,
+            Brush
         };
         public enum RetailDiesel
         {
@@ -263,6 +264,7 @@ namespace Fuelcards.GenericClassFiles
                         case 261: return EnumHelper.Products.EDISTDSignle;
                         case 241: return EnumHelper.Products.StockNotification;
                         case 280: return EnumHelper.Products.EmailPinCharge;
+                        case 7: return EnumHelper.Products.Brush;
                         default: return EnumHelper.Products.Other;
 
                     }

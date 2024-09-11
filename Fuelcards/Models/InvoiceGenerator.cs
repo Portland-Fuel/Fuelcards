@@ -306,7 +306,7 @@ namespace Fuelcards.Models
                     {
                         edi.Value = 0.00;
                     }
-                    edi.CardNumber = edi.CardNumber.Substring(edi.CardNumber.Length - 5);
+                    edi.CardNumber = SortEDICardNumber(edi.CardNumber);
 
                     var _row = table.AddRow();
                     _row.Cells[0].AddParagraph(edi.CardNumber);
@@ -323,6 +323,17 @@ namespace Fuelcards.Models
                     var edivalue = ediValueConversion(edi.Value);
                     _row.Cells[8].AddParagraph("£" + edivalue);
                 }
+            }
+        }
+        private string SortEDICardNumber(string? input)
+        {
+            try
+            {
+                return input.Substring(input.Length - 5);
+            }
+            catch (Exception)
+            {
+                return "";
             }
 
         }
@@ -390,9 +401,7 @@ namespace Fuelcards.Models
 
                 foreach (var edi in edis)
                 {
-                    edi.CardNumber = edi.CardNumber.Substring(edi.CardNumber.Length - 5);
-
-
+                    edi.CardNumber = SortEDICardNumber(edi.CardNumber);
                     string currentPanNumber = edi.CardNumber;
 
                     if (previousPanNumber != null && previousPanNumber != currentPanNumber)
@@ -438,10 +447,6 @@ namespace Fuelcards.Models
                     string val = ediValueConversion(edi.Value);
                     _row.Cells[8].AddParagraph("£" + val);
                     TotalValueForEachTransactionGroup += (double)edi.Value;
-
-
-
-
                 }
             }
             if (invoiceModelCustomerDetails.CustomerDetails.InvoiceType == 0)
@@ -455,13 +460,12 @@ namespace Fuelcards.Models
                     {
                         edi.Value = 0.00;
                     }
-                    edi.CardNumber = edi.CardNumber.Substring(edi.CardNumber.Length - 5);
-
+                    edi.CardNumber = SortEDICardNumber(edi.CardNumber);
                     var _row = table.AddRow();
                     _row.Borders.Visible = false;
-                    _row.Cells[0].AddParagraph(edi.CardNumber.ToString());
+                    _row.Cells[0].AddParagraph(edi.CardNumber?.ToString() ?? string.Empty);
                     _row.Cells[1].AddParagraph(edi.TransactionNumber.ToString());
-                    _row.Cells[2].AddParagraph(edi.RegNo);
+                    _row.Cells[2].AddParagraph(edi.RegNo ?? string.Empty);
                     _row.Cells[3].AddParagraph(edi.SiteName);
                     _row.Cells[3].Format.Font.Size = 5;
                     _row.Cells[4].AddParagraph(edi.TranDate.ToString() + " " + edi.TranTime);

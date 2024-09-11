@@ -198,16 +198,17 @@ namespace Fuelcards.InvoiceMethods
                 var a = (NewValue * 100) / data.quantity;
                 return NewValue * 100;
             }
-            try
+            if(network == EnumHelper.Network.Keyfuels)
             {
-                double? NewValue = 1.2 * (data.cost / 1.1) / 100;
-                var a = (NewValue * 100) / data.quantity;
-                return NewValue * 100;
+                var price = 1.25 * data.cost / 1.1;
+                var unitPrice = price / data.quantity;
+                return unitPrice;
             }
-            catch (Exception)
+            else
             {
-
-                return null;
+                var price = 1.2 * data.cost / 1.1;
+                var unitPrice = price / data.quantity;
+                return unitPrice;
             }
         }
         public double? PremiumDiesel(GenericTransactionFile data, EnumHelper.Network network)
@@ -366,6 +367,16 @@ namespace Fuelcards.InvoiceMethods
             return 0;
         }
 
-
+        internal double? Brush(GenericTransactionFile? transaction, EnumHelper.Network network)
+        {
+            switch (network)
+            {
+                case EnumHelper.Network.Keyfuels:
+                    var price = 1.25 * transaction.cost / 1.1;
+                    var unitPrice = price / transaction.quantity;
+                    return unitPrice;
+                default: return Other(transaction,network);
+            }
+        }
     }
 }
