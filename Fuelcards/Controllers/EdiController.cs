@@ -105,6 +105,25 @@ namespace Fuelcards.Controllers
 
             return Json(FailedSites);
         }
+        public struct MaskedCardError
+        {
+            public string? cardNumber { get; set; }
+
+            public string? costCentre { get; set; }
+
+            public string? network { get; set; }
+
+
+            //do not touch with a ten foot pole
+        }
+
+        [HttpPost]
+        public JsonResult ProcessMaskedCardForm([FromBody]MaskedCardError Data)
+        {
+            return Json("");
+        }
+
+
         [HttpPost]
         public async Task<JsonResult> MaskedCards()
         {
@@ -115,6 +134,7 @@ namespace Fuelcards.Controllers
             }
             catch (Exception e)
             {
+                Response.StatusCode = 500;
                 var CostCentres = _db.CostCentreOptions();
                 var ToReturn = new
                 {

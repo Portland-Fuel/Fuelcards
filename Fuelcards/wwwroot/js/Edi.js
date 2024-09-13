@@ -149,23 +149,107 @@ async function CheckSites() {
     });
 }
 async function MaskedCardCheck() {
+    startEdiLoader();
     await $.ajax({
         url: "/EdiController/MaskedCards",
         type: "POST",
         dataType: 'json',
         /*data: JSON.stringify(ListOfRecentControlIDs),*/
         contentType: "application/json;charset=utf-8",
-        success: function (MaskedCardResponse) {
+        success:async function (MaskedCardResponse) {
+            stopEdiLoader();
             Toast.fire({
                 icon: "success",
                 title: "No masked cards found!",
             });
         },
-        error: function (error) {
-            alert("Error");
+        error: async function (response) {
+            stopEdiLoader();
+            MaskedCardResponse = JSON.parse(response.responseText);
+            console.log(MaskedCardResponse);
+
+            await ShowMaskedCardForm(MaskedCardResponse);
         }
     });
 }
+
+
+async function ShowMaskedCardForm(response) {
+    const CostCentre = response.costCentres;  
+    const cardNumber = response.cardNumber;
+    const net = response.network;
+
+    // Generate the options dynamically based on the CostCentre list
+    let costCentreOptions = '<option value="">Select Cost Centre</option>';
+    CostCentre.forEach((centre, index) => {
+        costCentreOptions += `<option value="${centre}">${centre}</option>`;
+    });
+
+    const { value: formValues } = await Swal.fire({
+        title: 'Masked Card Form',
+        html: `
+        <div style="text-align: left;">
+        <label for="costCentreSelect" style="display: block; margin-bottom: 5px;">Cost Centre:</label>
+        <select id="costCentreSelect" name="costCentreSelect" required style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+            ${costCentreOptions}
+        </select>
+
+        <label for="cardNumberInput" style="display: block; margin-bottom: 5px;">Card Number:</label>
+        <input type="text" value="${cardNumber}" id="cardNumberInput" name="cardNumberInput" required style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+        
+        <label for="networkInput" style="display: block; margin-bottom: 5px;">Network:</label>
+        <input type="text" value="${net}" id="networkInput" name="networkInput" required style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+        
+        </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Submit',
+        cancelButtonText: 'Cancel',
+        preConfirm: () => {
+            const costCentreSelect = document.getElementById('costCentreSelect');
+            const selectedCostCentre = costCentreSelect.value;
+            const networkInput = document.getElementById('networkInput').value;
+
+            if (!selectedCostCentre || !networkInput) {
+                Swal.showValidationMessage('Please fill in all fields.');
+                return false;
+            }
+
+            return {
+                costCentre: selectedCostCentre,
+                cardNumber: cardNumber,
+                network: networkInput
+            };
+        }
+    });
+
+    if (formValues) {
+        console.log(formValues);
+
+        $.ajax({
+            url: '/EdiController/ProcessMaskedCardForm',
+            type: 'POST',
+            data: JSON.stringify(formValues),
+            contentType: 'application/json',
+            success: function(response) {
+                // Handle success response
+                Toast.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: "The request was successful."
+                });
+            },
+            error: function(error) {
+                Toast.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: "An error occurred while processing the request."
+                });
+            }
+        });
+    }
+}
+
 
 
 async function GetListOfRecentControlIDs() {
