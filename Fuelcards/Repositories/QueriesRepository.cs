@@ -1265,9 +1265,48 @@ namespace Fuelcards.Repositories
                 }
                 else
                 {
-                    throw new ArgumentException($"There is a missing masked card. {transaction.PanNumber}");
+                    throw new ArgumentException($"{transaction.PanNumber},1");
                 }
             }
+
+            var TexMaskedCards = await _db.TexacoTransactions.Where(e => e.Invoiced != true && e.PortlandId == null).ToListAsync();
+            foreach (var transaction in TexMaskedCards)
+            {
+                var result = AllMasked.FirstOrDefault(e => transaction.CardNo.Value.ToString().Contains(e.CardNo));
+                if (result is not null)
+                {
+                    transaction.PortlandId = result.PortlandId;
+                    _db.TexacoTransactions.Update(transaction);
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    throw new ArgumentException($"{transaction.CardNo},2");
+
+                }
+            }
+            var KeyMaskedCards = await _db.KfE1E3Transactions.Where(e => e.Invoiced != true && e.PortlandId == null).ToListAsync();
+            foreach (var transaction in KeyMaskedCards)
+            {
+                var result = AllMasked.FirstOrDefault(e => transaction.CardNumber.Value.ToString().Contains(e.CardNo));
+                if (result is not null)
+                {
+                    transaction.PortlandId = result.PortlandId;
+                    _db.KfE1E3Transactions.Update(transaction);
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    throw new ArgumentException($"{transaction.CardNumber},0");
+                }
+            }
+
+
+
+
+
+
+
 
 
         }
@@ -1282,6 +1321,11 @@ namespace Fuelcards.Repositories
         public double? GetRolledVolumeAsOfAllocation(int currentAllocation, int? currentTradeId)
         {
             return _db.AllocatedVolumes.Where(e => e.Volume > 0 && e.TradeId == currentTradeId && e.AllocationId < currentAllocation).Sum(e => e.Volume);
+        }
+        public List<string?>? CostCentreOptions()
+        {
+            var CostCentres = _db.FcHiddenCards.Where(e=>e.Id>0).Select(e=>e.CostCentre).Distinct().ToList();
+            return CostCentres;
         }
     }
 

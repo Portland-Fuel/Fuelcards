@@ -63,5 +63,6 @@ namespace Fuelcards.Repositories
         int GetAllocationAtTimeOfTransaction(DateOnly? transactionDate, int? tradeId);
         double? GetRolledVolumeAsOfAllocation(int currentAllocation, int? currentTradeId);
         CustomerInvoice OrderTransactions(CustomerInvoice customerInvoice);
+        List<string?>? CostCentreOptions();
     }
 }

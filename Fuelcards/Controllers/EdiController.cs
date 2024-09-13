@@ -2,6 +2,7 @@
 
 using DataAccess.Repositorys.IRepositorys;
 using FuelcardModels.ConsoleApp;
+using FuelcardModels.DataTypes;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -112,10 +113,16 @@ namespace Fuelcards.Controllers
                 await _db.GetTransactionsWithoutPortlandId();
                 return Json("Success");
             }
-            catch (Exception)
+            catch (Exception e)
             {
-
-                throw;
+                var CostCentres = _db.CostCentreOptions();
+                var ToReturn = new
+                {
+                    CostCentres = CostCentres,
+                    CardNumber = e.Message.Split(',')[0].ToString(),
+                    Network = e.Message.Split(',')[1].ToString(),
+                };
+                return Json(ToReturn); 
             }
             
         }
