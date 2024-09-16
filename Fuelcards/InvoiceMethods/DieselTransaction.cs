@@ -128,8 +128,6 @@ namespace Fuelcards.InvoiceMethods
         }
 
 
-
-
         private static bool GetFixAndFloatingRate(double? fixedPrice, Models.Site siteInfo, double? addon, double? basePrice, EnumHelper.CustomerType custType, EnumHelper.Network network, double? cost, Models.FixedInformation fixInfo, double? quantity, IQueriesRepository _db)
         {
             VolumeChargedAtFix = 0;

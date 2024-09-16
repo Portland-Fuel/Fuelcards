@@ -798,9 +798,22 @@ namespace Fuelcards.Repositories
         public async Task UpdateAccount(NewCustomerDetailsModel.AccountInfo updatedAccount, string CustomerName, EnumHelper.Network network)
         {
             FcEmail? ExistingEmail = _db.FcEmails.FirstOrDefault(e => e.Account == Convert.ToInt32(updatedAccount.account));
-            ExistingEmail.To = updatedAccount.toEmail;
-            ExistingEmail.Cc = updatedAccount.ccEmail;
-            ExistingEmail.Bcc = updatedAccount.BccEmail;
+            if (ExistingEmail is null)
+            {
+                ExistingEmail = new()
+                {
+                    To = updatedAccount.toEmail,
+                    Cc = updatedAccount.ccEmail,
+                    Bcc = updatedAccount.BccEmail,
+                };
+            }
+            else
+            {
+                ExistingEmail.To = updatedAccount.toEmail;
+                ExistingEmail.Cc = updatedAccount.ccEmail;
+                ExistingEmail.Bcc = updatedAccount.BccEmail;
+            }
+
             await FcEmailUpdateAsync(ExistingEmail);
             _db.SaveChanges();
             var portlandId = _db.FcNetworkAccNoToPortlandIds.FirstOrDefault(e => e.FcAccountNo == Convert.ToInt32(updatedAccount.account)).PortlandId;
@@ -1324,8 +1337,12 @@ namespace Fuelcards.Repositories
         }
         public List<string?>? CostCentreOptions()
         {
-            var CostCentres = _db.FcHiddenCards.Where(e=>e.Id>0).Select(e=>e.CostCentre).Distinct().ToList();
+            var CostCentres = _db.FcHiddenCards.Where(e => e.Id > 0).Select(e => e.CostCentre).Distinct().ToList();
             return CostCentres;
+        }
+        public void AddNewMaskedCard(EdiController.MaskedCardError data)
+        {
+
         }
     }
 

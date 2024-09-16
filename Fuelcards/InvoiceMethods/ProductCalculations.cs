@@ -206,7 +206,7 @@ namespace Fuelcards.InvoiceMethods
             }
             else
             {
-                var price = 1.2 * data.cost / 1.1;
+                var price = 1.2 * (data.cost / 100);
                 var unitPrice = price / data.quantity;
                 return unitPrice;
             }

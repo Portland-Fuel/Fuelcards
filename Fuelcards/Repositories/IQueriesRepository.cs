@@ -64,5 +64,6 @@ namespace Fuelcards.Repositories
         double? GetRolledVolumeAsOfAllocation(int currentAllocation, int? currentTradeId);
         CustomerInvoice OrderTransactions(CustomerInvoice customerInvoice);
         List<string?>? CostCentreOptions();
+        void AddNewMaskedCard(EdiController.MaskedCardError data);
     }
 }

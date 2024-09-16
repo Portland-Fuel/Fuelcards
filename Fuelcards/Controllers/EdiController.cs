@@ -120,6 +120,7 @@ namespace Fuelcards.Controllers
         [HttpPost]
         public JsonResult ProcessMaskedCardForm([FromBody]MaskedCardError Data)
         {
+            _db.AddNewMaskedCard(Data);
             return Json("");
         }
 
