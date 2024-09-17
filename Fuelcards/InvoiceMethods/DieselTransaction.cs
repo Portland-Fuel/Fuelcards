@@ -108,6 +108,7 @@ namespace Fuelcards.InvoiceMethods
         {
             if(CurrentAllocation != currentAllocation)
             {
+
                 CurrentAllocation = currentAllocation;
                 FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
                 //FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
@@ -126,7 +127,6 @@ namespace Fuelcards.InvoiceMethods
                 FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
             }
         }
-
 
         private static bool GetFixAndFloatingRate(double? fixedPrice, Models.Site siteInfo, double? addon, double? basePrice, EnumHelper.CustomerType custType, EnumHelper.Network network, double? cost, Models.FixedInformation fixInfo, double? quantity, IQueriesRepository _db)
         {

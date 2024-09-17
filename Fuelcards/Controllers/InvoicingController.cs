@@ -34,7 +34,6 @@ namespace Fuelcards.Controllers
             _sites = _db.GetAllSiteInformation();
         }
 
-
         public IActionResult Invoicing()
         {
             // Return the view without the model, as the model will be fetched via AJAX if needed
@@ -422,6 +421,10 @@ namespace Fuelcards.Controllers
         {
             try
             {
+                //if (transactionDataFromView.name.ToLower().Contains("lv"))
+                //{
+                //    var egg = "";
+                //}
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
                 TransactionBuilder tb = new(_sites, _db);
                 DataToPassBack model = tb.processTransaction(transactionDataFromView, network);
@@ -448,7 +451,14 @@ namespace Fuelcards.Controllers
                 return Json("Error:" + e.Message);
             }
         }
-
+        [HttpPost]
+        public JsonResult ClearOldInvoicingRun()
+        {
+            InvoicingController.invoices = new();
+            InvoicingController.reportList = new();
+            InvoicingController._report = new();
+            return Json("");
+        }
         public struct DataToPassBack
         {
             public string? SiteName { get; set; }
