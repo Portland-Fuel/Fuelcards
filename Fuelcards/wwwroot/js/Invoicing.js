@@ -27,6 +27,13 @@ function DevMode() {
 
 
 }
+async function ClearStaticVariables(params) {
+    let response = await $.ajax({
+        url: '/Invoicing/ClearOldInvoicingRun',
+        type: 'POST',
+        contentType: 'application/json',
+    });
+}
 
 function exportTableToExcel(tableID) {
     // Select the table
@@ -182,6 +189,7 @@ async function showSelectedNetworkCheckList(selectElement) {
     selectedNetwork = selectedValue;
     setModelAsGlobalJson();
     showInvoicingCheckList(GCB, selectedValue);
+    await ClearStaticVariables();
 }
 function setModelAsGlobalJson() {
     const stringifyData = JSON.stringify(model, null, 2);
