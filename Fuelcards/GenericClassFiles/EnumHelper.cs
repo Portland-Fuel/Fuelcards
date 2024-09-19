@@ -28,7 +28,8 @@ namespace Fuelcards.GenericClassFiles
             EDISTDSignle,
             StockNotification,
             EmailPinCharge,
-            Brush
+            Brush,
+            CarWash
         };
         public enum RetailDiesel
         {
@@ -276,8 +277,9 @@ namespace Fuelcards.GenericClassFiles
                             return EnumHelper.Products.Diesel;
                         case 7: return EnumHelper.Products.LPG;
                         case 24:
-                        case 45:
                             return EnumHelper.Products.Goods;
+                        case 45:
+                            return EnumHelper.Products.CarWash;
                         case 42: return EnumHelper.Products.HVO;
                         case 2: return EnumHelper.Products.ULSP;
                         case 5: return EnumHelper.Products.Gasoil;

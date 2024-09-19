@@ -119,6 +119,7 @@ namespace Fuelcards.InvoiceMethods
                 FixedVolumeUsedOnThisInvoice = 0;
                 RolledVolumeUsedOnThisInvoice = 0;
                 AvailableRolledVolume = StartingRoll;
+                
                 FixedPrice = newFixPrice;
                 FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
                 TotalDieselUsed = 0;
