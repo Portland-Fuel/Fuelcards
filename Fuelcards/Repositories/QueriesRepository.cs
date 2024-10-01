@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml;
 using Xero.NetStandard.OAuth2.Model.Accounting;
+using DataAccess.Repositorys.IRepositorys;
+using FuelcardModels.DataTypes;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -252,6 +254,7 @@ namespace Fuelcards.Repositories
                         model.addon = (customerAddons.Where(e => e.PortlandId == item[0].portlandId && e.Network == (int)network && e.EffectiveDate <= item[0].transactionDate).OrderByDescending(e => e.EffectiveDate).FirstOrDefault()?.Addon);
                     }
                     if (model.name.ToLower().Contains("portland")) model.name = "The Fuel Trading Company";
+
                     model.addon = Convert.ToDouble(Math.Round(Convert.ToDecimal(BasePrice + model.addon), 2));
                     if (model.addon == 0) throw new ArgumentException($"No Addon found for the following customer - {model.name} with account {model.account}");
                     model.account = item[0].customerCode;
@@ -864,6 +867,55 @@ namespace Fuelcards.Repositories
             model.PortlandId = await GetPortlandIdFromAccount(Convert.ToInt32(item.account));
             await FixedPriceContractUpdateAsync(model);
             await _db.SaveChangesAsync();
+            CreateFixIntervals(model.EffectiveFrom, model.EndDate, model.FrequencyId, model.Id);
+        }
+        public void CreateFixIntervals(DateOnly? start, DateOnly? end, int? frequencyId, int? TradeID)
+        {
+            List<FixAllocationDate> Allocations = new();
+            int? DaysBetweenAllcoation = _db.FixFrequencies.FirstOrDefault(e => e.FrequencyId == frequencyId)?.NoDays;
+            if (DaysBetweenAllcoation == null)
+            {
+                while (start <= end)
+                {
+
+                    FixAllocationDate model = new()
+                    {
+                        Allocated = false,
+                        TradeId = (int)TradeID,
+                        NewAllocationDate = start,
+                        AllocationEnd = start.Value.AddMonths(1),
+                    };
+                    Allocations.Add(model);
+                    start = start.Value.AddMonths(1);
+
+                }
+            }
+            else
+            {
+                while (start <= end)
+                {
+                    FixAllocationDate model = new()
+                    {
+                        Allocated = false,
+                        TradeId = (int)TradeID,
+                        NewAllocationDate = start,
+                        AllocationEnd = start.Value.AddDays((int)DaysBetweenAllcoation)
+                    };
+                    Allocations.Add(model);
+                    start = start.Value.AddDays((int)DaysBetweenAllcoation);
+
+                }
+            }
+            if (Allocations.Count > 0)
+            {
+                foreach (var allocation in Allocations)
+                {
+                    _db.FixAllocationDates.Add(allocation);
+                    _db.SaveChanges();
+                }
+            }
+
+
         }
 
         private int[]? GetNetworkArrayFromAccountNumber(int? account)
@@ -1343,6 +1395,133 @@ namespace Fuelcards.Repositories
         public void AddNewMaskedCard(EdiController.MaskedCardError data)
         {
 
+        }
+        public async Task AllocateVolume()
+        {
+            var currentDate = DateOnly.FromDateTime(DateTime.Now);
+
+            List<FixedPriceContract> ActiveTrades = await _db.FixedPriceContracts
+                .Where(e => e.EndDate.Value.AddMonths(1) >= currentDate).ToListAsync();
+
+            foreach (var item in ActiveTrades)
+            {
+                if (item.FrequencyId == 3)
+                {
+                    item.EndDate = item.EndDate.Value.AddMonths(1);
+                }
+                else if (item.FrequencyId == 1)
+                {
+                    item.EndDate = item.EndDate.Value.AddDays(8);
+                }
+            }
+
+            ActiveTrades = ActiveTrades.Where(e => e.EndDate >= currentDate).ToList();
+
+            foreach (var trade in ActiveTrades)
+            {
+                var contract = await _db.FixedPriceContracts.FirstOrDefaultAsync(e => e.Id == trade.Id);
+                double? volume = contract?.FixedVolume;
+
+                var allocations = await _db.FixAllocationDates
+    .Where(e => e.TradeId == trade.Id && e.NewAllocationDate <= currentDate && (e.Allocated == false || e.Allocated == null))
+    .ToListAsync();
+
+
+                if (allocations.Any())
+                {
+                    foreach (var allocation in allocations)
+                    {
+                        allocation.Allocated = true;
+                        try
+                        {
+                            _db.FixAllocationDates.Update(allocation);
+                            await _db.SaveChangesAsync().ConfigureAwait(false);
+
+                            var existingAllocation = await _db.AllocatedVolumes
+                                .FirstOrDefaultAsync(e => e.AllocationId == allocation.Id);
+
+                            if (existingAllocation == null)
+                            {
+                                var newAllocation = new AllocatedVolume
+                                {
+                                    TradeId = trade.Id,
+                                    Volume = volume,
+                                    AllocationId = allocation.Id,
+                                };
+                                await _db.AllocatedVolumes.AddAsync(newAllocation);
+                                await _db.SaveChangesAsync().ConfigureAwait(false);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // Consider logging the error using a logger like Serilog
+                            throw;  // Rethrow after logging to prevent silent failures
+                        }
+                    }
+                }
+            }
+
+            // Fuelcard_Methods.InvoicingMethods.Invoice.VolumeHasBeenAllocated = true;
+        }
+        public async Task<List<GenericTransactionFile?>> RequiredTexacoTransactions(TransactionLookup data)
+        {
+            List<TexacoTransaction?> texacoTransactions = new();
+            texacoTransactions = await _db.TexacoTransactions.Where(e => e.TransactionId > -1).ToListAsync();
+            if (data.TransactionNumber.HasValue)
+            {
+                texacoTransactions = texacoTransactions.Where(e => e.TranNoItem == data.TransactionNumber).ToList();
+            }
+            if (data.startDate.HasValue && data.endDate.HasValue)
+            {
+                texacoTransactions = texacoTransactions.Where(t => t.TranDate >= data.startDate.Value
+                                         && t.TranDate <= data.endDate.Value).ToList();
+            }
+            if (data.account.HasValue)
+            {
+                texacoTransactions = texacoTransactions.Where(t => t.Customer == data.account.Value).ToList();
+            }
+            var _sites = GetAllSiteInformation();
+            return Transactions.TurnTransactionIntoGeneric(null,null,texacoTransactions,null, _sites);
+        }
+        public async Task<List<GenericTransactionFile?>> RequiredUkFuelTransactions(TransactionLookup data)
+        {
+            List<UkfTransaction?> ukFuelTransactions = new();
+            ukFuelTransactions = await _db.UkfTransactions.Where(e => e.TransactionId > -1).ToListAsync();
+            if (data.TransactionNumber.HasValue)
+            {
+                ukFuelTransactions = ukFuelTransactions.Where(e => e.TranNoItem == data.TransactionNumber).ToList();
+            }
+            if (data.startDate.HasValue && data.endDate.HasValue)
+            {
+                ukFuelTransactions = ukFuelTransactions.Where(t => t.TranDate >= data.startDate.Value
+                                         && t.TranDate <= data.endDate.Value).ToList();
+            }
+            if (data.account.HasValue)
+            {
+                ukFuelTransactions = ukFuelTransactions.Where(t => t.Customer == data.account.Value).ToList();
+            }
+            var _sites = GetAllSiteInformation();
+            return Transactions.TurnTransactionIntoGeneric(null, ukFuelTransactions,null, null, _sites);
+        }
+        public async Task<List<GenericTransactionFile?>> RequiredKeyfuelTransactions(TransactionLookup data)
+        {
+            List<KfE1E3Transaction?> KeyfuelTransactions = new();
+            KeyfuelTransactions = await _db.KfE1E3Transactions.Where(e => e.TransactionId > -1).ToListAsync();
+            if (data.TransactionNumber.HasValue)
+            {
+                KeyfuelTransactions = KeyfuelTransactions.Where(e => e.TransactionNumber == data.TransactionNumber).ToList();
+            }
+            if (data.startDate.HasValue && data.endDate.HasValue)
+            {
+                KeyfuelTransactions = KeyfuelTransactions.Where(t => t.TransactionDate >= data.startDate.Value
+                                         && t.TransactionDate <= data.endDate.Value).ToList();
+            }
+            if (data.account.HasValue)
+            {
+                KeyfuelTransactions = KeyfuelTransactions.Where(t => t.CustomerCode == data.account.Value).ToList();
+            }
+            var _sites = GetAllSiteInformation();
+            return Transactions.TurnTransactionIntoGeneric(KeyfuelTransactions, null, null, null, _sites);
         }
     }
 

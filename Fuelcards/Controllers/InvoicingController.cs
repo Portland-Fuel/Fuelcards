@@ -76,6 +76,7 @@ namespace Fuelcards.Controllers
                 checks.KeyfuelsDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Keyfuels);
                 checks.UkFuelDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.UkFuel);
                 checks.TexacoDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Texaco);
+                await _db.AllocateVolume();
                 InvoicingController.reportList = new();
                 InvoicingController.invoices = new();
                 return Json(checks);

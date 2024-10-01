@@ -65,5 +65,9 @@ namespace Fuelcards.Repositories
         CustomerInvoice OrderTransactions(CustomerInvoice customerInvoice);
         List<string?>? CostCentreOptions();
         void AddNewMaskedCard(EdiController.MaskedCardError data);
+        Task AllocateVolume();
+        Task<List<GenericTransactionFile>> RequiredTexacoTransactions(TransactionLookup data);
+        Task<List<GenericTransactionFile>> RequiredUkFuelTransactions(TransactionLookup data);
+        Task<List<GenericTransactionFile>> RequiredKeyfuelTransactions(TransactionLookup data);
     }
 }

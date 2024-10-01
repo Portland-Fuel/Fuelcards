@@ -31,7 +31,7 @@ namespace Fuelcards.InvoiceMethods
             transactionDataFromView.transaction.quantity = ConvertToLitresBasedOnNetwork(transactionDataFromView.transaction.quantity, network);
             double? Addon = InvoiceSummary.Round2(_db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.portlandId, transactionDataFromView.transaction.transactionDate, network, transactionDataFromView.IfuelsCustomer, (int)transactionDataFromView.account));
 
-            if (transactionDataFromView.name.ToLower().Contains("lv") && transactionDataFromView.transaction.transactionDate >= DateOnly.Parse("2024-09-01"))
+            if (transactionDataFromView.name.ToLower().Contains("wigt"))
             {
                 var egg = "Chuckles";  
             }
