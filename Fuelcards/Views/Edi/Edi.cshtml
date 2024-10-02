@@ -1,6 +1,10 @@
-﻿<script src="~/js/edi.js"></script>
+﻿@model EDIVM
+
+<script src="~/js/edi.js"></script>
 <link href="~/css/edi.css" rel="stylesheet" />
 <link rel="shortcut icon" href="https://cdn.icon-icons.com/icons2/3455/PNG/96/download_folder_file_icon_219503.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <div class="container">
 
     <div hidden class="InvoicingLoaderContainer" id="EdiLoader">
@@ -23,11 +27,12 @@
     <div class="tabs">
         <button class="tab-button" onclick="showSection('table-section')">Latest Edi Upload</button>
         <button class="tab-button" onclick="showSection('upload-section')">Upload EDI</button>
+        <button class="tab-button" onclick="showSection('view-transactions-section')">View Transactions</button>
+
     </div>
 
 
     <div class="sections">
-        <!-- Table Section -->
         <div id="table-section" class="section active">
             <div class="table-container">
                 <div class="tabs">
@@ -79,6 +84,63 @@
                 </form>
             </div>
         </div>
+        <div id="view-transactions-section" class="section">
+            <div id="view-transactions-div" class="view-transactions">
+                <form id="view-transactions-form" onsubmit="ViewTransactions(event)">
 
+                    <h3>
+                        Complete the form
+                    </h3>
+
+                    <div class="form-group">
+                        <label>Select Network</label>
+                        <select required  id="view-transactions-network-select">
+                            @foreach (var item in Model.networkselectListItems)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Transaction Number</label>
+                        <input value="" type="number" id="view-transactions-transaction-number-decimal" />
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input  type="date" id="view-transactions-start-date-date"/>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input  type="date" id="view-transactions-end-date-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input id="view-transactions-account-number-number" type="number" />
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Go!</button>
+                    </div>
+                </form>
+
+
+
+               
+            </div>
+
+            <div style="display:none" id="TransactionTableDiv" class="TransactionTableDiv">
+                <div class="row-actions" style="display: none;">
+                    <label id="SelectedTransactionsLabel">Selected Transactions: 0</label>
+                    <button onclick="DeleteTransactions()" class="btn-delete">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+
+                <table  class="view-transaction-table" id="TransactionsTable">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+           
+        </div>
     </div>
 </div>

@@ -44,6 +44,27 @@ namespace Fuelcards.Repositories
             _db.ProductDescriptionToInventoryItemCodes.Add(new ProductDescriptionToInventoryItemCode { Description = description.Trim(), InventoryItemcode = itemCode.Trim() });
             _db.SaveChanges();
         }
+
+        public void DeleteKeyfuelTransaction(int transactionNumber)
+        {
+            _db.KfE1E3Transactions.Remove(_db.KfE1E3Transactions.FirstOrDefault(e => e.TransactionNumber == transactionNumber));
+            _db.SaveChanges();
+        }
+        public void DeleteUkFuelTransaction(int transactionNumber)
+        {
+            _db.UkfTransactions.Remove(_db.UkfTransactions.FirstOrDefault(e => e.TranNoItem == transactionNumber));
+            _db.SaveChanges();
+        }
+        public void DeleteTexacoTransaction(int transactionNumber)
+        {
+            _db.TexacoTransactions.Remove(_db.TexacoTransactions.FirstOrDefault(e => e.TranNoItem == transactionNumber));
+            _db.SaveChanges();
+        }
+        public void DeleteFuelgenieTransaction(int transactionNumber)
+        {
+            _db.FgTransactions.Remove(_db.FgTransactions.FirstOrDefault(e => e.TransactionId == transactionNumber));
+            _db.SaveChanges();
+        }
         public List<Dictionary<string, string>> GetListOfProducts()
         {
             List<Dictionary<string, string>> toreturn = new();
@@ -1465,64 +1486,156 @@ namespace Fuelcards.Repositories
         }
         public async Task<List<GenericTransactionFile?>> RequiredTexacoTransactions(TransactionLookup data)
         {
+            decimal? DecimalTranNum = null;
+
+            if (!string.IsNullOrEmpty(data.TransactionNumber))
+            {
+                DecimalTranNum = Convert.ToDecimal(data.TransactionNumber);
+            }
+            DateOnly? startDate = null;
+            DateOnly? endDate = null;
+
+            if (!string.IsNullOrEmpty(data.startDate))
+            {
+                if (DateOnly.TryParse(data.startDate, out var parsedStartDate))
+                {
+                    startDate = parsedStartDate;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(data.endDate))
+            {
+                if (DateOnly.TryParse(data.endDate, out var parsedEndDate))
+                {
+                    endDate = parsedEndDate;
+                }
+            }
+
             List<TexacoTransaction?> texacoTransactions = new();
             texacoTransactions = await _db.TexacoTransactions.Where(e => e.TransactionId > -1).ToListAsync();
-            if (data.TransactionNumber.HasValue)
+
+            if (DecimalTranNum != null)
             {
-                texacoTransactions = texacoTransactions.Where(e => e.TranNoItem == data.TransactionNumber).ToList();
+                texacoTransactions = texacoTransactions.Where(e => e.TranNoItem == DecimalTranNum).ToList();
             }
-            if (data.startDate.HasValue && data.endDate.HasValue)
+
+            if (startDate.HasValue && endDate.HasValue)
             {
-                texacoTransactions = texacoTransactions.Where(t => t.TranDate >= data.startDate.Value
-                                         && t.TranDate <= data.endDate.Value).ToList();
+                texacoTransactions = texacoTransactions.Where(t => t.TranDate >= startDate.Value
+                                         && t.TranDate <= endDate.Value).ToList();
             }
-            if (data.account.HasValue)
+
+            if (!string.IsNullOrEmpty(data.account.ToString()))
             {
-                texacoTransactions = texacoTransactions.Where(t => t.Customer == data.account.Value).ToList();
+                texacoTransactions = texacoTransactions.Where(t => t.Customer == Convert.ToInt16(data.account)).ToList();
             }
+
             var _sites = GetAllSiteInformation();
-            return Transactions.TurnTransactionIntoGeneric(null,null,texacoTransactions,null, _sites);
+            return Transactions.TurnTransactionIntoGeneric(null, null, texacoTransactions, null, _sites);
         }
         public async Task<List<GenericTransactionFile?>> RequiredUkFuelTransactions(TransactionLookup data)
         {
+            decimal? DecimalTranNum = null;
+
+            if (!string.IsNullOrEmpty(data.TransactionNumber))
+            {
+                 DecimalTranNum = Convert.ToDecimal(data.TransactionNumber);
+            }
+            DateOnly? startDate = null;
+            DateOnly? endDate = null;
+
+            if (!string.IsNullOrEmpty(data.startDate))
+            {
+                if (DateOnly.TryParse(data.startDate, out var parsedStartDate))
+                {
+                    startDate = parsedStartDate;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(data.endDate))
+            {
+                if (DateOnly.TryParse(data.endDate, out var parsedEndDate))
+                {
+                    endDate = parsedEndDate;
+                }
+            }
+
             List<UkfTransaction?> ukFuelTransactions = new();
             ukFuelTransactions = await _db.UkfTransactions.Where(e => e.TransactionId > -1).ToListAsync();
-            if (data.TransactionNumber.HasValue)
+
+            if (DecimalTranNum != null)
             {
-                ukFuelTransactions = ukFuelTransactions.Where(e => e.TranNoItem == data.TransactionNumber).ToList();
+                ukFuelTransactions = ukFuelTransactions.Where(e => e.TranNoItem == DecimalTranNum).ToList();
             }
-            if (data.startDate.HasValue && data.endDate.HasValue)
+
+            if (startDate.HasValue && endDate.HasValue)
             {
-                ukFuelTransactions = ukFuelTransactions.Where(t => t.TranDate >= data.startDate.Value
-                                         && t.TranDate <= data.endDate.Value).ToList();
+                ukFuelTransactions = ukFuelTransactions.Where(t => t.TranDate >= startDate.Value
+                                         && t.TranDate <= endDate.Value).ToList();
             }
-            if (data.account.HasValue)
+
+            if (!string.IsNullOrEmpty(data.account.ToString()))
             {
-                ukFuelTransactions = ukFuelTransactions.Where(t => t.Customer == data.account.Value).ToList();
+                ukFuelTransactions = ukFuelTransactions.Where(t => t.Customer == Convert.ToInt16(data.account)).ToList();
             }
+
             var _sites = GetAllSiteInformation();
-            return Transactions.TurnTransactionIntoGeneric(null, ukFuelTransactions,null, null, _sites);
+            return Transactions.TurnTransactionIntoGeneric(null, ukFuelTransactions, null, null, _sites);
         }
+
         public async Task<List<GenericTransactionFile?>> RequiredKeyfuelTransactions(TransactionLookup data)
         {
+            decimal? DecimalTranNum = null;
+
+
+            if (!string.IsNullOrEmpty(data.TransactionNumber))
+            {
+                DecimalTranNum = Convert.ToDecimal(data.TransactionNumber);
+            }
+
+            DateOnly? startDate = null;
+            DateOnly? endDate = null;
+
+            if (!string.IsNullOrEmpty(data.startDate))
+            {
+                if (DateOnly.TryParse(data.startDate, out var parsedStartDate))
+                {
+                    startDate = parsedStartDate;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(data.endDate))
+            {
+                if (DateOnly.TryParse(data.endDate, out var parsedEndDate))
+                {
+                    endDate = parsedEndDate;
+                }
+            }
+
             List<KfE1E3Transaction?> KeyfuelTransactions = new();
-            KeyfuelTransactions = await _db.KfE1E3Transactions.Where(e => e.TransactionId > -1).ToListAsync();
-            if (data.TransactionNumber.HasValue)
+            KeyfuelTransactions =  _db.KfE1E3Transactions.Where(e => e.TransactionId > -1).ToList();
+
+            if (DecimalTranNum != null)
             {
-                KeyfuelTransactions = KeyfuelTransactions.Where(e => e.TransactionNumber == data.TransactionNumber).ToList();
+                KeyfuelTransactions = KeyfuelTransactions.Where(e => e.TransactionNumber == DecimalTranNum).ToList();
             }
-            if (data.startDate.HasValue && data.endDate.HasValue)
+
+            if (startDate.HasValue && endDate.HasValue)
             {
-                KeyfuelTransactions = KeyfuelTransactions.Where(t => t.TransactionDate >= data.startDate.Value
-                                         && t.TransactionDate <= data.endDate.Value).ToList();
+                KeyfuelTransactions = KeyfuelTransactions.Where(t => t.TransactionDate >= startDate.Value
+                                         && t.TransactionDate <= endDate.Value).ToList();
             }
-            if (data.account.HasValue)
+
+            // Filter by account if provided
+            if (!string.IsNullOrEmpty(data.account.ToString()))
             {
-                KeyfuelTransactions = KeyfuelTransactions.Where(t => t.CustomerCode == data.account.Value).ToList();
+                KeyfuelTransactions = KeyfuelTransactions.Where(t => t.CustomerCode == Convert.ToInt16(data.account)).ToList();
             }
+
             var _sites = GetAllSiteInformation();
             return Transactions.TurnTransactionIntoGeneric(KeyfuelTransactions, null, null, null, _sites);
         }
+
     }
 
 }

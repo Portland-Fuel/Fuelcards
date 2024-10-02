@@ -2,21 +2,32 @@ function showSection(sectionId) {
     const sections = document.querySelectorAll('.section');
     const currentSection = document.querySelector('.section.active');
 
-    // Remove active class from current section and add slide-out animation
     currentSection.classList.add('slide-out');
     currentSection.classList.remove('active');
 
-    // Wait for the slide-out animation to finish before showing the new section
+    switch (sectionId) {
+        case 'view-transactions-section':
+            var Table = document.getElementById('TransactionsTable');
+            Table.getElementsByTagName('thead')[0].innerHTML = '';
+            Table.getElementsByTagName('tbody')[0].innerHTML = '';
+            var TableDiv = document.getElementById('TransactionTableDiv');
+            TableDiv.style.display = 'none';
+            document.getElementById('view-transactions-div').style.display = 'flex';
+
+            break;
+    }
+
+
     setTimeout(() => {
         sections.forEach(section => {
             section.classList.remove('active', 'slide-out', 'slide-in');
         });
 
-        // Show the clicked section with slide-in animation
         const newSection = document.getElementById(sectionId);
         newSection.classList.add('active', 'slide-in');
-    }, 300); // Duration matches the CSS animation time
+    }, 300);
 }
+
 document.addEventListener('DOMContentLoaded', function () {
     ShowBackButton();
     const networkCells = document.querySelectorAll('td[data-network]');
@@ -61,7 +72,7 @@ async function ProcessEdis(event) {
 
     var formData = new FormData();
     for (var i = 0; i < files.length; i++) {
-        if (files[i]) {  // Check if file exists before adding it
+        if (files[i]) {
             formData.append('files', files[i]);
         }
     }
@@ -104,11 +115,14 @@ async function ProcessEdis(event) {
 function HighlightRow(RowElement) {
     if (RowElement.style.backgroundColor == 'rgb(158, 52, 52)') {
         RowElement.style.backgroundColor = '';
+        return false;
     }
     else {
         RowElement.style.backgroundColor = '#9e3434';
+        return true;
     }
 }
+
 
 async function CheckSites() {
     ShowEdiLoader();
@@ -139,12 +153,10 @@ async function CheckSites() {
 
             }
 
-            // Handle success response
         },
         error: function (error) {
             HideEdiLoader();
             console.error("Error:", error);
-            // Handle error response
         }
     });
 }
@@ -156,7 +168,7 @@ async function MaskedCardCheck() {
         dataType: 'json',
         /*data: JSON.stringify(ListOfRecentControlIDs),*/
         contentType: "application/json;charset=utf-8",
-        success:async function (MaskedCardResponse) {
+        success: async function (MaskedCardResponse) {
             stopEdiLoader();
             Toast.fire({
                 icon: "success",
@@ -175,11 +187,10 @@ async function MaskedCardCheck() {
 
 
 async function ShowMaskedCardForm(response) {
-    const CostCentre = response.costCentres;  
+    const CostCentre = response.costCentres;
     const cardNumber = response.cardNumber;
     const net = response.network;
 
-    // Generate the options dynamically based on the CostCentre list
     let costCentreOptions = '<option value="">Select Cost Centre</option>';
     CostCentre.forEach((centre, index) => {
         costCentreOptions += `<option value="${centre}">${centre}</option>`;
@@ -231,7 +242,7 @@ async function ShowMaskedCardForm(response) {
             type: 'POST',
             data: JSON.stringify(formValues),
             contentType: 'application/json',
-            success: function(response) {
+            success: function (response) {
                 // Handle success response
                 Toast.fire({
                     icon: "success",
@@ -239,7 +250,7 @@ async function ShowMaskedCardForm(response) {
                     text: "The request was successful."
                 });
             },
-            error: function(error) {
+            error: function (error) {
                 Toast.fire({
                     icon: "error",
                     title: "Error!",
@@ -395,6 +406,164 @@ async function HideEdiLoader() {
     document.getElementById('EdiLoader').hidden = true;
 }
 
+async function ViewTransactions(event) {
+    ShowEdiLoader();
+    event.preventDefault();
+    var TransactionLookup = {
+        Network: document.getElementById('view-transactions-network-select').value,
+        TransactionNumber: document.getElementById('view-transactions-transaction-number-decimal').value,
+        startDate: document.getElementById('view-transactions-start-date-date').value,
+        endDate: document.getElementById('view-transactions-end-date-date').value,
+        account: document.getElementById('view-transactions-account-number-number').value,
+    }
+
+    console.log(TransactionLookup);
+
+    await $.ajax({
+        url: "/TransactionsController/ReturnTransaction",
+        type: "POST",
+        data: JSON.stringify(TransactionLookup),
+        contentType: "application/json",
+        success: async function (response) {
+            HideEdiLoader();
+            hideaelement('view-transactions-div');
+            await ShowTransactions(response);
+        },
+        error: function (error) {
+            HideEdiLoader();
+
+            console.error("Error:", error);
+        }
+    });
+
+}
+
+function hideaelement(eleid) {
+    document.getElementById(eleid).style.display = 'none';
+}
+TransactionNumbersToDelete = [];
+
+async function ShowTransactions(Data) {
+    var TableDiv = document.getElementById('TransactionTableDiv');
+    var Table = document.getElementById('TransactionsTable');
+    var tbody = Table.getElementsByTagName('tbody')[0];
+    var thead = Table.getElementsByTagName('thead')[0];
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    var Headers = Object.keys(Data[0]);
+
+    // Create table headers
+    Headers.forEach(header => {
+        let th = document.createElement('th');
+        th.textContent = header;
+        thead.appendChild(th);
+    });
+
+    Data.forEach((item) => {
+        let tr = document.createElement('tr');
+        let transactionNumber = '';
+        
+        Headers.forEach(header => {
+            let td = document.createElement('td');
+            var txtDataincell = item[header];
+            if (header === 'transactionNumber') {
+                transactionNumber = txtDataincell;
+            }
+            td.textContent = txtDataincell;
+            tr.appendChild(td);
+        });
+
+        tr.id = `TransactionRow-${transactionNumber}`;
+        tr.onclick = () => {
+            HighlightTransactionRow(tr, transactionNumber);
+        };
+
+        tbody.appendChild(tr);
+    });
+
+    TableDiv.style.display = 'flex';
+    Table.style.display = 'table';
+}
+
+
+function HighlightTransactionRow(RowElement, transactionNumber) {
+    if (HighlightRow(RowElement)) {
+        TransactionNumbersToDelete.push(transactionNumber);
+        IncrementSelectedLabel();
+    } else {
+        DeselectTransaction(transactionNumber);
+    }
+    ToggleRowActions();
+}
+
+function IncrementSelectedLabel() {
+    var SelectedLabel = document.getElementById('SelectedTransactionsLabel');
+    SelectedLabel.textContent = 'Selected Transactions: ' + TransactionNumbersToDelete.length;
+}
+
+function ToggleRowActions() {
+    var rowActions = document.querySelector('.row-actions');
+
+    if (TransactionNumbersToDelete.length > 0) {
+        rowActions.style.display = 'flex';  // or 'block', depending on your layout
+    } else {
+        rowActions.style.display = 'none';
+    }
+}
+
+function DeleteTransactions() {
+    console.log(TransactionNumbersToDelete);
+    var net = document.getElementById('view-transactions-network-select').value;
+
+    $.ajax({
+        url: "/TransactionsController/DeleteTransactions",
+        type: "POST",
+        data: JSON.stringify({ transactionNumbers: TransactionNumbersToDelete, Network: net }),
+        contentType: "application/json",
+        success: function (response) {
+            Toast.fire({
+                icon: "success",
+                title: "Transactions deleted successfully"
+            });
+            DeleteTransactionsFromTable();
+
+        },
+        error: function (error) {
+            Toast.fire({
+                icon: "error",
+                title: "Error deleting transactions",
+                text: error.responseText || "An unknown error occurred."
+            });
+        }
+    });
+}
+
+function DeleteTransactionsFromTable() {
+
+    var Table = document.getElementById('TransactionsTable');
+    var tbody = Table.getElementsByTagName('tbody')[0];
+    for (var i = 0; i < TransactionNumbersToDelete.length; i++) {
+        var MadeId = 'TransactionRow-' + TransactionNumbersToDelete[i];
+        var RowToDelete = document.getElementById(MadeId);
+        tbody.removeChild(RowToDelete);
+    }
+    TransactionNumbersToDelete = [];
+
+    IncrementSelectedLabel();
+    ToggleRowActions();
+}
+function DeselectTransaction(transactionNumber) {
+    var index = TransactionNumbersToDelete.indexOf(transactionNumber);
+    if (index > -1) {
+        TransactionNumbersToDelete.splice(index, 1);  // Remove the transaction number
+    }
+
+    IncrementSelectedLabel();
+    ToggleRowActions();
+}
+
+
 const Toast = Swal.mixin({
     toast: true,
     position: "top-end",
@@ -406,3 +575,6 @@ const Toast = Swal.mixin({
         toast.onmouseleave = Swal.resumeTimer;
     }
 });
+
+
+

@@ -1,10 +1,12 @@
 
 using DataAccess.Fuelcards;
+using FuelcardModels.DataTypes;
 using Fuelcards.GenericClassFiles;
 using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using PortlandXeroLib;
 using System.Diagnostics;
 
@@ -71,6 +73,28 @@ namespace Fuelcards.Controllers
                 model.EDIs.Add(_fcControl);
             }
             model.EDIs = model.EDIs.OrderByDescending(e => e.CreationDate).ToList();
+
+
+            model.networkselectListItems = new();
+
+            List<EnumHelper.Network> AllNetworks = new();
+
+            AllNetworks.Add(EnumHelper.Network.Keyfuels);
+            AllNetworks.Add(EnumHelper.Network.UkFuel);
+            AllNetworks.Add(EnumHelper.Network.Fuelgenie);
+            AllNetworks.Add(EnumHelper.Network.Texaco);
+
+            foreach (var item in AllNetworks)
+            {
+                SelectListItem selectListItem = new();
+                selectListItem.Value = item.ToString();
+                selectListItem.Text = EnumHelper.NetworkEnumFromInt(Convert.ToInt16(item)).ToString();
+                model.networkselectListItems.Add(selectListItem);
+            }
+
+
+
+
             return model;
         }
         public ActionResult Invoicing()

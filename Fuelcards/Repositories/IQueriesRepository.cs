@@ -69,5 +69,9 @@ namespace Fuelcards.Repositories
         Task<List<GenericTransactionFile>> RequiredTexacoTransactions(TransactionLookup data);
         Task<List<GenericTransactionFile>> RequiredUkFuelTransactions(TransactionLookup data);
         Task<List<GenericTransactionFile>> RequiredKeyfuelTransactions(TransactionLookup data);
+        void DeleteKeyfuelTransaction(int transactionNumber);
+        void DeleteUkFuelTransaction(int transactionNumber);
+        void DeleteTexacoTransaction(int transactionNumber);
+        void DeleteFuelgenieTransaction(int transactionNumber);
     }
 }

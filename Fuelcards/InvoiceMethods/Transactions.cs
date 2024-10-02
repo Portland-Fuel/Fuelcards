@@ -50,7 +50,16 @@ namespace Fuelcards.InvoiceMethods
                     transactions.transactonRegistration = item.TransactonRegistration;
                     transactions.invoiced = item.Invoiced;
                     transactions.network = 0;
-                    transactions.band = sites.FirstOrDefault(e => e.SiteNumber == transactions.siteCode && e.NetworkId == (int)EnumHelper.Network.Keyfuels)?.Band;
+                    try
+                    {
+                        transactions.band = sites.FirstOrDefault(e => e.SiteNumber == transactions.siteCode && e.NetworkId == (int)EnumHelper.Network.Keyfuels)?.Band;
+
+                    }
+                    catch (Exception e)
+                    {
+
+                        throw;
+                    }
                     TotalTransactions.Add(transactions);
                 }
             }

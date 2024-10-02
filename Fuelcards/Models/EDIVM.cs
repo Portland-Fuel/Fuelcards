@@ -1,4 +1,5 @@
 ﻿using DataAccess.Fuelcards;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Fuelcards.Models
 {
@@ -6,6 +7,9 @@ namespace Fuelcards.Models
     {
         public List<string> FileNames { get; set; }
         public List<FcControlVM> EDIs { get; set; }
+
+        public List<SelectListItem> networkselectListItems { get; set; }
+
     }
     public partial class FcControlVM
     {
