@@ -6,18 +6,7 @@ using Fuelcards.Models;
 using Fuelcards.Repositories;
 using ImageMagick;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Graph.SecurityNamespace;
-using Microsoft.Graph;
-using Microsoft.IdentityModel.Tokens;
-using MigraDoc.DocumentObjectModel;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Xero.NetStandard.OAuth2.Model.Accounting;
-using DataAccess.Cdata;
-using System.Numerics;
-using System.Threading;
-using System.Transactions;
-using Fuelcards.CustomExceptions;
+
 
 namespace Fuelcards.Controllers
 {

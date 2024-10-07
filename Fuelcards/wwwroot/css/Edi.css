@@ -354,7 +354,6 @@ button:hover {
 .TransactionTableDiv{
     display: flex;
     flex-direction: column;
-    overflow: auto;
 }
 
 
@@ -366,7 +365,9 @@ button:hover {
     text-align: left;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     border-radius: 8px;
-    overflow: hidden;
+    overflow-y: scroll;
+    overflow-x: scroll;
+
 }
 
 

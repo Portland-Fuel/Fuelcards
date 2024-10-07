@@ -22,7 +22,18 @@ async function HandleInvoicingModelLoadErrors(data) {
     }
 
 }
-
+async function ShowDuplicatesList(DuplicateSiteList) {
+    var DuplicateList = DuplicateSiteList;
+    var DuplicateListString = "";
+    for (let i = 0; i < DuplicateList.length; i++) {
+        DuplicateListString += DuplicateList[i] + "<br>";
+    }
+    await Swal.fire({
+        icon: 'info',
+        title: 'Duplicate Sites Found',
+        html: DuplicateListString
+    });
+}
 function HandleConfirmInvoicingError(responseText) {
     var response = JSON.parse(responseText);
     switch (response.exceptionType) {

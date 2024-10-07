@@ -325,6 +325,9 @@ async function createCheckListRows(model, network) {
     const DuplicateSiteList = getDuplicatesSiteList(network);
     if (DuplicateSiteList.length > 0) {
         const TDButton = createButton("FailedSitesButton", "View Failed Duplicates");
+        TDButton.onclick = function () {
+            ShowDuplicatesList(DuplicateSiteList);
+        };
         rows[4].appendChild(TDButton);
     } else {
         rows[4].appendChild(createCell("No duplicates"), "green");
