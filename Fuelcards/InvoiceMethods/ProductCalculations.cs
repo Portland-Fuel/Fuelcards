@@ -339,6 +339,21 @@ namespace Fuelcards.InvoiceMethods
                 return null;
             }
         }
+        public double? CarWash(GenericTransactionFile data, EnumHelper.Network network)
+        {
+            try
+            {
+
+                double? NewValue = 1.2 * (data.cost / 100) / 1.05;
+
+                return NewValue;
+            }
+            catch (Exception)
+            {
+
+                return null;
+            }
+        }
         public double? HVO(GenericTransactionFile data, EnumHelper.Network network)
         {
             try

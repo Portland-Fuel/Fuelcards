@@ -73,8 +73,7 @@ namespace Fuelcards.InvoiceMethods
                     case EnumHelper.Products.PackagedAdblue: return methodology.PackagedAdblue(data.transaction, network, _db);
                     case EnumHelper.Products.LPG: return methodology.LPG(data.transaction, network);
                     case EnumHelper.Products.Goods: return methodology.Goods(data.transaction, network);
-                    case EnumHelper.Products.CarWash: return methodology.Goods(data.transaction, network);
-
+                    case EnumHelper.Products.CarWash: return methodology.CarWash(data.transaction, network);
                     case EnumHelper.Products.HVO: return methodology.HVO(data.transaction, network);
                     case EnumHelper.Products.Card: return methodology.Card(data.transaction, network);
                     case EnumHelper.Products.CardStopManagementFee: return 0;

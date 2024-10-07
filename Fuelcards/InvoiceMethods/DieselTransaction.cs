@@ -75,6 +75,7 @@ namespace Fuelcards.InvoiceMethods
                         }
                         else if (fixFrequency == EnumHelper.InvoiceFrequency.Weekly)
                         {
+                            data.fixedInformation.CurrentAllocation = _db.GetAllocationAtTimeOfTransaction(data.transaction.transactionDate, data.fixedInformation.CurrentTradeId); // THIs LINE MAY BREAK IT
                             FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation(data.fixedInformation.CurrentAllocation);
                             UpdateStaticVariablesIfNeeded(
                             (int?)data.account,
@@ -123,7 +124,7 @@ namespace Fuelcards.InvoiceMethods
                 FixedPrice = newFixPrice;
                 FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
                 TotalDieselUsed = 0;
-                FixRate = newFixPrice;
+                //FixRate = newFixPrice; IF IT BREAKS ITS BECAUSE I COMMENTED THIS!!!!!!!!!!!!!!!
                 CurrentAllocation = currentAllocation;
                 FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
             }
@@ -195,7 +196,7 @@ namespace Fuelcards.InvoiceMethods
             }
             while (QuantityRemainingToBeAllocated > 0 && (FixedVolumeRemainingForCurrent > 0 || FixedVolumeRemainingForCurrent is null))
             {
-
+                
                 var originalVolume = AvailableRolledVolume;
                 var newVolume = UpdateVolume(originalVolume, ref QuantityRemainingToBeAllocated);
 
@@ -222,7 +223,7 @@ namespace Fuelcards.InvoiceMethods
             else if (data.customerType == EnumHelper.CustomerType.Fix)
             {
                 var RolledFixPrice = (VolumeChargedAtRolled * RolledRate) / 100;
-                FixPrice = (VolumeChargedAtFix * FixRate) / 100;
+                FixPrice = (VolumeChargedAtFix * (FixRate)) / 100;
                 FixPrice = FixPrice + RolledFixPrice;
             }
             if (VolumeChargedAtFix == 0 && VolumeChargedAtRolled == 0) FixPrice = 0;
