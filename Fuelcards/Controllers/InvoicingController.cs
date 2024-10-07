@@ -37,7 +37,7 @@ namespace Fuelcards.Controllers
                 InvoicingController.reportList = new();
                 InvoicingController._report = new();
                 InvoicePreCheckModels checks = new();
-                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-11)));
+                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-14)));
                 checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);
                 checks.PlattsPrice = checks.BasePrice - 52.95;
                 checks.KeyfuelImports = _db.GetTotalEDIs(0);
@@ -306,6 +306,10 @@ namespace Fuelcards.Controllers
             InvoiceSummary summary = new();
             try
             {
+                DieselTransaction.FixRate = null;
+                DieselTransaction.FloatingRate = null;
+                DieselTransaction.FixedPrice = null;
+
                 InvoicePDFModel newInvoice = new();
                 customerInvoice = _db.OrderTransactions(customerInvoice);
                 newInvoice.network = _db.getNetworkFromAccount((int)customerInvoice.account);
@@ -411,10 +415,10 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                //if (transactionDataFromView.name.ToLower().Contains("lv"))
-                //{
-                //    var egg = "";
-                //}
+                if (transactionDataFromView.name.ToLower().Contains("lv")  && transactionDataFromView.transaction.transactionNumber == 781989481)
+                {
+                    var egg = "";
+                }
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
                 TransactionBuilder tb = new(_sites, _db);
                 DataToPassBack model = tb.processTransaction(transactionDataFromView, network);
