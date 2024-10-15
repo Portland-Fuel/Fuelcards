@@ -393,5 +393,17 @@ namespace Fuelcards.InvoiceMethods
                 default: return Other(transaction,network);
             }
         }
+
+        internal double? MinimumStockCharge(GenericTransactionFile? transaction, EnumHelper.Network network)
+        {
+            switch (network)
+            {
+                case EnumHelper.Network.Keyfuels:
+                    var price = 1.25 * transaction.cost / 1.1;
+                    var unitPrice = price / transaction.quantity;
+                    return unitPrice;
+                default: return Other(transaction, network);
+            }
+        }
     }
 }

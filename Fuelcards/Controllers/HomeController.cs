@@ -60,7 +60,6 @@ namespace Fuelcards.Controllers
         }
         public static EDIVM LoadEdiVmModel()
         {
-
             EDIVM model = new();
             model.EDIs = new();
             FuelcardsContext _fuelcardrepo = new();

@@ -41,6 +41,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System.Transactions;
 using FuelcardModels.ConsoleApp;
+using Xero.NetStandard.OAuth2.Model.PayrollNz;
 namespace Fuelcards.Models
 {
     public class InvoiceGenerator
@@ -933,8 +934,17 @@ namespace Fuelcards.Models
             web.Font.Bold = false;
 
             HeaderRow1.Cells[2].Borders.Visible = false;
+            MigraDoc.DocumentObjectModel.Shapes.Image fuelCardImage = null;
 
-            var fuelCardImage = HeaderRow1.Cells[3].AddImage(@"C:\Portland\Fuel Trading Company\Portland - Portland\Marketing\Marketing Materials\Logos\New Logos\Short Logos\Colour\PNG\Fuel Cards.png");
+
+            if (File.Exists(@"C:\\Portland\\Fuel Trading Company\\Portland IT - Documents\\Projects\\Fuelcard App\\Logo Do not move or rename.png"))
+            {
+                fuelCardImage = HeaderRow1.Cells[3].AddImage(@"C:\\Portland\\Fuel Trading Company\\Portland IT - Documents\\Projects\\Fuelcard App\\Logo Do not move or rename.png");
+            }
+            else
+            {
+                throw new ArgumentException("Somebody has changed the path or renamed the file for the Fuelcard logo. it should be '\"C:\\Portland\\Fuel Trading Company\\Portland IT - Documents\\Projects\\Fuelcard App\\Logo Do not move or rename.png\'");
+            }
             fuelCardImage.Width = "4.2cm";
             fuelCardImage.Height = "1.8cm";
 

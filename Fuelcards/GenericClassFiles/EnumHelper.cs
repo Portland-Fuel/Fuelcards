@@ -29,7 +29,8 @@ namespace Fuelcards.GenericClassFiles
             StockNotification,
             EmailPinCharge,
             Brush,
-            CarWash
+            CarWash,
+            MinimumStockCharge
         };
         public enum RetailDiesel
         {
@@ -266,6 +267,7 @@ namespace Fuelcards.GenericClassFiles
                         case 241: return EnumHelper.Products.StockNotification;
                         case 280: return EnumHelper.Products.EmailPinCharge;
                         case 7: return EnumHelper.Products.Brush;
+                        case 576: return EnumHelper.Products.MinimumStockCharge;
                         default: return EnumHelper.Products.Other;
 
                     }

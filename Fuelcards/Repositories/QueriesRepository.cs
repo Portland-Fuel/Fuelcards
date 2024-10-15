@@ -1063,7 +1063,7 @@ namespace Fuelcards.Repositories
             }
             else
             {
-                return GetIfuelsAddon(account, network);
+                return GetIfuelsAddon(account, network, transactionDate);
             }
             return 0;
         }
@@ -1086,14 +1086,27 @@ namespace Fuelcards.Repositories
             bool Exists = _Idb.IfuelsCustomers.FirstOrDefault(e => e.CustomerNumber == account) != null;
             return Exists;
         }
-        internal double? GetIfuelsAddon(int account, EnumHelper.Network network)
+        //internal double? GetIfuelsAddon(int account, EnumHelper.Network network, DateOnly? transactionDate)
+        //{
+        //    var addon = _Idb.IfuelsAddons
+        //        .Where(e => e.CustomerNumber == account)
+        //        .OrderByDescending(e => e.EffectiveFrom)
+        //        .Select(e => e.Addon)
+        //        .FirstOrDefault();
+        //    double? ifuelsCost = _db.TransactionSiteSurcharges.FirstOrDefault(e => e.Network == (int)network && e.ChargeType == "i-fuelcards cost price")?.Surcharge;
+        //    return addon + ifuelsCost;
+        //}
+        internal double? GetIfuelsAddon(int account, EnumHelper.Network network, DateOnly? transactionDate)
         {
             var addon = _Idb.IfuelsAddons
-                .Where(e => e.CustomerNumber == account)
+                .Where(e => e.CustomerNumber == account && e.EffectiveFrom <= transactionDate)
                 .OrderByDescending(e => e.EffectiveFrom)
                 .Select(e => e.Addon)
                 .FirstOrDefault();
-            double? ifuelsCost = _db.TransactionSiteSurcharges.FirstOrDefault(e => e.Network == (int)network && e.ChargeType == "i-fuelcards cost price")?.Surcharge;
+
+            double? ifuelsCost = _db.TransactionSiteSurcharges
+                .FirstOrDefault(e => e.Network == (int)network && e.ChargeType == "i-fuelcards cost price")?.Surcharge;
+
             return addon + ifuelsCost;
         }
         public double? TransactionalSiteSurcharge(EnumHelper.Network network, int site, int productCode)

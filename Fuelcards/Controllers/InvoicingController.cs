@@ -7,7 +7,6 @@ using Fuelcards.Repositories;
 using ImageMagick;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace Fuelcards.Controllers
 {
     public class InvoicingController : Controller
@@ -323,7 +322,7 @@ namespace Fuelcards.Controllers
                 newInvoice.rows = summary.ProductBreakdown(customerInvoice, newInvoice.network);
 
                 newInvoice.transactions = summary.TurnsTransactionsToPdf(newInvoice.network, customerInvoice, _db);
-
+                
                 newInvoice.totals = summary.GetInvoiceTotal(newInvoice.rows);
                 if (customerInvoice.name != "The Fuel Trading Company")
                 {
@@ -415,7 +414,7 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                if (transactionDataFromView.name.ToLower().Contains("lv")  && transactionDataFromView.transaction.transactionNumber == 781989481)
+                if (transactionDataFromView.name.ToLower().Contains("lifel"))
                 {
                     var egg = "";
                 }

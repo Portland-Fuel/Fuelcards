@@ -4,6 +4,7 @@ using Fuelcards.Models;
 using Fuelcards.Repositories;
 using Microsoft.Graph;
 using System.Linq.Expressions;
+using Xero.NetStandard.OAuth2.Model.Accounting;
 
 namespace Fuelcards.InvoiceMethods
 {
@@ -11,13 +12,11 @@ namespace Fuelcards.InvoiceMethods
     {
         public List<SummaryRow> ProductBreakdown(CustomerInvoice invoice, EnumHelper.Network network)
         {
-            var (transactionsByProduct, dieselTransactionsByBand) = UkFuelsVersion(invoice, network);
+            var (transactionsByProduct, dieselTransactionsByBand) = ProductSplitter(invoice, network);
             List<SummaryRow> Rows = new();
 
-            // Process transactions for each product
             foreach (var product in transactionsByProduct)
             {
-                // Exclude Diesel from general product processing to handle separately by bands
                 if (!product.Key.Equals("Diesel"))
                 {
                     SummaryRow newRow = new()
@@ -35,35 +34,37 @@ namespace Fuelcards.InvoiceMethods
             }
 
             // Process Diesel transactions by bands, each band gets its own row
-            foreach (var band in dieselTransactionsByBand)
+            foreach (var band in dieselTransactionsByBand.OrderByDescending(b => b.Key == "" ? 1 : 0))
             {
-                SummaryRow dieselRow = new()
-                {
-                    productCode = band.Value.First().productCode.HasValue ? (int)band.Value.First().productCode : 0,
-                    productName = "Diesel - " + band.Key,
-                    Quantity = Convert.ToDouble(Math.Round(Convert.ToDecimal(band.Value.Sum(t => t.quantity)), 2, MidpointRounding.AwayFromZero)),
-                    NetTotal = Convert.ToDouble(Math.Round(Convert.ToDecimal(band.Value.Sum(t => t.invoicePrice)), 2, MidpointRounding.AwayFromZero)),
-                    VAT = Convert.ToDouble(Math.Round(Convert.ToDecimal(band.Value.Sum(t => t.invoicePrice) * 0.2), 2, MidpointRounding.AwayFromZero))
-                };
-                dieselRow.Quantity = TransactionBuilder.ConvertToLitresBasedOnNetwork(dieselRow.Quantity, network);
-                if (dieselRow.productName == "Diesel - " && invoice.CustomerType == EnumHelper.CustomerType.ExpiredFixWithVolume)
-                {
-                    dieselRow.productName = "Diesel";
-                    dieselRow.Quantity = dieselRow.Quantity - InvoiceSummary.Round2(DieselTransaction.RolledVolumeUsedOnThisInvoice);
-                }
-                // Check for specific business rules related to diesel (if applicable)
-                if (invoice.CustomerType == EnumHelper.CustomerType.Fix)
-                {
-                    dieselRow = AppendRowForFix(dieselRow, invoice); // Placeholder for actual method if required
-                }
+                SummaryRow newRow = new();
 
-                Rows.Add(dieselRow);
+                newRow.productCode = (int)band.Value.First().productCode;
+                newRow.productName = "Diesel - " + band.Key;
+                if (newRow.productName == "Diesel - ") newRow.productName = "Diesel";
+                newRow.Quantity = TransactionBuilder.ConvertToLitresBasedOnNetwork(Convert.ToDouble(Math.Round(Convert.ToDecimal(band.Value.Sum(e => e.quantity)), 2, MidpointRounding.AwayFromZero)),network);
+                newRow.NetTotal = Convert.ToDouble(Math.Round(Convert.ToDecimal(band.Value.Sum(e => e.invoicePrice)), 2, MidpointRounding.AwayFromZero));
+                newRow.VAT = Convert.ToDouble(Math.Round(Convert.ToDecimal(band.Value.Sum(e => e.invoicePrice) * 0.2), 2, MidpointRounding.AwayFromZero));
+                Rows.Add(newRow);
             }
-
+            CheckForExcessVolume(invoice.fixedInformation, Rows);
             return Rows;
         }
 
-        private (Dictionary<string, List<GenericTransactionFile>> transactionsByProduct, Dictionary<string, List<GenericTransactionFile>> dieselTransactionsByBand) UkFuelsVersion(CustomerInvoice invoice, EnumHelper.Network network)
+        private void CheckForExcessVolume(FixedInformation fix, List<SummaryRow> Rows)
+        {
+            if (fix is null || DieselTransaction.FixedVolumeRemainingForCurrent <= 0) return;
+            double? FixVolume = fix.AllFixes.FirstOrDefault(e => e.Id == fix.CurrentTradeId)?.FixedVolume;
+            double? FixPrice = fix.AllFixes.FirstOrDefault(e => e.Id == fix.CurrentTradeId)?.FixedPriceIncDuty;
+            SummaryRow ExcessRow = new();
+            ExcessRow.productName = "Fixed Remaining Diesel";
+            ExcessRow.Quantity = Round2(DieselTransaction.FixedVolumeRemainingForCurrent);
+            ExcessRow.NetTotal = Round2(ExcessRow.Quantity * (FixPrice / 100));
+            ExcessRow.VAT = Round2((ExcessRow.NetTotal * 0.2));
+            ExcessRow.productCode = 1;
+            Rows.Add(ExcessRow);
+        }
+
+        private (Dictionary<string, List<GenericTransactionFile>> transactionsByProduct, Dictionary<string, List<GenericTransactionFile>> dieselTransactionsByBand) ProductSplitter(CustomerInvoice invoice, EnumHelper.Network network)
         {
             string bandKey = string.Empty;
             // Initialize dictionaries to hold transactions by product and bands for Diesel
@@ -76,7 +77,7 @@ namespace Fuelcards.InvoiceMethods
                 Console.WriteLine("No transactions to process.");
                 return (transactionsByProduct, dieselTransactionsByBand); // Return empty dictionaries if no transactions
             }
-
+            
             // Process each transaction
             foreach (var transaction in invoice.CustomerTransactions)
             {
@@ -96,6 +97,7 @@ namespace Fuelcards.InvoiceMethods
                         {
                             "8" => "Sainsburys",
                             "9" => "Tesco",
+                            "3" => "Morrisons",
                             _ => ""
                         };
 
@@ -140,25 +142,25 @@ namespace Fuelcards.InvoiceMethods
             return (transactionsByProduct, dieselTransactionsByBand);
         }
 
-        private SummaryRow AppendRowForFix(SummaryRow newRow, CustomerInvoice invoice)
+        private SummaryRow AppendRowForFix(SummaryRow newRow, CustomerInvoice invoice, List<SummaryRow> rows)
         {
             if (invoice.fixedInformation.AllFixes.Where(e => e.Id == invoice.fixedInformation.CurrentTradeId).Select(e => e.FrequencyId).Any(frequencyId => frequencyId != 3))
             {
-
+                var RowsToInclude = rows.Where(e => e.productName.Contains("Diesel") || e.productName.Contains("Morrisons"));
 
 
                 double? FixVolume = invoice.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == invoice.fixedInformation.CurrentTradeId)?.FixedVolume;
                 double? FixPrice = invoice.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == invoice.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty;
                 double? RemainingToCharge = Round2(DieselTransaction.FixedVolumeRemainingForCurrent);
                 var total = invoice.CustomerTransactions.Where(e => e.product == "Diesel").Sum(e => e.invoicePrice);
-                double? PriceOfRemainingVolume = RemainingToCharge * 1.2302;
-
-
                 if (RemainingToCharge > 0)
                 {
                     newRow.Quantity = FixVolume;
+                    //newRow.Quantity = newRow.Quantity + RemainingToCharge;
+
                     double? RemainingVolumeCharge = RemainingToCharge * (FixPrice / 100);
                     newRow.NetTotal = Round2(total + RemainingVolumeCharge);
+                    //newRow.NetTotal = Round2(newRow.NetTotal - rows.Sum(e => e.NetTotal));
                     newRow.VAT = Round2(newRow.NetTotal * 0.2);
                 }
                 return newRow;
