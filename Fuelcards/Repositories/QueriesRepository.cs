@@ -573,7 +573,7 @@ namespace Fuelcards.Repositories
         public async Task<IEnumerable<KfE1E3Transaction>> GetAllKeyfuelTransactionsThatNeedToBeInvoiced(DateOnly InvoiceDate)
         {
 
-            var controlIds = await _db.FcControls.Where(e => e.CreationDate <= InvoiceDate && e.Invoiced != true)
+            var controlIds = await _db.FcControls.Where(e=> e.Invoiced != true)
                 .OrderByDescending(e => e.ControlId)
                 .Select(e => e.ControlId)
                 .ToListAsync();
