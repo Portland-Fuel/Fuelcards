@@ -24,7 +24,7 @@ namespace Fuelcards.InvoiceMethods
         public static double? FixRate { get; set; }
         public static double? FloatingRate { get; set; }
         public static int? CurrentAllocation { get; set; }
-        public static double? RolledRate { get; set; }  
+        public static double? RolledRate { get; set; }
         //private static void CheckIfStaticVariablesNeedUpdating(int? currentAccount, double? StartingRoll, double? newFixPrice, double? FixedVolumeCurrent)
         //{
         //    if (account is null || currentAccount != account)
@@ -60,17 +60,19 @@ namespace Fuelcards.InvoiceMethods
                         double? FixedVolumeRemainingForCurrent = 0;
                         if (fixFrequency == EnumHelper.InvoiceFrequency.Monthly)
                         {
-                            
+
                             //if(MonthlyFix.CheckIfRolloverWeek(data.invoiceDate) == true)
                             //{
-                                data.fixedInformation.CurrentAllocation = _db.GetAllocationAtTimeOfTransaction(data.transaction.transactionDate, data.fixedInformation.CurrentTradeId);
-                                data.fixedInformation.RolledVolume = _db.GetRolledVolumeAsOfAllocation(data.fixedInformation.CurrentAllocation, data.fixedInformation.CurrentTradeId);
-                                UpdateStaticVariablesIfNeeded(
-                            (int?)data.account,
-                            data.fixedInformation.RolledVolume,
-                            data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
-                            FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation,_db
-                        );
+
+                            data.fixedInformation.CurrentAllocation = _db.GetAllocationAtTimeOfTransaction(data.transaction.transactionDate, data.fixedInformation.CurrentTradeId);
+                            data.fixedInformation.RolledVolume = _db.GetRolledVolumeAsOfAllocation(data.fixedInformation.CurrentAllocation, data.fixedInformation.CurrentTradeId);
+
+                            UpdateStaticVariablesIfNeeded(
+                        (int?)data.account,
+                        data.fixedInformation.RolledVolume,
+                        data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
+                        FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation, _db
+                    );
                             //}
                         }
                         else if (fixFrequency == EnumHelper.InvoiceFrequency.Weekly)
@@ -81,7 +83,7 @@ namespace Fuelcards.InvoiceMethods
                             (int?)data.account,
                             data.fixedInformation.RolledVolume,
                             data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
-                            FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation,_db
+                            FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation, _db
                         );
                         }
                     }
@@ -91,7 +93,7 @@ namespace Fuelcards.InvoiceMethods
                         (int?)data.account,
                         data.fixedInformation.RolledVolume,
                         null,
-                        null,null,_db);
+                        null, null, _db);
                     }
                     ProcessRolloverVolumes(data, network, SiteInfo);
                 }
@@ -107,7 +109,7 @@ namespace Fuelcards.InvoiceMethods
 
         private static void UpdateStaticVariablesIfNeeded(int? currentAccount, double? StartingRoll, double? newFixPrice, double? FixedVolumeCurrent, int? currentAllocation, IQueriesRepository _db)
         {
-            if(CurrentAllocation != currentAllocation)
+            if (CurrentAllocation != currentAllocation)
             {
 
                 CurrentAllocation = currentAllocation;
@@ -120,7 +122,7 @@ namespace Fuelcards.InvoiceMethods
                 FixedVolumeUsedOnThisInvoice = 0;
                 RolledVolumeUsedOnThisInvoice = 0;
                 AvailableRolledVolume = StartingRoll;
-                
+
                 FixedPrice = newFixPrice;
                 FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
                 TotalDieselUsed = 0;
@@ -196,7 +198,7 @@ namespace Fuelcards.InvoiceMethods
             }
             while (QuantityRemainingToBeAllocated > 0 && (FixedVolumeRemainingForCurrent > 0 || FixedVolumeRemainingForCurrent is null))
             {
-                
+
                 var originalVolume = AvailableRolledVolume;
                 var newVolume = UpdateVolume(originalVolume, ref QuantityRemainingToBeAllocated);
 
@@ -260,7 +262,7 @@ namespace Fuelcards.InvoiceMethods
             {
                 FixedVolumeUsedOnThisInvoice += originalVolume;
                 AvailableRolledVolume = 0;
-                FixedVolumeRemainingForCurrent = 0;
+                //FixedVolumeRemainingForCurrent = 0;
                 //VolumeChargedAtRolled = originalVolume; I just commented this at 10:07am on 18th October because it bust
             }
             return newVolume;
@@ -269,6 +271,7 @@ namespace Fuelcards.InvoiceMethods
         private static double? HandleNegativeVolume(double? newVolume)
         {
             newVolume = Math.Abs((double)newVolume);
+
             if (FixedVolumeRemainingForCurrent >= newVolume)
             {
                 FixedVolumeRemainingForCurrent = FixedVolumeRemainingForCurrent - newVolume;
