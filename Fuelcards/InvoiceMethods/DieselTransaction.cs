@@ -260,7 +260,8 @@ namespace Fuelcards.InvoiceMethods
             {
                 FixedVolumeUsedOnThisInvoice += originalVolume;
                 AvailableRolledVolume = 0;
-                VolumeChargedAtRolled = originalVolume;
+                FixedVolumeRemainingForCurrent = 0;
+                //VolumeChargedAtRolled = originalVolume; I just commented this at 10:07am on 18th October because it bust
             }
             return newVolume;
         }
