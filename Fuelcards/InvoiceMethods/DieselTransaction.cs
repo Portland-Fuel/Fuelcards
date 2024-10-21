@@ -66,6 +66,7 @@ namespace Fuelcards.InvoiceMethods
                         }
                         break;
                     case EnumHelper.CustomerType.Floating:
+                        Reset();
                         VolumeChargedAtFloating = data.transaction.quantity;
                         break;
                     case EnumHelper.CustomerType.ExpiredFixWithVolume:
@@ -88,13 +89,15 @@ namespace Fuelcards.InvoiceMethods
             }
         }
 
+        private static void Reset()
+        {
+            FixedVolumeRemainingForCurrent = 0;
+            RolledVolumeUsedOnThisInvoice = 0;
+        }
+
         private static void UpdateStaticVariablesIfNeeded(int? currentAccount, double? StartingRoll, double? newFixPrice, double? FixedVolumeCurrent, int? currentAllocation, IQueriesRepository _db)
         {
-            if (CurrentAllocation != currentAllocation)
-            {
-                CurrentAllocation = currentAllocation;
-                FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
-            }
+            
             if (account == null || currentAccount != account)
             {
                 account = currentAccount;
@@ -105,6 +108,11 @@ namespace Fuelcards.InvoiceMethods
                 FixedPrice = newFixPrice;
                 FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
                 TotalDieselUsed = 0;
+                CurrentAllocation = currentAllocation;
+                FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
+            }
+            if (CurrentAllocation != currentAllocation)
+            {
                 CurrentAllocation = currentAllocation;
                 FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
             }
