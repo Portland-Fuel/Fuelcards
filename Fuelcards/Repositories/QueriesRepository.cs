@@ -282,7 +282,7 @@ namespace Fuelcards.Repositories
                     model.account = item[0].customerCode;
                     model.CustomerTransactions = new();
                     model.CustomerType = await customerType((int)model.account, invoiceDate);
-                    model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-9)));
+                    model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-6)));
                     var portlandId = GetPortlandIdFromAccount((int)model.account).Result;
                     model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
                     model.IfuelsCustomer = IfuelsCustomer((int)model.account);
