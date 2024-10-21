@@ -231,9 +231,13 @@ namespace Fuelcards.InvoiceMethods
             }
             else
             {
+                if(originalVolume > 0)
+                {
+                    VolumeChargedAtRolled = originalVolume;
+                }
                 FixedVolumeUsedOnThisInvoice += originalVolume;
+                //RolledVolumeUsedOnThisInvoice += originalVolume; //THIS MAY BREAK SOMETHING 21/10/24
                 AvailableRolledVolume = 0;
-
                 bool SomeBoolThatIdontKnowHowToUse = false;
                 if (SomeBoolThatIdontKnowHowToUse)
                 {
