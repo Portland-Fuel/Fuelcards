@@ -1242,6 +1242,11 @@ namespace Fuelcards.Repositories
                     _db.FcControls.Update(item);
                 }
                 _db.SaveChanges();
+                foreach (var report in reports)
+                {
+                    _db.InvoiceReports.Add(report);
+                }
+                _db.SaveChanges();
             }
             catch (Exception e)
             {
