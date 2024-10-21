@@ -36,7 +36,7 @@ namespace Fuelcards.Controllers
                 InvoicingController.reportList = new();
                 InvoicingController._report = new();
                 InvoicePreCheckModels checks = new();
-                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-6)));
+                checks.InvoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-9)));
                 checks.BasePrice = _db.GetBasePrice(checks.InvoiceDate);
                 checks.PlattsPrice = checks.BasePrice - 52.95;
                 checks.KeyfuelImports = _db.GetTotalEDIs(0);
@@ -414,10 +414,6 @@ namespace Fuelcards.Controllers
         {
             try
             {
-                if (transactionDataFromView.name.ToLower().Contains("lifel"))
-                {
-                    var egg = "";
-                }
                 EnumHelper.Network network = _db.getNetworkFromAccount((int)transactionDataFromView.account);
                 TransactionBuilder tb = new(_sites, _db);
                 DataToPassBack model = tb.processTransaction(transactionDataFromView, network);

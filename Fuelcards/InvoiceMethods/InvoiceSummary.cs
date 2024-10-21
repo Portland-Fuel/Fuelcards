@@ -52,7 +52,7 @@ namespace Fuelcards.InvoiceMethods
 
         private void CheckForExcessVolume(FixedInformation fix, List<SummaryRow> Rows)
         {
-            if (fix is null || DieselTransaction.FixedVolumeRemainingForCurrent <= 0) return;
+            if (fix is null || DieselTransaction.FixedVolumeRemainingForCurrent <= 0 || fix.fixFrequency == EnumHelper.InvoiceFrequency.Monthly) return;
             double? FixVolume = fix.AllFixes.FirstOrDefault(e => e.Id == fix.CurrentTradeId)?.FixedVolume;
             double? FixPrice = fix.AllFixes.FirstOrDefault(e => e.Id == fix.CurrentTradeId)?.FixedPriceIncDuty;
             SummaryRow ExcessRow = new();

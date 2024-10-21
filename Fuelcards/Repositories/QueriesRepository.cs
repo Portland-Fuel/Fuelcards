@@ -26,6 +26,7 @@ using System.Xml;
 using Xero.NetStandard.OAuth2.Model.Accounting;
 using DataAccess.Repositorys.IRepositorys;
 using FuelcardModels.DataTypes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
@@ -281,7 +282,7 @@ namespace Fuelcards.Repositories
                     model.account = item[0].customerCode;
                     model.CustomerTransactions = new();
                     model.CustomerType = await customerType((int)model.account, invoiceDate);
-                    model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-6)));
+                    model.invoiceDate = Transactions.GetMostRecentMonday(DateOnly.FromDateTime(DateTime.Now.AddDays(-9)));
                     var portlandId = GetPortlandIdFromAccount((int)model.account).Result;
                     model.CustomerTransactions = item.OrderBy(e => e.transactionDate).ThenBy(e => e.transactionTime).ToList();
                     model.IfuelsCustomer = IfuelsCustomer((int)model.account);
@@ -317,6 +318,8 @@ namespace Fuelcards.Repositories
                     model.fixedInformation.RolledVolume = _db.AllocatedVolumes
                         .Where(e => tradeIds.Contains((int)e.TradeId) && e.Volume > 0 && e.AllocationId < model.fixedInformation.CurrentAllocation)
                         .Sum(e => (double?)e.Volume) ?? 0;
+                    model.fixedInformation.fixFrequency = getFixFrequency((int)model.fixedInformation.CurrentTradeId);
+
                     return model;
                 }
                 else

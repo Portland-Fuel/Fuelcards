@@ -25,85 +25,66 @@ namespace Fuelcards.InvoiceMethods
         public static double? FloatingRate { get; set; }
         public static int? CurrentAllocation { get; set; }
         public static double? RolledRate { get; set; }
-        //private static void CheckIfStaticVariablesNeedUpdating(int? currentAccount, double? StartingRoll, double? newFixPrice, double? FixedVolumeCurrent)
-        //{
-        //    if (account is null || currentAccount != account)
-        //    {
 
-        //        account = currentAccount;
-        //        FixedVolumeUsedOnThisInvoice = 0;
-        //        RolledVolumeUsedOnThisInvoice = 0;
-        //        AvailableRolledVolume = StartingRoll;
-        //        FixedPrice = newFixPrice;
-        //        FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
-        //        TotalDieselUsed = 0;
-        //    }
-        //}
         public static double? DieselMethodology(InvoicingController.TransactionDataFromView data, double? addon, Models.Site SiteInfo, EnumHelper.Network network, IQueriesRepository _db, EnumHelper.Products product)
         {
             try
             {
-                bool CanReturnNow = GetFixAndFloatingRate(FixedPrice, SiteInfo, addon, _db.GetBasePrice((DateOnly)data.transaction.transactionDate), (EnumHelper.CustomerType)data.customerType, network, data.transaction.cost, data.fixedInformation, data.transaction.quantity, _db);
-                if (CanReturnNow)
+                bool immediatelyReturnFloatingRate = GetFixAndFloatingRate(FixedPrice, SiteInfo, addon, _db.GetBasePrice((DateOnly)data.transaction.transactionDate), (EnumHelper.CustomerType)data.customerType, network, data.transaction.cost, data.fixedInformation, data.transaction.quantity, _db);
+                if (immediatelyReturnFloatingRate)
                 {
                     return FloatingRate;
                 }
-                if (data.customerType == GenericClassFiles.EnumHelper.CustomerType.Floating)
+                switch (data.customerType)
                 {
-                    VolumeChargedAtFloating = data.transaction.quantity;
-                }
-                else
-                {
-                    if (data.customerType == EnumHelper.CustomerType.Fix)
-                    {
+                    case EnumHelper.CustomerType.Fix:
                         EnumHelper.InvoiceFrequency? fixFrequency = _db.getFixFrequency(data.fixedInformation.CurrentTradeId);
                         double? FixedVolumeRemainingForCurrent = 0;
-                        if (fixFrequency == EnumHelper.InvoiceFrequency.Monthly)
+
+                        switch (_db.getFixFrequency(data.fixedInformation.CurrentTradeId))
                         {
+                            case EnumHelper.InvoiceFrequency.Weekly:
+                                data.fixedInformation.CurrentAllocation = _db.GetAllocationAtTimeOfTransaction(data.transaction.transactionDate, data.fixedInformation.CurrentTradeId); 
+                                FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation(data.fixedInformation.CurrentAllocation);
+                                UpdateStaticVariablesIfNeeded(
+                                (int?)data.account,
+                                data.fixedInformation.RolledVolume,
+                                data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
+                                FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation, _db
+                            );
+                                break;
+                            case EnumHelper.InvoiceFrequency.Monthly:
+                                data.fixedInformation.CurrentAllocation = _db.GetAllocationAtTimeOfTransaction(data.transaction.transactionDate, data.fixedInformation.CurrentTradeId);
+                                data.fixedInformation.RolledVolume = _db.GetRolledVolumeAsOfAllocation(data.fixedInformation.CurrentAllocation, data.fixedInformation.CurrentTradeId);
 
-                            //if(MonthlyFix.CheckIfRolloverWeek(data.invoiceDate) == true)
-                            //{
-
-                            data.fixedInformation.CurrentAllocation = _db.GetAllocationAtTimeOfTransaction(data.transaction.transactionDate, data.fixedInformation.CurrentTradeId);
-                            data.fixedInformation.RolledVolume = _db.GetRolledVolumeAsOfAllocation(data.fixedInformation.CurrentAllocation, data.fixedInformation.CurrentTradeId);
-
-                            UpdateStaticVariablesIfNeeded(
-                        (int?)data.account,
-                        data.fixedInformation.RolledVolume,
-                        data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
-                        FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation, _db
-                    );
-                            //}
-                        }
-                        else if (fixFrequency == EnumHelper.InvoiceFrequency.Weekly)
-                        {
-                            data.fixedInformation.CurrentAllocation = _db.GetAllocationAtTimeOfTransaction(data.transaction.transactionDate, data.fixedInformation.CurrentTradeId); // THIs LINE MAY BREAK IT
-                            FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation(data.fixedInformation.CurrentAllocation);
-                            UpdateStaticVariablesIfNeeded(
+                                UpdateStaticVariablesIfNeeded(
                             (int?)data.account,
                             data.fixedInformation.RolledVolume,
                             data.fixedInformation.AllFixes.FirstOrDefault(e => e.Id == data.fixedInformation.CurrentTradeId)?.FixedPriceIncDuty,
-                            FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation, _db
-                        );
+                            FixedVolumeRemainingForCurrent, data.fixedInformation.CurrentAllocation, _db);
+                                break;
                         }
-                    }
-                    else if (data.customerType == EnumHelper.CustomerType.ExpiredFixWithVolume)
-                    {
+                        break;
+                    case EnumHelper.CustomerType.Floating:
+                        VolumeChargedAtFloating = data.transaction.quantity;
+                        break;
+                    case EnumHelper.CustomerType.ExpiredFixWithVolume:
                         UpdateStaticVariablesIfNeeded(
                         (int?)data.account,
                         data.fixedInformation.RolledVolume,
                         null,
                         null, null, _db);
-                    }
-                    ProcessRolloverVolumes(data, network, SiteInfo);
+                        break;
+                    default:throw new ArgumentException("Customer Type not recognised.");
+                
                 }
-
+                ProcessRolloverVolumes(data, network, SiteInfo);
                 var unitPrice = CalculatePrice(data, network);
                 return unitPrice;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                throw new ArgumentException(e.Message);
             }
         }
 
@@ -111,10 +92,8 @@ namespace Fuelcards.InvoiceMethods
         {
             if (CurrentAllocation != currentAllocation)
             {
-
                 CurrentAllocation = currentAllocation;
                 FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
-                //FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
             }
             if (account == null || currentAccount != account)
             {
@@ -126,7 +105,6 @@ namespace Fuelcards.InvoiceMethods
                 FixedPrice = newFixPrice;
                 FixedVolumeRemainingForCurrent = FixedVolumeCurrent;
                 TotalDieselUsed = 0;
-                //FixRate = newFixPrice; IF IT BREAKS ITS BECAUSE I COMMENTED THIS!!!!!!!!!!!!!!!
                 CurrentAllocation = currentAllocation;
                 FixedVolumeRemainingForCurrent = _db.GetRemaingVolumeForCurrentAllocation((int)currentAllocation);
             }
@@ -161,13 +139,7 @@ namespace Fuelcards.InvoiceMethods
                     }
                 }
             }
-            //if (network == EnumHelper.Network.Keyfuels)
-            //{
-            //    if ( productNum == 70)
-            //    {
-            //        FloatingRate = (cost + 100) / 100;
-            //    }
-            //}
+
             if (custType == EnumHelper.CustomerType.Fix)
             {
                 if (FixedPrice is null)
@@ -188,7 +160,6 @@ namespace Fuelcards.InvoiceMethods
 
         private static async Task ProcessRolloverVolumes(InvoicingController.TransactionDataFromView data, EnumHelper.Network network, Models.Site siteInfo)
         {
-
             double QuantityRemainingToBeAllocated = (double)data.transaction.quantity;
             if (network == EnumHelper.Network.UkFuel && (siteInfo.band == "9" || siteInfo.band == "8"))
             {
@@ -214,6 +185,8 @@ namespace Fuelcards.InvoiceMethods
             }
             return;
         }
+
+        
 
         private static double? CalculatePrice(InvoicingController.TransactionDataFromView data, EnumHelper.Network network)
         {
@@ -252,18 +225,20 @@ namespace Fuelcards.InvoiceMethods
             {
                 FixedVolumeUsedOnThisInvoice += QuantityBeforeAlteration;
                 RolledVolumeUsedOnThisInvoice += QuantityRemainingToBeAllocated;
-                //FixedVolumeUsedOnThisInvoice += QuantityRemainingToBeAllocated;
                 QuantityRemainingToBeAllocated = 0;
                 AvailableRolledVolume = newVolume;
                 VolumeChargedAtRolled = QuantityBeforeAlteration;
-                //TotalDieselUsed += QuantityBeforeAlteration;
             }
             else
             {
                 FixedVolumeUsedOnThisInvoice += originalVolume;
                 AvailableRolledVolume = 0;
-                //FixedVolumeRemainingForCurrent = 0;
-                //VolumeChargedAtRolled = originalVolume; I just commented this at 10:07am on 18th October because it bust
+
+                bool SomeBoolThatIdontKnowHowToUse = false;
+                if (SomeBoolThatIdontKnowHowToUse)
+                {
+                    FixedVolumeRemainingForCurrent = 0; // This fixed one and breaks trhe other
+                }
             }
             return newVolume;
         }
@@ -271,7 +246,6 @@ namespace Fuelcards.InvoiceMethods
         private static double? HandleNegativeVolume(double? newVolume)
         {
             newVolume = Math.Abs((double)newVolume);
-
             if (FixedVolumeRemainingForCurrent >= newVolume)
             {
                 FixedVolumeRemainingForCurrent = FixedVolumeRemainingForCurrent - newVolume;
@@ -290,9 +264,6 @@ namespace Fuelcards.InvoiceMethods
                 newVolume = newVolume - FixedVolumeRemainingForCurrent;
                 FixedVolumeRemainingForCurrent = 0;
                 return newVolume;
-                //VolumeChargedAtFix = 0;
-                //VolumeChargedAtFloating = newVolume;
-                //return 0;
             }
         }
     }

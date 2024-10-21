@@ -46,6 +46,7 @@ namespace Fuelcards.Models
         public int? CurrentTradeId { get; set; }
         public int CurrentAllocation { get; set; }
         public bool IsCurrentTrade { get; set; }
+        public EnumHelper.InvoiceFrequency? fixFrequency { get; set; }
 
 
     }

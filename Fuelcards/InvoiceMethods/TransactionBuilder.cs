@@ -31,10 +31,7 @@ namespace Fuelcards.InvoiceMethods
             transactionDataFromView.transaction.quantity = ConvertToLitresBasedOnNetwork(transactionDataFromView.transaction.quantity, network);
             double? Addon = InvoiceSummary.Round2(_db.GetAddonForSpecificTransaction(transactionDataFromView.transaction.portlandId, transactionDataFromView.transaction.transactionDate, network, transactionDataFromView.IfuelsCustomer, (int)transactionDataFromView.account));
 
-            //if (transactionDataFromView.name.ToLower().Contains("wigt"))
-            //{
-            //    var egg = "Chuckles";  
-            //}
+            
 
             if (Addon is null) throw new ArgumentException($"Addon should not be null - {transactionDataFromView.name} with account = {transactionDataFromView.account}");
             double? UnitPrice = Math.Round(Convert.ToDouble(CalculateUnitPrice(_db, product, transactionDataFromView, network, Addon, siteInfo)), 4, MidpointRounding.AwayFromZero);
