@@ -1,32 +1,12 @@
 ﻿using DataAccess.Cdata;
 using DataAccess.Fuelcards;
 using Fuelcards.GenericClassFiles;
-using System.Runtime.CompilerServices;
 using Fuelcards.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Fuelcards.Controllers;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Xero.NetStandard.OAuth2.Models;
-using static Fuelcards.Models.CustomerDetailsModels;
-using System.Linq;
-using Fuelcards.Models;
-using Xero.NetStandard.OAuth2.Client;
 using Fuelcards.InvoiceMethods;
-using System.Transactions;
-using Microsoft.Identity.Client;
-using Microsoft.Graph;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using DataAccess.Tickets;
 using Site = Fuelcards.Models.Site;
-using static Fuelcards.GenericClassFiles.EnumHelper;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using Microsoft.AspNetCore.Mvc;
-using System.Xml;
-using Xero.NetStandard.OAuth2.Model.Accounting;
-using DataAccess.Repositorys.IRepositorys;
-using FuelcardModels.DataTypes;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Fuelcards.Repositories
 {
     public class QueriesRepository : IQueriesRepository
