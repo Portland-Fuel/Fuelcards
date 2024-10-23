@@ -57,5 +57,10 @@ namespace Fuelcards.Models
         public double? Adblue { get; set; }
         public double? SuperUnleaded { get; set; }
         public double? Diesel { get; set; }
+        public double? PremiumDiesel { get; set; }
+        public double? HandlingCharge { get; set; }
+        //public double? Lube { get; set; }
+        //public double? AdblueCan { get; set; }
+        //public double? Other { get; set; }
     }
 }
