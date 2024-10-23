@@ -65,7 +65,7 @@ namespace Fuelcards.Controllers
                 //checks.TexacoVolume.PremiumDiesel = _db.GetProductVolume(EnumHelper.Products.Lube);
                 //checks.TexacoVolume.PremiumDiesel = _db.GetProductVolume(EnumHelper.Products.AdblueCan);
                 //checks.TexacoVolume.PremiumDiesel = _db.GetProductVolume(EnumHelper.Products.Other);
-                checks.TexacoVolume.HandlingCharge = (checks.TexacoVolume.Adblue + checks.TexacoVolume.SuperUnleaded + checks.TexacoVolume.Diesel + checks.TexacoVolume.PremiumDiesel + checks.TexacoVolume.Unleaded + checks.TexacoVolume.Lube + checks.TexacoVolume.AdblueCan + checks.TexacoVolume.Other);
+                checks.TexacoVolume.HandlingCharge = (checks.TexacoVolume.Adblue + checks.TexacoVolume.SuperUnleaded + checks.TexacoVolume.Diesel + checks.TexacoVolume.PremiumDiesel + checks.TexacoVolume.Unleaded);
                 checks.KeyfuelsDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Keyfuels);
                 checks.UkFuelDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.UkFuel);
                 checks.TexacoDuplicates = _db.CheckForDuplicateTransactions(EnumHelper.Network.Texaco);
