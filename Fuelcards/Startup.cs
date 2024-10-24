@@ -48,7 +48,7 @@ namespace Fuelcards
             services.AddRazorPages()
                 .AddMicrosoftIdentityUI();
 
-            
+
             // Register your database contexts here
             /* services.AddDbContext<TradingContext>(options =>
                   options.UseNpgsql(Configuration.GetConnectionString("Trading")));
