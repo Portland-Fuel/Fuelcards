@@ -54,4 +54,6 @@ public partial class TexacoTransaction
     public int? InvoiceNumber { get; set; }
 
     public double? UnitPrice { get; set; }
+
+    public DateOnly? InvoiceDate { get; set; }
 }

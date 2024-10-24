@@ -161,13 +161,7 @@ public partial class FuelcardsContext : DbContext
 
     public virtual DbSet<UkfuelCard> UkfuelCards { get; set; }
 
-    public virtual DbSet<UkfuelTransaction> UkfuelTransactions { get; set; }
-
     public virtual DbSet<XeroCustomer> XeroCustomers { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Server=78.32.37.42;Database=fuelcards;User Id=it;Password=nz2orJEzA5SeKqYFEG4ND88e&B8AGncV!*mq7fv^gz7%7TWZUQ;Port=59734");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1122,6 +1116,7 @@ public partial class FuelcardsContext : DbContext
             entity.Property(e => e.CustomerAc).HasColumnName("customer_ac");
             entity.Property(e => e.CustomerCode).HasColumnName("customer_code");
             entity.Property(e => e.FleetNumber).HasColumnName("fleet_number");
+            entity.Property(e => e.InvoiceDate).HasColumnName("invoice_date");
             entity.Property(e => e.InvoiceNumber).HasColumnName("invoice_number");
             entity.Property(e => e.InvoicePrice).HasColumnName("invoice_price");
             entity.Property(e => e.Invoiced).HasColumnName("invoiced");
@@ -1730,6 +1725,7 @@ public partial class FuelcardsContext : DbContext
             entity.Property(e => e.ControlId).HasColumnName("control_id");
             entity.Property(e => e.Customer).HasColumnName("customer");
             entity.Property(e => e.Division).HasColumnName("division");
+            entity.Property(e => e.InvoiceDate).HasColumnName("invoice_date");
             entity.Property(e => e.InvoiceNumber).HasColumnName("invoice_number");
             entity.Property(e => e.InvoicePrice).HasColumnName("invoice_price");
             entity.Property(e => e.Invoiced).HasColumnName("invoiced");
@@ -1793,6 +1789,7 @@ public partial class FuelcardsContext : DbContext
             entity.Property(e => e.ControlId).HasColumnName("control_id");
             entity.Property(e => e.Customer).HasColumnName("customer");
             entity.Property(e => e.Division).HasColumnName("division");
+            entity.Property(e => e.InvoiceDate).HasColumnName("invoice_date");
             entity.Property(e => e.InvoiceNumber).HasColumnName("invoice_number");
             entity.Property(e => e.InvoicePrice).HasColumnName("invoice_price");
             entity.Property(e => e.Invoiced)
@@ -1890,39 +1887,6 @@ public partial class FuelcardsContext : DbContext
             entity.Property(e => e.Unleaded)
                 .HasColumnType("char")
                 .HasColumnName("unleaded");
-        });
-
-        modelBuilder.Entity<UkfuelTransaction>(entity =>
-        {
-            entity.HasKey(e => e.Transactionnumber).HasName("ukfuel_transactions_pkey");
-
-            entity.ToTable("ukfuel_transactions");
-
-            entity.Property(e => e.Transactionnumber)
-                .ValueGeneratedNever()
-                .HasColumnName("transactionnumber");
-            entity.Property(e => e.Batch).HasColumnName("batch");
-            entity.Property(e => e.Cardnumber).HasColumnName("cardnumber");
-            entity.Property(e => e.ClientType)
-                .HasMaxLength(255)
-                .HasColumnName("client_type");
-            entity.Property(e => e.Customer).HasColumnName("customer");
-            entity.Property(e => e.Division).HasColumnName("division");
-            entity.Property(e => e.Invoiced).HasColumnName("invoiced");
-            entity.Property(e => e.Mileage).HasColumnName("mileage");
-            entity.Property(e => e.Month).HasColumnName("month");
-            entity.Property(e => e.Pan).HasColumnName("pan");
-            entity.Property(e => e.Price).HasColumnName("price");
-            entity.Property(e => e.Productnumber).HasColumnName("productnumber");
-            entity.Property(e => e.Quantity).HasColumnName("quantity");
-            entity.Property(e => e.Receiptnumber).HasColumnName("receiptnumber");
-            entity.Property(e => e.Registration)
-                .HasMaxLength(255)
-                .HasColumnName("registration");
-            entity.Property(e => e.Site).HasColumnName("site");
-            entity.Property(e => e.Transactiondate).HasColumnName("transactiondate");
-            entity.Property(e => e.Transactiontime).HasColumnName("transactiontime");
-            entity.Property(e => e.Week).HasColumnName("week");
         });
 
         modelBuilder.Entity<XeroCustomer>(entity =>

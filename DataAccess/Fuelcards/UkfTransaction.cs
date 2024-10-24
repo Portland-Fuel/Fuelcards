@@ -56,4 +56,6 @@ public partial class UkfTransaction
     public int? InvoiceNumber { get; set; }
 
     public double? UnitPrice { get; set; }
+
+    public DateOnly? InvoiceDate { get; set; }
 }
